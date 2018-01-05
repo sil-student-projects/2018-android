@@ -24,4 +24,6 @@
             android:label="@string/entry_title"></activity>
     </application>
 
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
 </manifest>
