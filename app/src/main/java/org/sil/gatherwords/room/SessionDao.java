@@ -3,6 +3,7 @@ package org.sil.gatherwords.room;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -17,23 +18,20 @@ public interface SessionDao {
 	List<Session> getAll();
 
 	@Query("SELECT :columns FROM session")
-	List getAll(List<String> columns);
+	List<String> getAll(List<String> columns);
 
-	@Query("SELECT :columns FROM session WHERE :whereColumn :compare :value")
-	List getWhere(List<String> columns, String whereColumn, String compare, String value);
-
-	// UPDATES
-	@Query("UPDATE session SET :column = :value WHERE :whereColumn :compare :whereValue ")
-	int updateColumnWhere(String column, String value, String whereColumn, String compare, String whereValue);
-
-	@Query("UPDATE session SET :column = :value")
-	int updateColumn(String column, String value);
+	@Query("SELECT :columns FROM session WHERE :comparisonString")
+	List<String> getWhere(List<String> columns, String comparisonString);
 
 	// DELETE
-	@Query("DELETE FROM session WHERE :column :compare :value")
-	int deleteColumn(String column, String compare, String value);
+	@Query("DELETE FROM session WHERE :comparisonString")
+	int deleteColumn(String comparisonString);
 
 	// INSERT
 	@Insert
-	int insertSession(Session session);
+	void insertSession(Session session);
+
+	// Update
+	@Update
+	int updateSession(Session oldSession, Session newSession);
 }

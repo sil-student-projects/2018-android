@@ -3,6 +3,7 @@ package org.sil.gatherwords.room;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -17,23 +18,20 @@ public interface WordDao {
 	List<Word> getAll();
 
 	@Query("SELECT :columns FROM word")
-	List get(List<String> columns);
+	List<String> get(List<String> columns);
 
-	@Query("SELECT :columns FROM word WHERE :whereColumn :compare :value")
-	List getWhere(List<String> columns, String whereColumn, String compare, String value);
+	@Query("SELECT :columns FROM word WHERE :comparisonStatement")
+	List<String> getWhere(List<String> columns, String comparisonStatement);
 
 	// UPDATES
-	@Query("UPDATE word SET :column = :value WHERE :whereColumn :compare :whereValue ")
-	int updateColumnWhere(String column, String value, String whereColumn, String compare, String whereValue);
-
-	@Query("UPDATE word SET :column = :value")
-	int updateColumn(String column, String value);
+	@Update
+	int updateWord(Word oldWord, Word newWord);
 
 	// DELETE
-	@Query("DELETE FROM word WHERE :column :compare :value")
-	int deleteColumn(String column, String compare, String value);
+	@Query("DELETE FROM word WHERE :comparisonStatement")
+	int deleteColumn(String comparisonStatement);
 
 	// INSERT
 	@Insert
-	int insertSession(Word session);
+	void insertSession(Word session);
 }

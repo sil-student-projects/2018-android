@@ -2,9 +2,6 @@ package org.sil.gatherwords.room;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.location.Location;
-
-import java.util.Date;
 
 /**
  * Entity class for a language gathering session
@@ -17,11 +14,11 @@ public class Session {
 	public int id;
 
 	// Define the columns
-	public Date date;
+	public String date;
 	public String speaker;
 	public String recorder;
-	public String[] wordList;
+	public String wordList; // JSON, arrays and lists are can't be stored
 	public String language;
-	public String[] listLanguages;
-	public Location location;
+	public String listLanguages; // Also JSON
+	public String location;
 }

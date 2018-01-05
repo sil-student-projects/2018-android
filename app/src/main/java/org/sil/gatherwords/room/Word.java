@@ -2,9 +2,10 @@ package org.sil.gatherwords.room;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
-import java.nio.file.Path;
+import java.sql.Blob;
 
 /**
  * Entity class for each word of a session
@@ -20,7 +21,11 @@ public class Word {
 	childColumns = "session")
 	public int session;
 
-	public String[] meanings;
-	public Path audio;
-	public Path picuture;
+	public String meanings; // JSON
+
+	@Ignore
+	public Blob audio;
+
+	@Ignore
+	public Blob picuture;
 }
