@@ -12,16 +12,19 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".SessionActivity"
-            android:label="@string/session_title"></activity>
+            android:label="@string/session_title">
+        </activity>
         <activity
             android:name=".EntryActivity"
-            android:label="@string/entry_title"></activity>
+            android:label="@string/entry_title">
+        </activity>
     </application>
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
 </manifest>
