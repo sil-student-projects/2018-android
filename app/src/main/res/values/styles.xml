@@ -8,10 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="MDTheme" parent="android:Theme.Material">
-        <!-- Customize your theme here. -->
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
+    <!-- Custom tool bar style. -->
+    <style name="CustomToolBarStyle" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:background">@color/colorToolBarBackground</item>
+    </style>
+
+    <!-- Custom menu popup style. -->
+    <style name="CustomMenuPopUpStyle" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:background">@color/colorToolBarMenuPopUpBackground</item>
     </style>
 </resources>

@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#001a36</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorPrimaryLight">#446b8e</color>
+
+    <color name="colorToolBarBackground">#590c97</color>
+    <color name="colorToolBarMenuPopUpBackground">#33970c</color>
 </resources>
