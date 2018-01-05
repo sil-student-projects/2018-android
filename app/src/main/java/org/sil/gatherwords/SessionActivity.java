@@ -1,9 +1,9 @@
 package org.sil.gatherwords;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-public class SessionActivity extends Activity {
+public class SessionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
