@@ -23,7 +23,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Name of session"
                         android:textColorHighlight="@color/colorAccent"
-                        android:textSize="24sp"/>
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_name"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -35,7 +36,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Eliciter"
                         android:textColorHighlight="@color/colorAccent"
-                        android:textSize="24sp"/>
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_eliciter"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -47,7 +49,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Speaker"
                         android:textColorHighlight="@color/colorAccent"
-                        android:textSize="24sp"/>
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_speaker"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -59,7 +62,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Location"
                         android:textColorHighlight="@color/colorAccent"
-                        android:textSize="24sp"/>
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_location"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -71,7 +75,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Date"
                         android:textColorHighlight="@color/colorAccent"
-                        android:textSize="24sp"/>
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_date"/>
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
         </ScrollView>
