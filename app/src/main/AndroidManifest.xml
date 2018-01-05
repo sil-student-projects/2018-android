@@ -16,6 +16,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SessionActivity"
+            android:label="@string/session_title"></activity>
+        <activity
+            android:name=".EntryActivity"
+            android:label="@string/entry_title"></activity>
     </application>
 
 </manifest>

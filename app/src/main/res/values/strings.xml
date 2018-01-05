@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Gather Words</string>
+    <string name="session_title">Session</string>
+    <string name="entry_title">Lexical Entry</string>
 </resources>
