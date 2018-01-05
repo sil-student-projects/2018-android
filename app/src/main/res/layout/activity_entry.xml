@@ -10,9 +10,19 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="272dp"
         android:onClick="dispatchTakePictureIntent"
         android:text="Take Picture"
-        tools:layout_editor_absoluteX="111dp"
-        tools:layout_editor_absoluteY="231dp" />
+        />
+
+    <LinearLayout
+        android:id="@+id/audioRecorderLayout"
+        android:layout_width="312dp"
+        android:layout_height="88dp"
+        android:orientation="horizontal"
+        tools:layout_editor_absoluteX="64dp"
+        tools:layout_editor_absoluteY="415dp">
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
