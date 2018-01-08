@@ -47,7 +47,6 @@ public class AppDatabaseTest {
 		s3.id = 3;
 		sessionDao.insertSession(s3);
 		compareSessions(s3,sessionDao.getAll().get(1));
-		s3.insertWordlist("swadesh-100.json", context);
 
 		// Can duplicate primary keys be added
 		try {
@@ -114,8 +113,7 @@ public class AppDatabaseTest {
 		}
 		Assert.assertEquals("date",s1.date, s2.date);
 		Assert.assertEquals(s1.location, s2.location);
-		Assert.assertEquals(s1.language, s2.language);
+		Assert.assertEquals(s1.vernacular, s2.vernacular);
 		Assert.assertEquals(s1.listLanguages, s2.listLanguages);
-		Assert.assertEquals(s1.wordList, s2.wordList);
 	}
 }

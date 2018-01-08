@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase;
  * The database class.
  */
 
-@android.arch.persistence.room.Database(entities = {Session.class, Word.class}, version = 1)
+@android.arch.persistence.room.Database(entities = {Session.class, Word.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 	public abstract SessionDao sessionDao();
 	public abstract WordDao wordDao();

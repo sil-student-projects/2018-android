@@ -26,8 +26,8 @@ public class Word {
 	public String meanings; // JSON, TODO: possibly split to meanings table
 
 	@Ignore
-	public Blob audio;
+	public Blob audio; // NOTE: LF does NOT support multiple audio files
 
 	@Ignore
-	public Blob picture;
+	public Blob picture; // NOTE: LF DOES support multiple picture files
 }

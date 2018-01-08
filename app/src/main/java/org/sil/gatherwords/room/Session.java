@@ -2,13 +2,9 @@ package org.sil.gatherwords.room;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.content.Context;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
- * Entity class for a language gathering session
+ * Entity class for a vernacular gathering session
  */
 
 @Entity
@@ -18,31 +14,19 @@ public class Session {
 	public int id = 0;
 
 	// Define the columns
-	public String date;
+	public Long date = generateDate();
 	public String speaker;
 	public String recorder;
-	public String wordList; // JSON, arrays and lists are can't be stored
-	public String language;
+	public String vernacular;
 	public String listLanguages; // Also JSON
-	public String location; // Possibly JSON, TODO: decide location format when added
+	public String location; // Human readable location
+	public String gps; // google map gps string
 
-	void insertWordlist(String wordlistName, Context context) {
-		String json = null;
-		try {
-			InputStream is = context.getAssets().open("wordLists/" + wordlistName);
-			int size = is.available();
-
-			byte[] buffer = new byte[size];
-
-			is.read(buffer);
-
-			is.close();
-
-			json = new String(buffer, "UTF-8");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		this.wordList = json;
+	/**
+	 * Generate the current unix timestamp
+	 * @return The 64-bit timestamp
+	 */
+	public Long generateDate(){
+		return System.currentTimeMillis()/1000L;
 	}
 }
