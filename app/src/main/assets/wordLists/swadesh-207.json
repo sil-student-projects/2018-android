@@ -1,0 +1,1256 @@
+[
+  {
+    "id": 1,
+    "entry": "I",
+    "pos": "function word",
+    "notes": "1st person singular pronoun"
+  },
+  {
+    "id": 2,
+    "entry": "you",
+    "pos": "function word",
+    "notes": "2nd person singular pronoun"
+  },
+  {
+    "id": 3,
+    "entry": "he",
+    "pos": "function word",
+    "notes": "3rd person singular pronoun, masculine gender"
+  },
+  {
+    "id": 4,
+    "entry": "we",
+    "pos": "function word",
+    "notes": "1st person plural pronoun"
+  },
+  {
+    "id": 5,
+    "entry": "you",
+    "pos": "function word",
+    "notes": "2nd person plural pronoun"
+  },
+  {
+    "id": 6,
+    "entry": "they",
+    "pos": "function word",
+    "notes": "3rd person plural pronoun"
+  },
+  {
+    "id": 7,
+    "entry": "this",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 8,
+    "entry": "that",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 9,
+    "entry": "here",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 10,
+    "entry": "there",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 11,
+    "entry": "who?",
+    "pos": "Q",
+    "notes": ""
+  },
+  {
+    "id": 12,
+    "entry": "what?",
+    "pos": "Q",
+    "notes": ""
+  },
+  {
+    "id": 13,
+    "entry": "where?",
+    "pos": "Q",
+    "notes": "at/to what place"
+  },
+  {
+    "id": 14,
+    "entry": "when?",
+    "pos": "Q",
+    "notes": "at what time"
+  },
+  {
+    "id": 15,
+    "entry": "how?",
+    "pos": "Q",
+    "notes": "in what manner"
+  },
+  {
+    "id": 16,
+    "entry": "not",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 17,
+    "entry": "all",
+    "pos": "function word",
+    "notes": "also every"
+  },
+  {
+    "id": 18,
+    "entry": "many",
+    "pos": "function word",
+    "notes": "also much"
+  },
+  {
+    "id": 19,
+    "entry": "some",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 20,
+    "entry": "few",
+    "pos": "function word",
+    "notes": "few in number, see also little"
+  },
+  {
+    "id": 2559,
+    "entry": "little",
+    "pos": "",
+    "notes": "a small quantity of, see also few"
+  },
+  {
+    "id": 21,
+    "entry": "other",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 22,
+    "entry": "one",
+    "pos": "",
+    "notes": "numeral"
+  },
+  {
+    "id": 23,
+    "entry": "two",
+    "pos": "",
+    "notes": "numeral"
+  },
+  {
+    "id": 24,
+    "entry": "three",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 25,
+    "entry": "four",
+    "pos": "",
+    "notes": ""
+  },
+  {
+    "id": 26,
+    "entry": "five",
+    "pos": "",
+    "notes": ""
+  },
+  {
+    "id": 27,
+    "entry": "big",
+    "pos": "adjective",
+    "notes": "also large"
+  },
+  {
+    "id": 28,
+    "entry": "long",
+    "pos": "adjective",
+    "notes": "of much length"
+  },
+  {
+    "id": 29,
+    "entry": "wide",
+    "pos": "adjective",
+    "notes": "also broad"
+  },
+  {
+    "id": 30,
+    "entry": "thick",
+    "pos": "adjective",
+    "notes": "in dimension"
+  },
+  {
+    "id": 31,
+    "entry": "heavy",
+    "pos": "adjective",
+    "notes": "of much weight"
+  },
+  {
+    "id": 32,
+    "entry": "small",
+    "pos": "adjective",
+    "notes": "also little"
+  },
+  {
+    "id": 33,
+    "entry": "short",
+    "pos": "adjective",
+    "notes": "of little length"
+  },
+  {
+    "id": 34,
+    "entry": "narrow",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 35,
+    "entry": "thin",
+    "pos": "adjective",
+    "notes": "in dimension"
+  },
+  {
+    "id": 36,
+    "entry": "woman",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 37,
+    "entry": "man",
+    "pos": "noun",
+    "notes": "adult male"
+  },
+  {
+    "id": 38,
+    "entry": "person, human being, Man",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 39,
+    "entry": "child",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 40,
+    "entry": "wife",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 41,
+    "entry": "husband",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 42,
+    "entry": "mother",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 43,
+    "entry": "father",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 44,
+    "entry": "animal",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 45,
+    "entry": "fish",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 46,
+    "entry": "bird",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 47,
+    "entry": "dog",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 48,
+    "entry": "louse",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 49,
+    "entry": "snake",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 50,
+    "entry": "worm",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 51,
+    "entry": "tree",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 52,
+    "entry": "forest",
+    "pos": "noun",
+    "notes": "also woods"
+  },
+  {
+    "id": 53,
+    "entry": "stick",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 54,
+    "entry": "fruit",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 55,
+    "entry": "seed",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 56,
+    "entry": "leaf",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 57,
+    "entry": "root",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 58,
+    "entry": "bark",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 59,
+    "entry": "flower",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 60,
+    "entry": "grass",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 61,
+    "entry": "rope",
+    "pos": "noun",
+    "notes": "also cord"
+  },
+  {
+    "id": 62,
+    "entry": "skin",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 63,
+    "entry": "meat",
+    "pos": "noun",
+    "notes": "also flesh"
+  },
+  {
+    "id": 64,
+    "entry": "blood",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 65,
+    "entry": "bone",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 66,
+    "entry": "fat",
+    "pos": "noun",
+    "notes": "grease"
+  },
+  {
+    "id": 67,
+    "entry": "egg",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 68,
+    "entry": "horn",
+    "pos": "noun",
+    "notes": "not the musical instrument"
+  },
+  {
+    "id": 69,
+    "entry": "tail",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 70,
+    "entry": "feather",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 71,
+    "entry": "hair",
+    "pos": "noun",
+    "notes": "on head"
+  },
+  {
+    "id": 72,
+    "entry": "head",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 73,
+    "entry": "ear",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 74,
+    "entry": "eye",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 75,
+    "entry": "nose",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 76,
+    "entry": "mouth",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 77,
+    "entry": "tooth",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 78,
+    "entry": "tongue",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 79,
+    "entry": "fingernail",
+    "pos": "noun",
+    "notes": "also claw"
+  },
+  {
+    "id": 80,
+    "entry": "foot",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 81,
+    "entry": "leg",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 82,
+    "entry": "knee",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 83,
+    "entry": "hand",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 84,
+    "entry": "wing",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 85,
+    "entry": "belly",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 86,
+    "entry": "guts",
+    "pos": "",
+    "notes": "also intestines"
+  },
+  {
+    "id": 87,
+    "entry": "neck",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 88,
+    "entry": "back",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 89,
+    "entry": "breast",
+    "pos": "noun",
+    "notes": "also: breasts"
+  },
+  {
+    "id": 90,
+    "entry": "heart",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 91,
+    "entry": "liver",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 92,
+    "entry": "drink",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 93,
+    "entry": "eat",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 94,
+    "entry": "bite",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 95,
+    "entry": "suck",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 96,
+    "entry": "spit",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 97,
+    "entry": "vomit",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 98,
+    "entry": "blow",
+    "pos": "verb",
+    "notes": "move/cause to move as a current of gas"
+  },
+  {
+    "id": 99,
+    "entry": "breathe, breath",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 100,
+    "entry": "laugh",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 101,
+    "entry": "see",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 102,
+    "entry": "hear",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 103,
+    "entry": "know",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 104,
+    "entry": "think",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 105,
+    "entry": "smell",
+    "pos": "verb",
+    "notes": "intr"
+  },
+  {
+    "id": 106,
+    "entry": "fear",
+    "pos": "noun",
+    "notes": "also fright"
+  },
+  {
+    "id": 107,
+    "entry": "sleep",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 108,
+    "entry": "live",
+    "pos": "verb",
+    "notes": "be alive"
+  },
+  {
+    "id": 109,
+    "entry": "die",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 110,
+    "entry": "kill",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 111,
+    "entry": "fight",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 112,
+    "entry": "hunt",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 113,
+    "entry": "hit",
+    "pos": "verb",
+    "notes": "also strike, beat"
+  },
+  {
+    "id": 114,
+    "entry": "cut",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 115,
+    "entry": "split",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 116,
+    "entry": "sta",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 117,
+    "entry": "scratch",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 118,
+    "entry": "dig",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 119,
+    "entry": "swim",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 939,
+    "entry": "fly",
+    "pos": "verb",
+    "notes": "move through the air"
+  },
+  {
+    "id": 121,
+    "entry": "walk",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 122,
+    "entry": "come",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 123,
+    "entry": "lie",
+    "pos": "verb",
+    "notes": "recline horizontally"
+  },
+  {
+    "id": 124,
+    "entry": "sit",
+    "pos": "verb",
+    "notes": "be in a sitting position"
+  },
+  {
+    "id": 125,
+    "entry": "stand",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 126,
+    "entry": "turn",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 127,
+    "entry": "fall",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 128,
+    "entry": "give",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 129,
+    "entry": "hold",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 130,
+    "entry": "squeeze",
+    "pos": "verb",
+    "notes": "also wring"
+  },
+  {
+    "id": 131,
+    "entry": "ru",
+    "pos": "verb",
+    "notes": "also wipe"
+  },
+  {
+    "id": 132,
+    "entry": "wash",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 133,
+    "entry": "wipe",
+    "pos": "verb",
+    "notes": "also ru"
+  },
+  {
+    "id": 134,
+    "entry": "pull",
+    "pos": "verb",
+    "notes": "also draw"
+  },
+  {
+    "id": 135,
+    "entry": "push",
+    "pos": "verb",
+    "notes": "also shove"
+  },
+  {
+    "id": 136,
+    "entry": "throw",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 137,
+    "entry": "tie",
+    "pos": "verb",
+    "notes": "also bind"
+  },
+  {
+    "id": 138,
+    "entry": "sew",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 139,
+    "entry": "count",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 140,
+    "entry": "say",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 141,
+    "entry": "sing",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 142,
+    "entry": "play",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 143,
+    "entry": "float",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 144,
+    "entry": "flow",
+    "pos": "verb",
+    "notes": "travel in a current"
+  },
+  {
+    "id": 145,
+    "entry": "freeze",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 146,
+    "entry": "swell",
+    "pos": "verb",
+    "notes": ""
+  },
+  {
+    "id": 147,
+    "entry": "sun",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 148,
+    "entry": "moon",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 149,
+    "entry": "star",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 150,
+    "entry": "water",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 151,
+    "entry": "rain",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 152,
+    "entry": "river",
+    "pos": "noun",
+    "notes": "also stream, brook"
+  },
+  {
+    "id": 153,
+    "entry": "lake",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 154,
+    "entry": "sea",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 155,
+    "entry": "salt",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 156,
+    "entry": "stone",
+    "pos": "noun",
+    "notes": "also: rock"
+  },
+  {
+    "id": 157,
+    "entry": "sand",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 158,
+    "entry": "dust",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 159,
+    "entry": "earth",
+    "pos": "noun",
+    "notes": "soil"
+  },
+  {
+    "id": 160,
+    "entry": "cloud",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 161,
+    "entry": "fog",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 162,
+    "entry": "sky",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 163,
+    "entry": "wind",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 164,
+    "entry": "snow",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 165,
+    "entry": "ice",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 166,
+    "entry": "smoke",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 167,
+    "entry": "fire",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 168,
+    "entry": "ash, ashes",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 169,
+    "entry": "burn",
+    "pos": "verb",
+    "notes": "intr"
+  },
+  {
+    "id": 170,
+    "entry": "road",
+    "pos": "noun",
+    "notes": "also: trail, path, not street"
+  },
+  {
+    "id": 1518,
+    "entry": "path",
+    "pos": "noun",
+    "notes": "also: trail, road, not street"
+  },
+  {
+    "id": 171,
+    "entry": "mountain",
+    "pos": "noun",
+    "notes": "also: hill"
+  },
+  {
+    "id": 172,
+    "entry": "red",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 173,
+    "entry": "green",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 174,
+    "entry": "yellow",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 175,
+    "entry": "white",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 176,
+    "entry": "black",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 177,
+    "entry": "night",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 178,
+    "entry": "day",
+    "pos": "noun",
+    "notes": "as opposed to night"
+  },
+  {
+    "id": 179,
+    "entry": "year",
+    "pos": "noun",
+    "notes": ""
+  },
+  {
+    "id": 180,
+    "entry": "hot",
+    "pos": "adjective",
+    "notes": "also warm"
+  },
+  {
+    "id": 181,
+    "entry": "cold",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 182,
+    "entry": "full",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 183,
+    "entry": "new",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 184,
+    "entry": "old",
+    "pos": "adjective",
+    "notes": "of much age; having existed/lived for a long time"
+  },
+  {
+    "id": 185,
+    "entry": "good",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 186,
+    "entry": "bad",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 187,
+    "entry": "rotten",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 188,
+    "entry": "dirty",
+    "pos": "adjective",
+    "notes": "also soiled"
+  },
+  {
+    "id": 189,
+    "entry": "straight",
+    "pos": "adjective",
+    "notes": "not bent"
+  },
+  {
+    "id": 190,
+    "entry": "round",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 191,
+    "entry": "sharp",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 192,
+    "entry": "dull",
+    "pos": "adjective",
+    "notes": "also blunt"
+  },
+  {
+    "id": 193,
+    "entry": "smooth",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 194,
+    "entry": "wet",
+    "pos": "adjective",
+    "notes": "also damp"
+  },
+  {
+    "id": 195,
+    "entry": "dry",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 196,
+    "entry": "correct",
+    "pos": "",
+    "notes": "also right"
+  },
+  {
+    "id": 197,
+    "entry": "near",
+    "pos": "adver",
+    "notes": ""
+  },
+  {
+    "id": 198,
+    "entry": "far",
+    "pos": "adver",
+    "notes": ""
+  },
+  {
+    "id": 199,
+    "entry": "right",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 200,
+    "entry": "left",
+    "pos": "adjective",
+    "notes": ""
+  },
+  {
+    "id": 201,
+    "entry": "at",
+    "pos": "",
+    "notes": ""
+  },
+  {
+    "id": 202,
+    "entry": "in",
+    "pos": "",
+    "notes": ""
+  },
+  {
+    "id": 203,
+    "entry": "with",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 204,
+    "entry": "and",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 205,
+    "entry": "if",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 206,
+    "entry": "because",
+    "pos": "function word",
+    "notes": ""
+  },
+  {
+    "id": 207,
+    "entry": "name",
+    "pos": "noun",
+    "notes": ""
+  }
+]
