@@ -7,13 +7,26 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import java.util.Calendar;
+//import android.location.
 
 public class SessionActivity extends AppCompatActivity {
+
+    //private FusedLocationProviderClient mFusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+
+        long date = System.currentTimeMillis() / 1000L;
+
+        EditText dateField = findViewById(R.id.session_create_date);
+        dateField.setText(Long.toString(date));
+        dateField.setEnabled(false);
+
+        //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
     }
 
     public void save_settings_fab_pressed(View view) {
