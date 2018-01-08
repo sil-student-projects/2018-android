@@ -23,6 +23,16 @@ import java.io.IOException;
 
 public class EntryActivity extends AppCompatActivity {
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_entry);
+        configureItemUpdateControls();
+    }
+
+    // Audio recording features
+    // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
+
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String mFileName = null;
@@ -33,9 +43,39 @@ public class EntryActivity extends AppCompatActivity {
     private PlayButton   mPlayButton = null;
     private MediaPlayer   mPlayer = null;
 
+    private String TAKE_PHOTO_LABEL = "Photo";
+    private String START_RECORDING_LABEL = "Record";
+    private String STOP_RECORDING_LABEL = "Stop";
+    private String START_PLAYING_LABEL = "Play";
+    private String STOP_PLAYING_LABEL = "Stop";
+
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+
+    /**
+     * This function configures the audio recording buttons and temp storage.
+     */
+    private void configureItemUpdateControls() {
+        // Record to the external cache directory for visibility
+        mFileName = getExternalCacheDir().getAbsolutePath();
+        mFileName += "/audiorecordtest.3gp";
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
+        LinearLayout ll = (LinearLayout) findViewById(R.id.ItemUpdateControlsLayout);
+        mRecordButton = new RecordButton(this);
+        ll.addView(mRecordButton,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        0));
+        mPlayButton = new PlayButton(this);
+        ll.addView(mPlayButton,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        0));
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -101,6 +141,7 @@ public class EntryActivity extends AppCompatActivity {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
+        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
     }
 
     class RecordButton extends AppCompatButton {
@@ -110,9 +151,9 @@ public class EntryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 onRecord(mStartRecording);
                 if (mStartRecording) {
-                    setText("Stop recording");
+                    setText(STOP_RECORDING_LABEL);
                 } else {
-                    setText("Start recording");
+                    setText(START_RECORDING_LABEL);
                 }
                 mStartRecording = !mStartRecording;
             }
@@ -120,7 +161,7 @@ public class EntryActivity extends AppCompatActivity {
 
         public RecordButton(Context ctx) {
             super(ctx);
-            setText("Start recording");
+            setText(START_RECORDING_LABEL);
             setOnClickListener(clicker);
         }
     }
@@ -132,9 +173,9 @@ public class EntryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 onPlay(mStartPlaying);
                 if (mStartPlaying) {
-                    setText("Stop playing");
+                    setText(STOP_PLAYING_LABEL);
                 } else {
-                    setText("Start playing");
+                    setText(START_PLAYING_LABEL);
                 }
                 mStartPlaying = !mStartPlaying;
             }
@@ -142,37 +183,9 @@ public class EntryActivity extends AppCompatActivity {
 
         public PlayButton(Context ctx) {
             super(ctx);
-            setText("Start playing");
+            setText(START_PLAYING_LABEL);
             setOnClickListener(clicker);
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_entry);
-
-        // Record to the external cache directory for visibility
-        mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
-        LinearLayout ll = (LinearLayout)findViewById(R.id.audioRecorderLayout);
-        mRecordButton = new RecordButton(this);
-        ll.addView(mRecordButton,
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        0));
-        mPlayButton = new PlayButton(this);
-        ll.addView(mPlayButton,
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        0));
-
-
     }
 
     @Override
@@ -190,7 +203,8 @@ public class EntryActivity extends AppCompatActivity {
     }
 
 
-    // Image processing
+    // Camera/Image processing
+    // based on https://developer.android.com/training/camera/photobasics.html
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
