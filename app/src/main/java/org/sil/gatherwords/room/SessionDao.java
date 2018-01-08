@@ -29,9 +29,10 @@ public interface SessionDao {
 
 	// INSERT
 	@Insert
-	void insertSession(Session session);
+	void insertSession(Session... sessions);
 
 	// Update
 	@Update
-	int updateSession(Session oldSession, Session newSession);
+	int updateSession(Session... sessions);
+
 }

@@ -25,7 +25,7 @@ public interface WordDao {
 
 	// UPDATES
 	@Update
-	int updateWord(Word oldWord, Word newWord);
+	int updateWords(Word... words);
 
 	// DELETE
 	@Query("DELETE FROM word WHERE :comparisonStatement")
@@ -33,5 +33,5 @@ public interface WordDao {
 
 	// INSERT
 	@Insert
-	void insertSession(Word session);
+	void insertWords(Word... words);
 }

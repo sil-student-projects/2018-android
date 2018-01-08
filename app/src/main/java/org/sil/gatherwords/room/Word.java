@@ -13,19 +13,21 @@ import java.sql.Blob;
 
 @Entity
 public class Word {
-	@PrimaryKey
+	@PrimaryKey (autoGenerate = true)
 	public int id;
 
 	@ForeignKey(entity = Session.class,
 	parentColumns = "id",
-	childColumns = "session")
-	public int session;
+	childColumns = "session",
+	onDelete = ForeignKey.CASCADE,
+	onUpdate = ForeignKey.CASCADE)
+	public int sessionId;
 
-	public String meanings; // JSON
+	public String meanings; // JSON, TODO: possibly split to meanings table
 
 	@Ignore
 	public Blob audio;
 
 	@Ignore
-	public Blob picuture;
+	public Blob picture;
 }

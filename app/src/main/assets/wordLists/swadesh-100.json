@@ -103,7 +103,7 @@
   },
   {
     "id": 38,
-    "entry": "person, human being, Man",
+    "entry": "person,human being,Man",
     "pos": "noun",
     "notes": ""
   },
@@ -303,7 +303,7 @@
     "id": 89,
     "entry": "breast",
     "pos": "noun",
-    "notes": "also: breasts"
+    "notes": "also:breasts"
   },
   {
     "id": 90,
@@ -453,7 +453,7 @@
     "id": 156,
     "entry": "stone",
     "pos": "noun",
-    "notes": "also: rock"
+    "notes": "also:rock"
   },
   {
     "id": 157,
@@ -487,7 +487,7 @@
   },
   {
     "id": 168,
-    "entry": "ash, ashes",
+    "entry": "ash,ashes",
     "pos": "noun",
     "notes": ""
   },
@@ -501,13 +501,13 @@
     "id": 170,
     "entry": "road",
     "pos": "noun",
-    "notes": "also: trail, path, not street"
+    "notes": "also:trail,path,not street"
   },
   {
     "id": 171,
     "entry": "mountain",
     "pos": "noun",
-    "notes": "also: hill"
+    "notes": "also:hill"
   },
   {
     "id": 172,
@@ -603,6 +603,6 @@
     "id": 1518,
     "entry": "path",
     "pos": "noun",
-    "notes": "also: trail, road, not street"
+    "notes": "also:trail,road,not street"
   }
 ]

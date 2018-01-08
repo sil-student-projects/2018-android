@@ -8,7 +8,11 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+
+        testApplicationId "com.test.foo"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testHandleProfiling true
+        testFunctionalTest true
 
         javaCompileOptions {
             annotationProcessorOptions {
