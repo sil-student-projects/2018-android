@@ -4,16 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/session_create_layout">
+    android:id="@+id/session_create_layout"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/session_settings_scroll">
+            android:id="@+id/session_create_scroll">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:id="@+id/session_create_scroll_lin">
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -25,7 +28,8 @@
                         android:hint="Name of session"
                         android:textColorHighlight="@color/colorAccent"
                         android:textSize="24sp"
-                        android:id="@+id/session_create_name"/>
+                        android:id="@+id/session_create_name"
+                        />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -79,10 +83,37 @@
                         android:textSize="24sp"
                         android:id="@+id/session_create_date"/>
                 </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="16dp">
+                    <android.support.design.widget.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Time"
+                        android:textColorHighlight="@color/colorAccent"
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_time"/>
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="16dp">
+                    <android.support.design.widget.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Timezone (UTC)"
+                        android:textColorHighlight="@color/colorAccent"
+                        android:textSize="24sp"
+                        android:id="@+id/session_create_time_zone"/>
+                </android.support.design.widget.TextInputLayout>
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+                    <!--TODO: Homogenize color with text fields-->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -105,7 +136,7 @@
             android:id="@+id/save_settings_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_anchor="@id/session_settings_scroll"
+            app:layout_anchor="@id/session_create_scroll"
             app:layout_anchorGravity="bottom|right|end"
             android:layout_margin="16dp"
             android:clickable="true"
