@@ -4,16 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/session_create_layout">
+    android:id="@+id/session_create_layout"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/session_settings_scroll">
+            android:id="@+id/session_create_scroll">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:id="@+id/session_create_scroll_lin">
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -133,7 +136,7 @@
             android:id="@+id/save_settings_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_anchor="@id/session_settings_scroll"
+            app:layout_anchor="@id/session_create_scroll"
             app:layout_anchorGravity="bottom|right|end"
             android:layout_margin="16dp"
             android:clickable="true"

@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 import java.util.Calendar;
@@ -65,6 +66,7 @@ public class SessionActivity extends AppCompatActivity {
 
     //TODO: Do something legitimate with the data
     // Run when the FAB is pressed, right now it creates a session and returns to Main
+    // Seconds not currently recorded
     public void save_settings_fab_pressed(View view) {
         EditText name = findViewById(R.id.session_create_name);
         EditText eliciter = findViewById(R.id.session_create_eliciter);
@@ -72,6 +74,8 @@ public class SessionActivity extends AppCompatActivity {
         EditText date = findViewById(R.id.session_create_date);
         EditText time = findViewById(R.id.session_create_time);
         EditText timeZone = findViewById(R.id.session_create_time_zone);
+
+        String iso8601 = date.getText().toString() + "T" + time.getText().toString() + ":00" + timeZone.getText().toString();
 
         Session session = new Session();
         session.setData("name", name.getText().toString());
@@ -115,7 +119,7 @@ public class SessionActivity extends AppCompatActivity {
         if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
             sw.setChecked(false);
-            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_layout),
+            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_scroll_lin),
                     "Please enable location services to access this feature", Snackbar.LENGTH_LONG);
             mySnackbar.show();
             locationEnabled = false;
