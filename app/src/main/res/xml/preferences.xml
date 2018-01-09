@@ -3,7 +3,13 @@
     android:theme="@style/PreferenceThemeOverlay">
 
     <!-- Lists the various different preferences available to the user -->
+    <!-- Refer to strings.xml file for the actual text in the strings -->
 
+
+
+    <!-- List preference to specify language setting in the app -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
     <ListPreference
         android:defaultValue="1"
         android:entries="@array/pref_language_selection_entries"
@@ -11,4 +17,6 @@
         android:key="@string/pref_language_select_key"
         android:summary="@string/pref_language_select_summary"
         android:title="@string/pref_language_select_title" />
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
 </PreferenceScreen>

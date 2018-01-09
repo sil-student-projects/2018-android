@@ -5,8 +5,17 @@ import android.os.Bundle;
 
 public class SettingsActivityCustom extends AppCompatActivity {
 
+    /*
+    Static variable assigned to the key-value pair for the preference.
+    Ensure string matches the exact identifier as found in strings.xml.
+    */
+
+    public static final String
+            KEY_LIST_PREF_LANGUAGE_SELECT = "list_pref_1anguage";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_settings_custom);
 
