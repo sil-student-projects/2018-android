@@ -11,12 +11,14 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
 import java.io.IOException;
@@ -28,6 +30,19 @@ public class EntryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entry);
         configureItemUpdateControls();
+
+        ViewPager pager = findViewById(R.id.viewpager);
+        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                return EntryFragment.newInstance(position, getCount());
+            }
+
+            @Override
+            public int getCount() {
+                return 10;
+            }
+        });
     }
 
     // Audio recording features
@@ -62,7 +77,7 @@ public class EntryActivity extends AppCompatActivity {
         mFileName += "/audiorecordtest.3gp";
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
-        LinearLayout ll = (LinearLayout) findViewById(R.id.ItemUpdateControlsLayout);
+        LinearLayout ll = (LinearLayout) findViewById(R.id.footer_controls);
         mRecordButton = new RecordButton(this);
         ll.addView(mRecordButton,
                 new LinearLayout.LayoutParams(
