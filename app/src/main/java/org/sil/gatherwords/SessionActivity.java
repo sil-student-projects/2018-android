@@ -88,7 +88,12 @@ public class SessionActivity extends AppCompatActivity {
         AppDatabase appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
         new DatabaseAccess(appDatabase).setSessions(session).insert();
 
-        Intent i = new Intent(this, MainActivity.class);
+        Intent i;
+        if ( name.getText().toString().equals("shipit_") ) {
+            i = new Intent(this, ShipItActivity.class);
+        } else {
+            i = new Intent(this, MainActivity.class);
+        }
         startActivity(i);
     }
 
