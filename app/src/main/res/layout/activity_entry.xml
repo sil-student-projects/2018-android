@@ -6,13 +6,21 @@
     android:layout_height="match_parent"
     tools:context="org.sil.gatherwords.EntryActivity">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="dispatchTakePictureIntent"
-        android:text="Take Picture"
-        tools:layout_editor_absoluteX="111dp"
-        tools:layout_editor_absoluteY="231dp" />
+    <LinearLayout
+        android:id="@+id/ItemUpdateControlsLayout"
+        android:layout_width="312dp"
+        android:layout_height="88dp"
+        android:orientation="horizontal"
+        tools:layout_editor_absoluteX="36dp"
+        tools:layout_editor_absoluteY="416dp">
+
+        <Button
+            android:id="@+id/photoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="dispatchTakePictureIntent"
+            android:text="Photo" />
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
