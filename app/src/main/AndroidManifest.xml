@@ -21,6 +21,7 @@
             android:label="@string/session_title"></activity>
         <activity
             android:name=".EntryActivity"
+            android:windowSoftInputMode="adjustPan"
             android:label="@string/entry_title"></activity>
     </application>
 
