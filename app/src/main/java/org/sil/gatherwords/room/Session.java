@@ -6,7 +6,6 @@ import android.arch.persistence.room.PrimaryKey;
 /**
  * Entity class for a vernacular gathering session
  */
-
 @Entity
 public class Session {
 	// Define the primary key

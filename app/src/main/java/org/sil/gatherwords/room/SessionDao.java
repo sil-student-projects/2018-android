@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Data Access Object for the Session table
  */
-
 @Dao
 public interface SessionDao {
 	// SELECTS
