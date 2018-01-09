@@ -11,8 +11,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
 
-import java.lang.reflect.Method;
-
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -26,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(actionBar);
 
         //Set preferences to default values.
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.settings_localization_preferences, false);
 
         //Get the shared preferences file for the app.
         SharedPreferences sharedPref =
@@ -34,11 +32,11 @@ public class MainActivity extends AppCompatActivity {
 
         //FIXME - ensure if no value is found, it is actually set to the default value.
         //Get value of this preference.  If no value found, set to default value.
-        String listPrefLanguage = sharedPref.getString
-                (SettingsActivityCustom.KEY_LIST_PREF_LANGUAGE_SELECT, "1");
+        String listPrefLocalization = sharedPref.getString
+                (SettingsActivityFragmentHost.KEY_LIST_PREF_LOCALIZATION_SELECT, "1");
 
         //Display value of this preference (for testing purposes).
-        //Toast.makeText(this, listPrefLanguage, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, listPrefLocalization, Toast.LENGTH_SHORT).show();
     }
 
     //Method makes menu visible.
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(getApplicationContext(), "Settings", Toast.LENGTH_SHORT).show();
 
-                Intent settingsIntent = new Intent(this, SettingsActivityCustom.class);
+                Intent settingsIntent = new Intent(this, SettingsActivityFragmentHost.class);
                 startActivity(settingsIntent);
                 break;
 
