@@ -13,10 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
-
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SessionActivity extends AppCompatActivity {
@@ -31,37 +29,20 @@ public class SessionActivity extends AppCompatActivity {
 
         locationEnabled = false;
 
-        Calendar cal = Calendar.getInstance();
-        // Grab the box to display the date
         EditText dateField, timeField, timeZoneField;
-        dateField= findViewById(R.id.session_create_date);
-        // Get today's day and format
-        String dayOfMonth = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-        dayOfMonth = addLeadingZero(dayOfMonth);
-        // Get the current month and format
-        int month = cal.get(Calendar.MONTH);
-        month++;
-        String monthString = String.valueOf(month);
-        monthString = addLeadingZero(monthString);
-
-        dateField.setText(cal.get(Calendar.YEAR) + "-" + monthString + "-" + dayOfMonth);
-
-        // Get the current time and format it
-        timeField= findViewById(R.id.session_create_time);
-        String hourOfDay = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
-        hourOfDay = addLeadingZero(hourOfDay);
-        String minute = String.valueOf(cal.get(Calendar.MINUTE));
-        minute = addLeadingZero(minute);
-        timeField.setText(hourOfDay + ":" + minute);
-
-        // Get the offset from utc and format it
+        dateField = findViewById(R.id.session_create_date);
+        timeField = findViewById(R.id.session_create_time);
         timeZoneField= findViewById(R.id.session_create_time_zone);
-        String utc;
-        Date date = new Date();
-        utc = String.valueOf((cal.getTimeZone().getOffset(date.getTime() / 1000)) / 3600);
-        utc = formatUTC(utc);
-        timeZoneField.setText(utc);
 
+        // Set date, time, and timezone fields
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        dateField.setText(sdf.format(date));
+        sdf.applyPattern("HH:mm");
+        timeField.setText(sdf.format(date));
+        sdf.applyPattern("z");
+        String timeZoneString = sdf.format(date);
+        timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
     }
 
     //TODO: Do something legitimate with the data
@@ -130,30 +111,6 @@ public class SessionActivity extends AppCompatActivity {
         }
 
     }
-
-    // The calendar returns many single digit numbers and this method adds a leading 0 when appropriate
-    private String addLeadingZero(String s) {
-        if (s.length() < 2) {
-            return ("0" + s);
-        }
-        return s;
-    }
-
-    // Creates a ISO 8601 UTC offset from system time
-    private String formatUTC(String utc) {
-        utc = utc.substring(0, utc.length() - 1 );
-        if ( !utc.contains("-") ) {
-            utc = "+" + utc;
-        }
-        if (utc.substring(1, utc.length()).length() < 4 ) {
-            utc = utc.substring(0, 1) + "0" + utc.substring(1, utc.length());
-        }
-        utc = utc.replaceAll("50", "30");
-        utc = utc.substring(0,3) + ":" + utc.substring(3, utc.length());
-
-        return utc;
-    }
-
 
     // Runs when the user selects whether to grant a permission
     @Override
