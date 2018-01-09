@@ -90,7 +90,8 @@ public class SessionActivity extends AppCompatActivity {
 		}
 	}
 
-	@SuppressLint("MissingPermission")
+	// TODO: Handle missing location permissions
+	@SuppressLint("MissingPermission") // Suppress the location permissions warning
 	private void setSessionLocation() {
 		LocationManager mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
