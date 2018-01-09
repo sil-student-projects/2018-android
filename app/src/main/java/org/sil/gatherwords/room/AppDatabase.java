@@ -11,3 +11,4 @@ public abstract class AppDatabase extends RoomDatabase {
 	public abstract SessionDao sessionDao();
 	public abstract WordDao wordDao();
 }
+

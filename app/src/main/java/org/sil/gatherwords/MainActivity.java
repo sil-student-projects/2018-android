@@ -1,8 +1,9 @@
 package org.sil.gatherwords;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -10,11 +11,15 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.sil.gatherwords.room.AppDatabase;
+
 public class MainActivity extends AppCompatActivity {
 
+    private AppDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Context context = getApplicationContext();
         setContentView(R.layout.activity_main);
 
         ListView sessionList = findViewById(R.id.session_list);
@@ -75,3 +80,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

@@ -2,4 +2,6 @@
     <string name="app_name">Gather Words</string>
     <string name="session_title">Session</string>
     <string name="entry_title">Lexical Entry</string>
+    <string name="database_name_testing">test-gather_words</string>
+    <string name="database_name">gather_words</string>
 </resources>
