@@ -21,6 +21,7 @@ public class Session {
 	public String listLanguages; // Also JSON
 	public String location; // Human readable location
 	public String gps; // google map gps string
+	public String label;
 
 	/**
 	 * Generate the current unix timestamp
