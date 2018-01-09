@@ -6,15 +6,19 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
-    <!-- Custom tool bar style. -->
-    <style name="CustomToolBarStyle" parent="Theme.AppCompat.NoActionBar">
+    <!-- Custom action bar style. -->
+    <style name="CustomToolBarStyle" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@color/colorToolBarBackground</item>
     </style>
 
     <!-- Custom menu popup style. -->
-    <style name="CustomMenuPopUpStyle" parent="Theme.AppCompat.NoActionBar">
+    <style name="CustomMenuPopUpStyle" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@color/colorToolBarMenuPopUpBackground</item>
+        <item name="overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">-4.0dp</item>
     </style>
+
 </resources>

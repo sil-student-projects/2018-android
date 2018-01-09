@@ -2,26 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO - Figure out how to make the icons display -->
     <item
         android:id="@+id/app_action_bar_settings"
-        android:title="@string/app_action_settings"
+        android:title="@string/app_action_bar_settings"
         android:icon="@drawable/settings_icon"
-        app:showAsAction="always">
+        app:showAsAction="ifRoom">
     </item>
-
-    <item
-        android:id="@+id/app_action_bar_help"
-        android:title="@string/app_action_bar_help"
-        android:icon="@drawable/settings_icon"
-        app:showAsAction="always">
-    </item>
-
-    <item
-        android:id="@+id/app_action_bar_updates"
-        android:title="@string/app_action_bar_updates"
-        android:icon="@drawable/settings_icon"
-        app:showAsAction="always">
-    </item>
-
 </menu>

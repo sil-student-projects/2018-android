@@ -1,6 +1,5 @@
 package org.sil.gatherwords;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,19 +7,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-import android.widget.Toolbar;
+import android.support.v7.widget.Toolbar;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar actionBar = (Toolbar) findViewById(R.id.app_action_bar);
-        setActionBar(actionBar);
+        Toolbar actionBar = findViewById(R.id.app_action_support_bar);
+        setSupportActionBar(actionBar);
     }
 
+    //Method makes menu visible.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -28,21 +28,15 @@ public class MainActivity extends Activity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    //Method allows linking to other activity and app components.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
+            //Links to the preferences/settings page.
             case R.id.app_action_bar_settings:
                 Toast.makeText(getApplicationContext(), "Settings", Toast.LENGTH_SHORT).show();
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                Intent settingsIntent = new Intent(this, SettingsActivityCustom.class);
                 startActivity(settingsIntent);
-                break;
-            case R.id.app_action_bar_help:
-                Toast.makeText(getApplicationContext(), "Help", Toast.LENGTH_SHORT).show();
-                Intent helpIntent = new Intent(this, HelpActivity.class);
-                startActivity(helpIntent);
-                break;
-            case R.id.app_action_bar_updates:
-                Toast.makeText(getApplicationContext(), "Placeholder - Does Nothing Presently!", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
