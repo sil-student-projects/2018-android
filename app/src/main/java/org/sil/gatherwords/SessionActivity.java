@@ -11,8 +11,11 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -24,12 +27,14 @@ import org.sil.gatherwords.room.Session;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SessionActivity extends AppCompatActivity {
+public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     // Used to track location through multiple methods
     private FusedLocationProviderClient mFusedLocationClient;
     boolean locationEnabled;
     Location location;
     AppDatabase db;
+    AppCompatSpinner spinner;
+    String worldListToLoad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,13 @@ public class SessionActivity extends AppCompatActivity {
         dateField = findViewById(R.id.session_create_date);
         timeField = findViewById(R.id.session_create_time);
         timeZoneField= findViewById(R.id.session_create_time_zone);
+
+        spinner = findViewById(R.id.word_list_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.word_lists, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
 
         // Set date, time, and timezone fields
         Date date = new Date();
@@ -153,5 +165,24 @@ public class SessionActivity extends AppCompatActivity {
                 return;
             }
         }
+    }
+
+    public void onItemSelected(AdapterView<?> parent, View view,
+                               int pos, long id) {
+        switch ( pos ) {
+            case 0:
+                worldListToLoad = "";
+                break;
+            case 1:
+                worldListToLoad = "swadesh-100.json";
+                break;
+            case 2:
+                worldListToLoad = "swadesh-207.json";
+                break;
+        }
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        worldListToLoad = "";
     }
 }
