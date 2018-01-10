@@ -1,6 +1,56 @@
 <resources>
+
+    <!-- Strings related to the name of each activity page -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
     <string name="app_name">Gather Words</string>
     <string name="session_title">Session</string>
     <string name="entry_title">Lexical Entry</string>
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
+    <string name="app_settings_page_title">Settings</string>
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+
+
+    <!-- Strings related to the toolbar/action bar -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <string name="app_action_bar_settings">Settings</string>
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+
+
+    <!-- Strings for TextView objects -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <string name="app_main_page_title">Hello, Gather Words!</string>
+    <string name="fragment_settings_word_field_setup">Word Field Setup.</string>
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+
+
+    <!-- Strings for the language selection list-type preference setting -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <string name="pref_localization_select_key">list_pref_localization</string>
+    <string name="pref_localization_select_title">Localization Selection.</string>
+    <string name="pref_localization_select_summary">Select text localization for the app.</string>
+    <string-array name="pref_localization_selection_entries">
+        <item>English</item>
+        <item>Thai</item>
+        <item>Latin</item>
+    </string-array>
+    <string-array name="pref_localization_selection_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+
 </resources>
