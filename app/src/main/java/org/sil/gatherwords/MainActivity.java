@@ -4,6 +4,7 @@ import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,8 +15,6 @@ import android.widget.TextView;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 sessions = (List<Session>) databaseAccess.select("session").get();
 
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                Log.e("SessionList Adapter", "There was a problem in reading from the database", e);
             }
         }
 
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Object getItem(int i) {
-            return null;
+            return sessions.get(i);
         }
 
         @Override
@@ -86,7 +85,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Session session = sessions.get(i);
-            // get the date to prove that there is data being retrieved
+
+            // Get the date to prove that there is data being retrieved
             TextView dateText = convertView.findViewById(R.id.date);
             dateText.setText(session.date);
             TextView location = convertView.findViewById(R.id.location);
