@@ -1,12 +1,33 @@
 package org.sil.gatherwords;
 
 import android.media.MediaPlayer;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatImageView;
 
 public class ShipItActivity extends AppCompatActivity {
 
     MediaPlayer mp;
+    AppCompatImageView iv;
+    Handler handler;
+
+    private Runnable runnable = new Runnable() {
+        boolean rev = false;
+        @Override
+        public void run() {
+            if ( rev ) {
+                iv.setImageResource(R.drawable.cambell);
+                rev = false;
+            } else {
+                iv.setImageResource(R.drawable.cambell_rev);
+                rev = true;
+            }
+            handler.postDelayed(runnable, 500);
+        }
+
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -15,6 +36,11 @@ public class ShipItActivity extends AppCompatActivity {
         mp = MediaPlayer.create(this, R.raw.music);
         mp.setLooping(true);
         mp.setVolume(100, 100);
+
+        iv = findViewById(R.id.cambell);
+        handler = new Handler();
+
+        handler.post(runnable);
     }
 
     public void onDestroy() {
@@ -27,6 +53,7 @@ public class ShipItActivity extends AppCompatActivity {
                 mp = null;
             }
         }
+        handler.removeCallbacks(runnable);
     }
 
     public void onPause() {
