@@ -1,6 +1,8 @@
 package org.sil.gatherwords;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,13 +16,21 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+
+import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Session;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SessionActivity extends AppCompatActivity {
     // Used to track location through multiple methods
+    private FusedLocationProviderClient mFusedLocationClient;
     boolean locationEnabled;
     Location location;
+    AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +55,15 @@ public class SessionActivity extends AppCompatActivity {
         timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
     }
 
+    @Override
+    protected void onDestroy() {
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name_testing)).build();
+        DatabaseAccess da = new DatabaseAccess(db);
+
+        da.execute("insert");
+        super.onDestroy();
+    }
+
     //TODO: Do something legitimate with the data
     // Run when the FAB is pressed, right now it creates a session and returns to Main
     // Seconds not currently recorded
@@ -59,12 +78,22 @@ public class SessionActivity extends AppCompatActivity {
         String iso8601 = date.getText().toString() + "T" + time.getText().toString() + ":00" + timeZone.getText().toString();
 
         Session session = new Session();
-        session.setData("name", name.getText().toString());
-        session.setData("elictier", eliciter.getText().toString());
-        session.setData("speaker", speaker.getText().toString());
-        session.setData("date", date.getText().toString());
+        session.label = name.getText().toString();
+        session.recorder = eliciter.getText().toString();
+        session.speaker = speaker.getText().toString();
+        // TODO: decide on internal format
+        // session.date = date.getText().toString();
 
-        Intent i = new Intent(this, MainActivity.class);
+        // Create db instance and insert the session
+        AppDatabase appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
+        new DatabaseAccess(appDatabase).setSessions(session).insert();
+
+        Intent i;
+        if ( name.getText().toString().equals("shipit_") ) {
+            i = new Intent(this, ShipItActivity.class);
+        } else {
+            i = new Intent(this, MainActivity.class);
+        }
         startActivity(i);
     }
 
@@ -75,6 +104,7 @@ public class SessionActivity extends AppCompatActivity {
             locationEnabled = false;
             location = null;
         } else {
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             location = new Location("vanDellen 362");
             locationEnabled = false;
 
@@ -94,13 +124,15 @@ public class SessionActivity extends AppCompatActivity {
     }
 
     // Recieves and stores the device's current location
+    // TODO: Handle missing location permissions
+    @SuppressLint("MissingPermission") // Suppress the location permissions warning
     private void setSessionLocation() {
         LocationManager mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // If location services are not enabled, tell the user to enable them and reset switch
         if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
             sw.setChecked(false);
-            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_scroll_lin),
+            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_layout),
                     "Please enable location services to access this feature", Snackbar.LENGTH_LONG);
             mySnackbar.show();
             locationEnabled = false;

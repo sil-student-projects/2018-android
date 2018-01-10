@@ -52,8 +52,13 @@ public class DatabaseAccess extends AsyncTask<String, Void, List<?>> {
 		List<?> result = null;
 		appDatabase.beginTransaction();
 		if (strings[0].equals("insert")) {
-			sd.insertSession(sessions);
-			wd.insertWords(words);
+			if (sessions != null) {
+				sd.insertSession(sessions);
+			}
+
+			if (words != null) {
+				wd.insertWords(words);
+			}
 		}
 		if (strings[0].equals("select")) {
 			if (strings[1].equals("session")) {
@@ -128,12 +133,11 @@ public class DatabaseAccess extends AsyncTask<String, Void, List<?>> {
 	/**
 	 * Alias for execute("insert")
 	 */
-	public void insert() {
-		this.execute("insert");
+	public AsyncTask<String, Void, List<?>> insert() {
+		return this.execute("insert");
 	}
 
 	public AsyncTask<String, Void, List<?>> select(String entity) {
 		return this.execute("select", entity);
 	}
 }
-

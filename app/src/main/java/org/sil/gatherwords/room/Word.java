@@ -10,7 +10,6 @@ import java.sql.Blob;
 /**
  * Entity class for each word of a session
  */
-
 @Entity
 public class Word {
 	@PrimaryKey (autoGenerate = true)

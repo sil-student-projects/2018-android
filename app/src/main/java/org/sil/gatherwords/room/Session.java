@@ -11,7 +11,6 @@ import java.util.TimeZone;
 /**
  * Entity class for a vernacular gathering session
  */
-
 @Entity
 public class Session {
 	// Define the primary key
