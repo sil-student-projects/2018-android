@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -23,6 +24,7 @@ import org.sil.gatherwords.room.Session;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 public class SessionActivity extends AppCompatActivity {
     // Used to track location through multiple methods
@@ -75,7 +77,11 @@ public class SessionActivity extends AppCompatActivity {
         // session.date = date.getText().toString();
 
         // Acquire db instance and insert the session
-        new DatabaseAccess(AppDatabase.get(this)).setSessions(session).insert();
+        try {
+            new DatabaseAccess(AppDatabase.get(this)).setSessions(session).insert().get(); // insert and wait to finish
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e("SessionList Adapter", "There was a problem in reading from the database", e);
+        }
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -97,7 +103,7 @@ public class SessionActivity extends AppCompatActivity {
             location = new Location("vanDellen 362");
             locationEnabled = false;
 
-            // If location permission is not granted, request it. Otherwise prep location get.
+            // If location permission is not granted, request it. Otherwise prep location getAll.
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
