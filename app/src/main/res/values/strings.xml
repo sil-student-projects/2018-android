@@ -6,6 +6,7 @@
     <string name="app_name">Gather Words</string>
     <string name="session_title">Session</string>
     <string name="entry_title">Lexical Entry</string>
+    <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
     <string name="app_settings_page_title">Settings</string>
     <!-- =============================================================== -->
     <!-- =============================================================== -->
@@ -53,4 +54,3 @@
     <!-- =============================================================== -->
 
 </resources>
-

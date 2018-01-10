@@ -10,14 +10,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         //Set custom support action bar.
         Toolbar actionBar = findViewById(R.id.app_action_support_bar);
@@ -35,8 +41,16 @@ public class MainActivity extends AppCompatActivity {
         String listPrefLocalization = sharedPref.getString
                 (SettingsActivityFragmentHost.KEY_LIST_PREF_LOCALIZATION_SELECT, "1");
 
-        //Display value of this preference (for testing purposes).
-        //Toast.makeText(this, listPrefLocalization, Toast.LENGTH_SHORT).show();
+        ListView sessionList = findViewById(R.id.session_list);
+        sessionList.setAdapter(new SessionListAdapter());
+
+        sessionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getApplicationContext(), EntryActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     //Method makes menu visible.
@@ -72,5 +86,51 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onCreateSessionClick(View v) {
+        Intent intent = new Intent(this, SessionActivity.class);
+        startActivity(intent);
+    }
+
+    // TODO: Switch to CursorAdapter
+    private class SessionListAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return 1;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup container) {
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(
+                    R.layout.session_list_item,
+                    container,
+                    false
+                );
+            }
+
+            TextView dateText = convertView.findViewById(R.id.date);
+            dateText.setText("1:42 PM 1/5/2018");
+
+            TextView locationText = convertView.findViewById(R.id.location);
+            locationText.setText("Thailand");
+
+            TextView personText = convertView.findViewById(R.id.person);
+            personText.setText("Example Person");
+
+            return convertView;
+        }
     }
 }
