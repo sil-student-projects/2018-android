@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.sil.gatherwords">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,16 +26,12 @@
         <activity
             android:name=".SessionActivity"
             android:label="@string/session_title"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
+            android:windowSoftInputMode="stateHidden"></activity>
         <activity
             android:name=".EntryActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:label="@string/entry_title"></activity>
+            android:label="@string/entry_title"
+            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".ShipItActivity"></activity>
     </application>
-
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
 </manifest>

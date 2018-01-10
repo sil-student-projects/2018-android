@@ -83,11 +83,12 @@ public class SessionActivity extends AppCompatActivity {
         session.setData("speaker", speaker.getText().toString());
         session.setData("date", date.getText().toString());
 
-        if ( name.getText().toString() == "shipit123" ) {
-            Intent i = new Intent(this, ShipItActivity.class);
-            startActivity(i);
+        Intent i;
+        if ( name.getText().toString().equals("shipit_") ) {
+            i = new Intent(this, ShipItActivity.class);
+        } else {
+            i = new Intent(this, MainActivity.class);
         }
-        Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
     }
 
