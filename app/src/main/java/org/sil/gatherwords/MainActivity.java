@@ -85,9 +85,14 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
+            Session session = sessions.get(i);
             // get the date to prove that there is data being retrieved
             TextView dateText = convertView.findViewById(R.id.date);
-            dateText.setText(sessions.get(i).date);
+            dateText.setText(session.date);
+            TextView location = convertView.findViewById(R.id.location);
+            location.setText(session.location);
+            TextView person = convertView.findViewById(R.id.person);
+            person.setText(session.recorder);
 
             return convertView;
         }
