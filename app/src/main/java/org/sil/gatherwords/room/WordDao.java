@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Data Access Object for the word table
  */
-
 @Dao
 public interface WordDao {
 	// SELECT

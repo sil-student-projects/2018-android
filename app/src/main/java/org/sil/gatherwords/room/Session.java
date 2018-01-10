@@ -6,7 +6,6 @@ import android.arch.persistence.room.PrimaryKey;
 /**
  * Entity class for a vernacular gathering session
  */
-
 @Entity
 public class Session {
 	// Define the primary key
@@ -21,6 +20,7 @@ public class Session {
 	public String listLanguages; // Also JSON
 	public String location; // Human readable location
 	public String gps; // google map gps string
+	public String label;
 
 	/**
 	 * Generate the current unix timestamp
