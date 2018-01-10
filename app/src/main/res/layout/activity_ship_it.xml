@@ -14,13 +14,14 @@
             android:src="@drawable/cambell"
             android:foregroundGravity="center_vertical|center_horizontal"
             android:id="@+id/cambell"/>
+
         <android.support.v7.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/cambell"
+            android:layout_alignBottom="@+id/cambell"
+            android:layout_centerHorizontal="true"
             android:text="I'm proud of you"
-            android:textSize="24sp"
-            android:gravity="center_horizontal"/>
+            android:textSize="24sp" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
