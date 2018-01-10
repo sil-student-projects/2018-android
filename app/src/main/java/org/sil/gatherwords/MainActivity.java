@@ -1,5 +1,6 @@
 package org.sil.gatherwords;
 
+import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,11 +11,21 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Session;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+public class MainActivity extends AppCompatActivity {
+    private AppDatabase ad;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ad = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
+
         setContentView(R.layout.activity_main);
 
         ListView sessionList = findViewById(R.id.session_list);
@@ -36,10 +47,22 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: Switch to CursorAdapter
     private class SessionListAdapter extends BaseAdapter {
+        private List<Session> sessions;
+        DatabaseAccess databaseAccess;
+
+        SessionListAdapter() {
+            try {
+                databaseAccess = new DatabaseAccess(ad);
+                sessions = (List<Session>) databaseAccess.select("session").get();
+
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
 
         @Override
         public int getCount() {
-            return 1;
+            return sessions.size();
         }
 
         @Override
@@ -62,14 +85,9 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
+            // get the date to prove that there is data being retrieved
             TextView dateText = convertView.findViewById(R.id.date);
-            dateText.setText("1:42 PM 1/5/2018");
-
-            TextView locationText = convertView.findViewById(R.id.location);
-            locationText.setText("Thailand");
-
-            TextView personText = convertView.findViewById(R.id.person);
-            personText.setText("Example Person");
+            dateText.setText(sessions.get(i).date);
 
             return convertView;
         }
