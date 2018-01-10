@@ -1,12 +1,34 @@
 package org.sil.gatherwords.room;
 
+import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.content.Context;
+
+import org.sil.gatherwords.R;
 
 /**
  * The database class.
  */
 @android.arch.persistence.room.Database(entities = {Session.class, Word.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
-	public abstract SessionDao sessionDao();
-	public abstract WordDao wordDao();
+    // Singleton db instance; avoids expensive init.
+    private static AppDatabase INSTANCE = null;
+
+    private static void init(Context context) {
+        INSTANCE = Room.databaseBuilder(
+            context,
+            AppDatabase.class,
+            context.getString(R.string.database_name)
+        ).build();
+    }
+
+    public static AppDatabase get(Context context) {
+        if (INSTANCE == null) {
+            init(context);
+        }
+        return INSTANCE;
+    }
+
+    public abstract SessionDao sessionDao();
+    public abstract WordDao wordDao();
 }

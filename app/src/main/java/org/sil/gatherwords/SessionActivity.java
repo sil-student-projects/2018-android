@@ -2,7 +2,6 @@ package org.sil.gatherwords;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -55,15 +54,6 @@ public class SessionActivity extends AppCompatActivity {
         timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
     }
 
-    @Override
-    protected void onDestroy() {
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name_testing)).build();
-        DatabaseAccess da = new DatabaseAccess(db);
-
-        da.execute("insert");
-        super.onDestroy();
-    }
-
     //TODO: Do something legitimate with the data
     // Run when the FAB is pressed, right now it creates a session and returns to Main
     // Seconds not currently recorded
@@ -84,9 +74,8 @@ public class SessionActivity extends AppCompatActivity {
         // TODO: decide on internal format
         // session.date = date.getText().toString();
 
-        // Create db instance and insert the session
-        AppDatabase appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
-        new DatabaseAccess(appDatabase).setSessions(session).insert();
+        // Acquire db instance and insert the session
+        new DatabaseAccess(AppDatabase.get(this)).setSessions(session).insert();
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
