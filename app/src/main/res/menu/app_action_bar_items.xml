@@ -2,6 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- Settings activity page and associated fragments -->
     <item
         android:id="@+id/app_action_bar_settings"
         android:title="@string/app_action_bar_settings"

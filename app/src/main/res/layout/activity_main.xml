@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context="org.sil.gatherwords.MainActivity">
 
-    <include
-        android:id="@+id/app_action_support_bar"
-        layout="@layout/app_action_support_bar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteY="0dp" />
-
     <ListView
         android:id="@+id/session_list"
         android:layout_width="match_parent"
@@ -32,4 +23,5 @@
         app:borderWidth="0dp"
         app:layout_anchor="@id/session_list"
         app:layout_anchorGravity="bottom|right|end" android:focusable="true" />
+
 </android.support.design.widget.CoordinatorLayout>

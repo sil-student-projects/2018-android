@@ -25,13 +25,15 @@
     <!-- =============================================================== -->
     <string name="app_main_page_title">Hello, Gather Words!</string>
     <string name="fragment_settings_word_field_setup">Word Field Setup.</string>
+    <string name="fragment_settings_localization_setup">Localization Setup.</string>
     <!-- =============================================================== -->
     <!-- =============================================================== -->
 
 
-    <!-- Strings for the language selection list-type preference setting -->
+    <!-- Strings for the localization selection list-type preference setting -->
     <!-- =============================================================== -->
     <!-- =============================================================== -->
+    <string name="pref_localization_select_default_value">1</string>
     <string name="pref_localization_select_key">list_pref_localization</string>
     <string name="pref_localization_select_title">Localization Selection.</string>
     <string name="pref_localization_select_summary">Select text localization for the app.</string>
@@ -46,11 +48,36 @@
         <item>3</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+
+
+    <!-- Strings for the multi language options multi-select-list-type preference setting -->
+    <!-- =============================================================== -->
+    <!-- =============================================================== -->
+    <string name="pref_language_option_default_value">1</string>
+    <string name="pref_language_option_key">list_pref_language</string>
+    <string name="pref_language_option_title">Language Options.</string>
+    <string name="pref_language_option_summary">Language and associated options.</string>
+    <string-array name="pref_language_option_default_values">
+    </string-array>
+    <string-array name="pref_language_option_entries">
+        <item>English</item>
+        <item>Thai</item>
+        <item>Latin</item>
+    </string-array>
+    <string-array name="pref_language_option_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 
     <!-- =============================================================== -->
     <!-- =============================================================== -->
     <!-- =============================================================== -->
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -1,7 +1,7 @@
 package org.sil.gatherwords;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 public class SettingsActivityFragmentHost extends AppCompatActivity {
 
@@ -12,6 +12,8 @@ public class SettingsActivityFragmentHost extends AppCompatActivity {
 
     public static final String
             KEY_LIST_PREF_LOCALIZATION_SELECT = "list_pref_localization";
+    public static final String
+            KEY_CHECKBOX_PREF_LANGUAGE_OPTIONS = "list_pref_language";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +28,13 @@ public class SettingsActivityFragmentHost extends AppCompatActivity {
 
         //Enable localization fragment.
         getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsLocalizationFragment())
+                .add(android.R.id.content, new SettingsLocalizationFragment())
                 .commit();
+
+        //FIXME - crashing at the moment.  Disabled for now.
+        //Enable word field setup fragment.
+//        getSupportFragmentManager().beginTransaction()
+//                .add(android.R.id.content, new SettingsWordFieldSetupFragment())
+//                .commit();
     }
 }

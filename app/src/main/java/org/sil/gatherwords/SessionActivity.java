@@ -13,8 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
-
 
 import java.util.Calendar;
 import java.util.Date;

@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@style/PreferenceThemeOverlay">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Lists the various different preferences available to the user -->
-    <!-- Refer to strings.xml file for the actual text in the strings -->
-
-
-
-    <!-- List preference to specify localization setting in the app -->
-    <!-- =============================================================== -->
-    <!-- =============================================================== -->
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="@string/pref_localization_select_default_value"
         android:entries="@array/pref_localization_selection_entries"
         android:entryValues="@array/pref_localization_selection_values"
         android:key="@string/pref_localization_select_key"
         android:summary="@string/pref_localization_select_summary"
         android:title="@string/pref_localization_select_title" />
-    <!-- =============================================================== -->
-    <!-- =============================================================== -->
 </PreferenceScreen>

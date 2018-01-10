@@ -2,20 +2,19 @@ package org.sil.gatherwords;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,13 +23,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        //Set custom support action bar.
-        Toolbar actionBar = findViewById(R.id.app_action_support_bar);
-        setSupportActionBar(actionBar);
+        /* Begin code by Joseph Jinn */
+        //////////////////////////////////////////////////////////////////////////////////////////////
 
         //Set preferences to default values.
         PreferenceManager.setDefaultValues(this, R.xml.settings_localization_preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.settings_word_field_setup_preferences, false);
 
         //Get the shared preferences file for the app.
         SharedPreferences sharedPref =
@@ -40,6 +38,11 @@ public class MainActivity extends AppCompatActivity {
         //Get value of this preference.  If no value found, set to default value.
         String listPrefLocalization = sharedPref.getString
                 (SettingsActivityFragmentHost.KEY_LIST_PREF_LOCALIZATION_SELECT, "1");
+//        String checkBoxPrefLanguage = sharedPref.getString
+//                (SettingsActivityFragmentHost.KEY_CHECKBOX_PREF_LANGUAGE_OPTIONS, "1");
+
+        /* End code by Joseph Jinn */
+        //////////////////////////////////////////////////////////////////////////////////////////////
 
         ListView sessionList = findViewById(R.id.session_list);
         sessionList.setAdapter(new SessionListAdapter());
@@ -53,7 +56,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //Method makes menu visible.
+    /* Begin code by Joseph Jinn */
+    //////////////////////////////////////////////////////////////////////////////////////////////
+
+    //Method makes menu items visible.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -87,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /* End code by Joseph Jinn */
+    //////////////////////////////////////////////////////////////////////////////////////////////
 
     public void onCreateSessionClick(View v) {
         Intent intent = new Intent(this, SessionActivity.class);
