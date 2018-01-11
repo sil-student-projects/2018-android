@@ -1,5 +1,6 @@
 package org.sil.gatherwords.room;
 
+import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
@@ -9,7 +10,7 @@ import org.sil.gatherwords.R;
 /**
  * The database class.
  */
-@android.arch.persistence.room.Database(entities = {Session.class, Word.class}, version = 2)
+@Database(entities = {Session.class, Word.class}, version = 4)
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton db instance; avoids expensive init.
     private static AppDatabase INSTANCE = null;
@@ -19,7 +20,9 @@ public abstract class AppDatabase extends RoomDatabase {
             context,
             AppDatabase.class,
             context.getString(R.string.database_name)
-        ).build();
+        )
+        .fallbackToDestructiveMigration()
+        .build();
     }
 
     public static AppDatabase get(Context context) {

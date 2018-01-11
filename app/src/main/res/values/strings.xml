@@ -6,10 +6,13 @@
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="language_options_key">Language Options Key.</string>
     <string name="language_options_title">Language Options Title.</string>
     <string name="language_options_summary">Language Options Summary.</string>
+
+    <string-array name="word_lists">
+        <item>None (Blank Template)</item>
+        <item>swadesh-100</item>
+        <item>swadesh-207</item>
+    </string-array>
 </resources>

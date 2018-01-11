@@ -3,6 +3,7 @@ package org.sil.gatherwords;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,11 +13,20 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Session;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 public class MainActivity extends AppCompatActivity {
+    private AppDatabase ad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ad = AppDatabase.get(this);
         setContentView(R.layout.activity_main);
 
         ListView sessionList = findViewById(R.id.session_list);
@@ -64,20 +74,34 @@ public class MainActivity extends AppCompatActivity {
 
     public void onCreateSessionClick(View v) {
         Intent intent = new Intent(this, SessionActivity.class);
+        // To distinguish between creating a session and viewing the settings of an old one
+        intent.putExtra(SessionActivity.CREATING_SESSION, true);
         startActivity(intent);
     }
 
     // TODO: Switch to CursorAdapter
     private class SessionListAdapter extends BaseAdapter {
+        private List<Session> sessions = new ArrayList<>();
+        DatabaseAccess databaseAccess;
+
+        SessionListAdapter() {
+            try {
+                databaseAccess = new DatabaseAccess(ad);
+                sessions = (List<Session>) databaseAccess.select("session").get();
+
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e("SessionList Adapter", "There was a problem in reading from the database", e);
+            }
+        }
 
         @Override
         public int getCount() {
-            return 1;
+            return sessions.size();
         }
 
         @Override
         public Object getItem(int i) {
-            return null;
+            return sessions.get(i);
         }
 
         @Override
@@ -95,14 +119,15 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
+            Session session = sessions.get(i);
+
+            // Get the date to prove that there is data being retrieved
             TextView dateText = convertView.findViewById(R.id.date);
-            dateText.setText("1:42 PM 1/5/2018");
-
-            TextView locationText = convertView.findViewById(R.id.location);
-            locationText.setText("Thailand");
-
-            TextView personText = convertView.findViewById(R.id.person);
-            personText.setText("Example Person");
+            dateText.setText(session.date);
+            TextView location = convertView.findViewById(R.id.location);
+            location.setText(session.location);
+            TextView person = convertView.findViewById(R.id.person);
+            person.setText(session.recorder);
 
             return convertView;
         }
