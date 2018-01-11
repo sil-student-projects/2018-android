@@ -5,4 +5,7 @@
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

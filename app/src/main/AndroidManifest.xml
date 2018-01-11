@@ -26,12 +26,15 @@
         <activity
             android:name=".SessionActivity"
             android:label="@string/session_title"
-            android:windowSoftInputMode="stateHidden"></activity>
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".EntryActivity"
             android:label="@string/entry_title"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ShipItActivity"></activity>
+        <activity android:name=".ShipItActivity" />
+        <activity android:name=".PreferencesActivity"
+            android:parentActivityName=".MainActivity">
+        </activity>
     </application>
 
 </manifest>
