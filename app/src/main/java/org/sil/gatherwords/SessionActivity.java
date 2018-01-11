@@ -33,6 +33,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     private FusedLocationProviderClient mFusedLocationClient;
     boolean locationEnabled;
     Location location;
+    boolean creatingNewSession;
     AppDatabase db;
     AppCompatSpinner spinner;
     String worldListToLoad;
@@ -42,11 +43,14 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
 
+        creatingNewSession = getIntent().getBooleanExtra("creating_session", true);
+
+
         locationEnabled = false;
 
         spinner = findViewById(R.id.word_list_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.word_lists, android.R.layout.simple_spinner_item);
+                R.array.word_lists, R.layout.world_list_spinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
@@ -65,6 +69,15 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         sdf.applyPattern("z");
         String timeZoneString = sdf.format(date);
         timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
+
+        // Disables location and loaded word list if not creating a new session
+        // May want to remove the location disable
+        if ( !creatingNewSession ) {
+            SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
+            sw.setEnabled(false);
+            spinner.setEnabled(false);
+
+        }
     }
 
     //TODO: Do something legitimate with the data

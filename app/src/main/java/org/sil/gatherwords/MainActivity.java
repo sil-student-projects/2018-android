@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onCreateSessionClick(View v) {
         Intent intent = new Intent(this, SessionActivity.class);
+        // To distinguish between creating a session and viewing the settings of an old one
+        intent.putExtra("creating_session", true);
         startActivity(intent);
     }
 
