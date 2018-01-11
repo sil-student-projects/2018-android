@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -43,19 +44,19 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         locationEnabled = false;
 
-        EditText dateField, timeField, timeZoneField;
-        dateField = findViewById(R.id.session_create_date);
-        timeField = findViewById(R.id.session_create_time);
-        timeZoneField= findViewById(R.id.session_create_time_zone);
-
         spinner = findViewById(R.id.word_list_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.word_lists, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-
+        spinner.setOnItemSelectedListener(this);
 
         // Set date, time, and timezone fields
+        EditText dateField, timeField, timeZoneField;
+        dateField = findViewById(R.id.session_create_date);
+        timeField = findViewById(R.id.session_create_time);
+        timeZoneField= findViewById(R.id.session_create_time_zone);
+
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         dateField.setText(sdf.format(date));
@@ -83,11 +84,13 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         session.label = name.getText().toString();
         session.recorder = eliciter.getText().toString();
         session.speaker = speaker.getText().toString();
+
         // TODO: decide on internal format
         // session.date = date.getText().toString();
 
         // Acquire db instance and insert the session
         new DatabaseAccess(AppDatabase.get(this)).setSessions(session).insert();
+
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -167,6 +170,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
+    @Override
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         switch ( pos ) {
