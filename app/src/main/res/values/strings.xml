@@ -5,6 +5,11 @@
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
+
+    <string name="language_options_key">Language Options Key.</string>
+    <string name="language_options_title">Language Options Title.</string>
+    <string name="language_options_summary">Language Options Summary.</string>
+
     <string-array name="word_lists">
         <item>None (Blank Template)</item>
         <item>swadesh-100</item>

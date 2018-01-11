@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <MultiSelectListPreference
+        android:defaultValue="@array/language_options_default_values"
+        android:entries="@array/language_options_entries"
+        android:entryValues="@array/language_options_values"
+        android:key="@string/language_options_key"
+        android:summary="@string/language_options_summary"
+        android:title="@string/language_options_summary" />
+</PreferenceScreen>

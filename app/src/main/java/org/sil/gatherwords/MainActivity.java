@@ -5,6 +5,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,6 +38,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Load preference fragment.
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.mainView, new org.sil.gatherwords.PreferenceFragment())
+                    .commit();
+        }
+
         new FillSessionListTask(this).execute();
     }
 
@@ -62,6 +72,29 @@ public class MainActivity extends AppCompatActivity {
                     sessions
                 ));
             }
+        }
+    }
+
+    //Enables icon to access Preferences activity.
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.preference_menu, menu);
+        return true;
+    }
+
+    /**
+     * react to the user tapping/selecting an options menu item
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.preference_menu:
+                Intent i = new Intent(this, PreferencesActivity.class);
+                startActivity(i);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
