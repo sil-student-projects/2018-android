@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Load preference fragment(s).
+        //Load preference fragment.
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.mainView, new org.sil.gatherwords.PreferenceFragment())
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_new_thingy:
+            case R.id.preference_menu:
                 //Toast.makeText(this, "ADD!", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(this, PreferencesActivity.class);
                 startActivity(i);

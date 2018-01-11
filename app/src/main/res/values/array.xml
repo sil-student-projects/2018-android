@@ -10,4 +10,35 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+
+    <string-array name="language_options_entries">
+        <item> English - IPA</item>
+        <item> English - Audio</item>
+        <item> English - Video</item>
+        <item> English - Gloss</item>
+        <item> Thai - IPA</item>
+        <item> Thai - Audio</item>
+        <item> Thai - Video</item>
+        <item> Thai - Gloss</item>
+    </string-array>
+    <string-array name="language_options_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="language_options_default_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
 </resources>
