@@ -13,6 +13,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -24,6 +25,7 @@ import org.sil.gatherwords.room.Session;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 public class SessionActivity extends AppCompatActivity {
     // Used to track location through multiple methods
@@ -36,6 +38,7 @@ public class SessionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
 
         locationEnabled = false;
 
@@ -53,15 +56,6 @@ public class SessionActivity extends AppCompatActivity {
         sdf.applyPattern("z");
         String timeZoneString = sdf.format(date);
         timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
-    }
-
-    @Override
-    protected void onDestroy() {
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name_testing)).build();
-        DatabaseAccess da = new DatabaseAccess(db);
-
-        da.execute("insert");
-        super.onDestroy();
     }
 
     //TODO: Do something legitimate with the data
@@ -85,8 +79,11 @@ public class SessionActivity extends AppCompatActivity {
         // session.date = date.getText().toString();
 
         // Create db instance and insert the session
-        AppDatabase appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
-        new DatabaseAccess(appDatabase).setSessions(session).insert();
+        try {
+            new DatabaseAccess(db).setSessions(session).insert().get(); // insert and wait to finish
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e("SessionList Adapter", "There was a problem in reading from the database", e);
+        }
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -108,7 +105,7 @@ public class SessionActivity extends AppCompatActivity {
             location = new Location("vanDellen 362");
             locationEnabled = false;
 
-            // If location permission is not granted, request it. Otherwise prep location get.
+            // If location permission is not granted, request it. Otherwise prep location getAll.
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},

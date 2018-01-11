@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
-    private AppDatabase ad;
+    AppDatabase ad;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ad = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, getString(R.string.database_name)).build();
-
         setContentView(R.layout.activity_main);
 
         ListView sessionList = findViewById(R.id.session_list);
@@ -78,9 +78,9 @@ public class MainActivity extends AppCompatActivity {
         public View getView(int i, View convertView, ViewGroup container) {
             if (convertView == null) {
                 convertView = getLayoutInflater().inflate(
-                    R.layout.session_list_item,
-                    container,
-                    false
+                        R.layout.session_list_item,
+                        container,
+                        false
                 );
             }
 

@@ -10,7 +10,6 @@ import org.sil.gatherwords.room.WordDao;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Accesses the database in a worker thread.
@@ -65,12 +64,23 @@ public class DatabaseAccess extends AsyncTask<String, Void, List<?>> {
 				if (stringList == null && comparisonString == null) {
 					result = sd.getAll();
 				} else if (stringList == null && comparisonString != null) {
-					stringList = Arrays.asList("id", "label", "date", "speaker", "recorder", "vernacular", "listLanguages", "location", "gps");
+					stringList = Arrays.asList("*");
 					result = sd.getWhere(stringList, comparisonString);
 				} else if (stringList != null && comparisonString == null) {
-					result = sd.getAll(stringList);
+					result = sd.get(stringList);
 				} else {
 					result = sd.getWhere(stringList, comparisonString);
+				}
+			} else if (strings[0].equals("word")) {
+				if (stringList == null && comparisonString == null) {
+					result = wd.getAll();
+				} else if (stringList == null && comparisonString != null) {
+					stringList = Arrays.asList("*");
+					result = wd.getWhere(stringList, comparisonString);
+				} else if (stringList != null && comparisonString == null) {
+					result = wd.get(stringList);
+				} else {
+					result = wd.getWhere(stringList, comparisonString);
 				}
 			}
 		}
@@ -79,7 +89,7 @@ public class DatabaseAccess extends AsyncTask<String, Void, List<?>> {
 	}
 
 	/**
-	 * Reset the arrays
+	 * Reset the variables
 	 */
 	@Override
 	protected void onPostExecute(List<?> result) {
@@ -132,11 +142,17 @@ public class DatabaseAccess extends AsyncTask<String, Void, List<?>> {
 
 	/**
 	 * Alias for execute("insert")
+	 * @return self
 	 */
 	public AsyncTask<String, Void, List<?>> insert() {
 		return this.execute("insert");
 	}
 
+	/**
+	 * Alias for execute("select", entity)
+	 * @param entity Which table in the database is being selected from
+	 * @return
+	 */
 	public AsyncTask<String, Void, List<?>> select(String entity) {
 		return this.execute("select", entity);
 	}
