@@ -3,6 +3,7 @@ package org.sil.gatherwords.room;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
 import org.sil.gatherwords.R;
@@ -10,7 +11,8 @@ import org.sil.gatherwords.R;
 /**
  * The database class.
  */
-@Database(entities = {Session.class, Word.class}, version = 4)
+@Database(entities = {Session.class, Word.class}, version = 5)
+@TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton db instance; avoids expensive init.
     private static AppDatabase INSTANCE = null;

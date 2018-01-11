@@ -1,5 +1,6 @@
 package org.sil.gatherwords;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -19,7 +21,10 @@ import org.sil.gatherwords.room.Session;
 import org.sil.gatherwords.room.SessionDao;
 
 import java.lang.ref.WeakReference;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,11 +33,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView sessionList = findViewById(R.id.session_list);
+        final ListView sessionList = findViewById(R.id.session_list);
+
+        // TODO: This doesn't seem to work currently
         sessionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), EntryActivity.class);
+                Session session = (Session) sessionList.getAdapter().getItem(i);
+                intent.putExtra(SessionActivity.ARG_ID, session.id);
+                // Passes id of selected session into EntryActivity
+                // TODO: EntryActivity currently does nothing with
                 startActivity(intent);
             }
         });
@@ -93,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     public void onCreateSessionClick(View v) {
         Intent intent = new Intent(this, SessionActivity.class);
         // To distinguish between creating a session and viewing the settings of an old one
-        intent.putExtra(SessionActivity.CREATING_SESSION, true);
+        intent.putExtra(SessionActivity.ARG_CREATING_SESSION, true);
         startActivity(intent);
     }
 
@@ -132,15 +143,27 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
-            Session session = sessions.get(i);
+            final Session session = sessions.get(i);
 
             // Get the date to prove that there is data being retrieved
-            TextView dateText = convertView.findViewById(R.id.date);
-            dateText.setText(session.date);
-            TextView location = convertView.findViewById(R.id.location);
-            location.setText(session.location);
-            TextView person = convertView.findViewById(R.id.person);
-            person.setText(session.recorder);
+            TextView labelText = convertView.findViewById(R.id.session_list_lable);
+            labelText.setText(session.label);
+            TextView date = convertView.findViewById(R.id.session_list_date);
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            date.setText(df.format(session.date));
+            TextView speaker = convertView.findViewById(R.id.session_list_speaker);
+            speaker.setText(session.speaker);
+
+            ImageButton button = convertView.findViewById(R.id.session_list_button);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Context context = inflater.getContext();
+                    Intent intent = new Intent(context, SessionActivity.class);
+                    intent.putExtra(SessionActivity.ARG_CREATING_SESSION, false);
+                    intent.putExtra(SessionActivity.ARG_ID, session.id);
+                    context.startActivity(intent);
+                }
+            });
 
             return convertView;
         }
