@@ -14,7 +14,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -26,26 +29,40 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-public class SessionActivity extends AppCompatActivity {
+public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     // Used to track location through multiple methods
     private FusedLocationProviderClient mFusedLocationClient;
     boolean locationEnabled;
     Location location;
+    boolean creatingNewSession;
     AppDatabase db;
+    Spinner spinner;
+    String worldListToLoad;
+
+    public static final String CREATING_SESSION = "creating_session";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
 
+        creatingNewSession = getIntent().getBooleanExtra(CREATING_SESSION, true);
+
         locationEnabled = false;
 
+        spinner = findViewById(R.id.word_list_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.word_lists, R.layout.world_list_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
+        // Set date, time, and timezone fields
         EditText dateField, timeField, timeZoneField;
         dateField = findViewById(R.id.session_create_date);
         timeField = findViewById(R.id.session_create_time);
         timeZoneField= findViewById(R.id.session_create_time_zone);
 
-        // Set date, time, and timezone fields
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         dateField.setText(sdf.format(date));
@@ -54,6 +71,14 @@ public class SessionActivity extends AppCompatActivity {
         sdf.applyPattern("z");
         String timeZoneString = sdf.format(date);
         timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
+
+        // Disables location and loaded word list if not creating a new session
+        // May want to remove the location disable
+        if ( !creatingNewSession ) {
+            SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
+            sw.setEnabled(false);
+            spinner.setEnabled(false);
+        }
     }
 
     //TODO: Do something legitimate with the data
@@ -73,6 +98,7 @@ public class SessionActivity extends AppCompatActivity {
         session.label = name.getText().toString();
         session.recorder = eliciter.getText().toString();
         session.speaker = speaker.getText().toString();
+
         // TODO: decide on internal format
         // session.date = date.getText().toString();
 
@@ -159,5 +185,25 @@ public class SessionActivity extends AppCompatActivity {
                 return;
             }
         }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view,
+                               int pos, long id) {
+        switch ( pos ) {
+            case 0:
+                worldListToLoad = "";
+                break;
+            case 1:
+                worldListToLoad = "swadesh-100.json";
+                break;
+            case 2:
+                worldListToLoad = "swadesh-207.json";
+                break;
+        }
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        worldListToLoad = "";
     }
 }
