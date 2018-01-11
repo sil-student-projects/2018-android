@@ -7,12 +7,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,10 +25,10 @@ import com.google.android.gms.location.LocationServices;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
+import org.sil.gatherwords.room.SessionDao;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     // Used to track location through multiple methods
@@ -103,11 +104,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // session.date = date.getText().toString();
 
         // Acquire db instance and insert the session
-        try {
-            new DatabaseAccess(AppDatabase.get(this)).setSessions(session).insert().get(); // insert and wait to finish
-        } catch (InterruptedException | ExecutionException e) {
-            Log.e("SessionList Adapter", "There was a problem in reading from the database", e);
-        }
+        new InsertSessionsTask(AppDatabase.get(this)).execute(session);
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -116,6 +113,20 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             i = new Intent(this, MainActivity.class);
         }
         startActivity(i);
+    }
+
+    private static class InsertSessionsTask extends AsyncTask<Session, Void, Void> {
+        private SessionDao sDAO;
+
+        InsertSessionsTask(AppDatabase db) {
+            sDAO = db.sessionDao();
+        }
+
+        @Override
+        protected Void doInBackground(Session... sessions) {
+            sDAO.insertSession(sessions);
+            return null;
+        }
     }
 
     // Run when the location switch is toggled
