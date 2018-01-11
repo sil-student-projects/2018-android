@@ -15,6 +15,7 @@ import android.widget.TextView;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: Switch to CursorAdapter
     private class SessionListAdapter extends BaseAdapter {
-        private List<Session> sessions;
+        private List<Session> sessions = new ArrayList<>();
         DatabaseAccess databaseAccess;
 
         SessionListAdapter() {
