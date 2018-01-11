@@ -1,6 +1,7 @@
 package org.sil.gatherwords;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +15,8 @@ public class EntryFragment extends Fragment {
     private static final String ARG_POSITION = "position";
     private static final String ARG_TOTAL = "total";
 
-    private int m_position;
-    private int m_total;
+    private int m_position; // The index of the displayed word (0-indexed).
+    private int m_total;    // Total number of words.
 
     public static EntryFragment newInstance(int position, int total) {
         EntryFragment fragment = new EntryFragment();
@@ -47,8 +48,9 @@ public class EntryFragment extends Fragment {
         ListView entryFields = entryPage.findViewById(R.id.entry_fields);
         String[] langs = {"lang1", "lang2"};
         entryFields.setAdapter(new ArrayAdapter<String>(getContext(), 0, langs) {
+            @NonNull
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 if (convertView == null) {
                     convertView = getLayoutInflater().inflate(
                         R.layout.entry_field_item,

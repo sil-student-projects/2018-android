@@ -14,7 +14,7 @@
             android:id="@+id/session_create_scroll">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:id="@+id/session_create_scroll_lin">
 
@@ -154,6 +154,7 @@
             android:layout_margin="16dp"
             android:clickable="true"
             android:src="@drawable/ic_check_white_24dp"
-            android:onClick="save_settings_fab_pressed"/>
+            android:onClick="save_settings_fab_pressed"
+            android:focusable="true" />
 
 </android.support.design.widget.CoordinatorLayout>
