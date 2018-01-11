@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -18,28 +19,35 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
+import org.sil.gatherwords.room.SessionDao;
 
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    EditText dateField, timeField, timeZoneField, labelField, speakerField, eliciterField;
+    SimpleDateFormat dateSDF, timeSDF, timeZoneSDF;
     // Used to track location through multiple methods
     private FusedLocationProviderClient mFusedLocationClient;
     boolean locationEnabled;
     Location location;
     boolean creatingNewSession;
-    AppDatabase db;
+    int id;
     Spinner spinner;
     String worldListToLoad;
 
     public static final String CREATING_SESSION = "creating_session";
+    public static final String ID = "id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         setContentView(R.layout.activity_session);
 
         creatingNewSession = getIntent().getBooleanExtra(CREATING_SESSION, true);
+        id = getIntent().getIntExtra(ID, 0);
 
         locationEnabled = false;
 
@@ -57,31 +66,49 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
+        // Find lable, speaker, eliciter EditTexts
+        labelField = findViewById(R.id.session_create_name);
+        speakerField = findViewById(R.id.session_create_speaker);
+        eliciterField = findViewById(R.id.session_create_eliciter);
+
         // Set date, time, and timezone fields
-        EditText dateField, timeField, timeZoneField;
         dateField = findViewById(R.id.session_create_date);
         timeField = findViewById(R.id.session_create_time);
         timeZoneField= findViewById(R.id.session_create_time_zone);
 
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        dateField.setText(sdf.format(date));
-        sdf.applyPattern("HH:mm");
-        timeField.setText(sdf.format(date));
-        sdf.applyPattern("z");
-        String timeZoneString = sdf.format(date);
-        timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
+        dateSDF = new SimpleDateFormat("yyyy-MM-dd");
+        timeSDF = new SimpleDateFormat("HH:mm");
+        timeZoneSDF = new SimpleDateFormat("z");
 
+        Date date;
+
+        if ( creatingNewSession ) {
+            date = new Date();
+            dateField.setText(dateSDF.format(date));
+            timeField.setText(timeSDF.format(date));
+            String timeZoneString = timeZoneSDF.format(date);
+            timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
+        }
         // Disables location and loaded word list if not creating a new session
-        // May want to remove the location disable
-        if ( !creatingNewSession ) {
+        else {
+            // Set fields to fields from database
+            new GetInfoFromDB(this).execute(id);
+
+            // Disables changing of location storage
+            // May want to allow this
             SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
             sw.setEnabled(false);
+
+            // Hides the spinner
             spinner.setEnabled(false);
+            spinner.setVisibility(View.GONE);
+            TextView spinnerText = findViewById(R.id.word_list_spinner_text_view);
+            spinnerText.setVisibility(View.GONE);
+
         }
     }
 
-    //TODO: Do something legitimate with the data
+    //TODO: Save settings instead of write to new session
     // Run when the FAB is pressed, right now it creates a session and returns to Main
     // Seconds not currently recorded
     public void save_settings_fab_pressed(View view) {
@@ -144,9 +171,9 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
-    // Recieves and stores the device's current location
+    // Receives and stores the device's current location
     // TODO: Handle missing location permissions
-    @SuppressLint("MissingPermission") // Suppress the location permissions warning
+//    @SuppressLint("MissingPermission") // Suppress the location permissions warning
     private void setSessionLocation() {
         LocationManager mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // If location services are not enabled, tell the user to enable them and reset switch
@@ -205,5 +232,40 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
     public void onNothingSelected(AdapterView<?> parent) {
         worldListToLoad = "";
+    }
+
+
+    private static class GetInfoFromDB extends AsyncTask<Integer, Void, List<Session>> {
+        private SessionDao sDAO;
+        private WeakReference<SessionActivity> sessionActivityRef;
+
+        GetInfoFromDB(SessionActivity sessionActivity) {
+            sDAO = AppDatabase.get(sessionActivity).sessionDao();
+            sessionActivityRef = new WeakReference<>(sessionActivity);
+        }
+
+        @Override
+        protected List<Session> doInBackground(Integer... ids) {
+            return sDAO.getSessionByID(ids);
+        }
+
+        @Override
+        protected void onPostExecute(List<Session> sessions) {
+            SessionActivity sessionActivity = sessionActivityRef.get();
+            if (sessionActivity != null && sessions.size() > 0 ) {
+                Session session = sessions.get(0);
+                // Insert previous date
+                Date date = session.date;
+                sessionActivity.dateField.setText(sessionActivity.dateSDF.format(date));
+                sessionActivity.timeField.setText(sessionActivity.timeSDF.format(date));
+                String timeZoneString = sessionActivity.timeZoneSDF.format(date);
+                sessionActivity.timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
+
+                // Insert previous lable, speaker, eliciter
+                sessionActivity.labelField.setText(session.label);
+                sessionActivity.speakerField.setText(session.speaker);
+                sessionActivity.eliciterField.setText(session.recorder);
+            }
+        }
     }
 }
