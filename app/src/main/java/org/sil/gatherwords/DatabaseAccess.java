@@ -1,6 +1,7 @@
 package org.sil.gatherwords;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
@@ -50,41 +51,47 @@ public class DatabaseAccess extends AsyncTask<String, Void, List<?>> {
 	protected List<?> doInBackground(String... strings) {
 		List<?> result = null;
 		appDatabase.beginTransaction();
-		if (strings[0].equals("insert")) {
-			if (sessions != null) {
-				sd.insertSession(sessions);
-			}
+		try {
+			if (strings[0].equals("insert")) {
+                if (sessions != null) {
+                    sd.insertSession(sessions);
+                }
 
-			if (words != null) {
-				wd.insertWords(words);
-			}
+                if (words != null) {
+                    wd.insertWords(words);
+                }
+            }
+			if (strings[0].equals("select")) {
+                if (strings[1].equals("session")) {
+                    if (stringList == null && comparisonString == null) {
+                        result = sd.getAll();
+                    } else if (stringList == null && comparisonString != null) {
+                        stringList = Arrays.asList("*");
+                        result = sd.getWhere(stringList, comparisonString);
+                    } else if (stringList != null && comparisonString == null) {
+                        result = sd.get(stringList);
+                    } else {
+                        result = sd.getWhere(stringList, comparisonString);
+                    }
+                } else if (strings[0].equals("word")) {
+                    if (stringList == null && comparisonString == null) {
+                        result = wd.getAll();
+                    } else if (stringList == null && comparisonString != null) {
+                        stringList = Arrays.asList("*");
+                        result = wd.getWhere(stringList, comparisonString);
+                    } else if (stringList != null && comparisonString == null) {
+                        result = wd.get(stringList);
+                    } else {
+                        result = wd.getWhere(stringList, comparisonString);
+                    }
+                }
+            }
+            appDatabase.setTransactionSuccessful();
+		} catch (Exception e) {
+			Log.e("DatabaseAccess", "Something went wrong in doInBackground", e);
+		} finally {
+			appDatabase.endTransaction();
 		}
-		if (strings[0].equals("select")) {
-			if (strings[1].equals("session")) {
-				if (stringList == null && comparisonString == null) {
-					result = sd.getAll();
-				} else if (stringList == null && comparisonString != null) {
-					stringList = Arrays.asList("*");
-					result = sd.getWhere(stringList, comparisonString);
-				} else if (stringList != null && comparisonString == null) {
-					result = sd.get(stringList);
-				} else {
-					result = sd.getWhere(stringList, comparisonString);
-				}
-			} else if (strings[0].equals("word")) {
-				if (stringList == null && comparisonString == null) {
-					result = wd.getAll();
-				} else if (stringList == null && comparisonString != null) {
-					stringList = Arrays.asList("*");
-					result = wd.getWhere(stringList, comparisonString);
-				} else if (stringList != null && comparisonString == null) {
-					result = wd.get(stringList);
-				} else {
-					result = wd.getWhere(stringList, comparisonString);
-				}
-			}
-		}
-		appDatabase.endTransaction();
 		return result;
 	}
 

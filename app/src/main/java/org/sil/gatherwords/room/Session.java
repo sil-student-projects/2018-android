@@ -5,6 +5,7 @@ import android.arch.persistence.room.PrimaryKey;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -36,5 +37,11 @@ public class Session {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
 		df.setTimeZone(tz);
 		return df.format(new Date());
+	}
+
+	@Override
+	public String toString() {
+		String[] out = {"ID: " + String.valueOf(id), "Date: " + date, "Speaker: " + speaker, "Recorder: " + recorder, "Vernacular: " + vernacular, "listLanguage: " + listLanguages, "Location: " + location, "GPS: " + gps, "Location: " + location};
+		return Arrays.toString(out);
 	}
 }
