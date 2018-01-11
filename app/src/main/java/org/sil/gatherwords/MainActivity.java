@@ -1,9 +1,10 @@
 package org.sil.gatherwords;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -13,23 +14,19 @@ import android.widget.TextView;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
+import org.sil.gatherwords.room.SessionDao;
 
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
-    private AppDatabase ad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ad = AppDatabase.get(this);
         setContentView(R.layout.activity_main);
 
         ListView sessionList = findViewById(R.id.session_list);
-        sessionList.setAdapter(new SessionListAdapter());
-
         sessionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -37,6 +34,35 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        new FillSessionListTask(this).execute();
+    }
+
+    private static class FillSessionListTask extends AsyncTask<Void, Void, List<Session>> {
+        private SessionDao sDAO;
+        private WeakReference<MainActivity> mainActivityRef;
+
+        FillSessionListTask(MainActivity mainActivity) {
+            sDAO = AppDatabase.get(mainActivity).sessionDao();
+            mainActivityRef = new WeakReference<>(mainActivity);
+        }
+
+        @Override
+        protected List<Session> doInBackground(Void... v) {
+            return sDAO.getAll();
+        }
+
+        @Override
+        protected void onPostExecute(List<Session> sessions) {
+            MainActivity mainActivity = mainActivityRef.get();
+            if (mainActivity != null) {
+                ListView sessionList = mainActivity.findViewById(R.id.session_list);
+                sessionList.setAdapter(new SessionListAdapter(
+                    mainActivity.getLayoutInflater(),
+                    sessions
+                ));
+            }
+        }
     }
 
     public void onCreateSessionClick(View v) {
@@ -47,18 +73,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // TODO: Switch to CursorAdapter
-    private class SessionListAdapter extends BaseAdapter {
-        private List<Session> sessions = new ArrayList<>();
-        DatabaseAccess databaseAccess;
+    private static class SessionListAdapter extends BaseAdapter {
+        private LayoutInflater inflater;
+        private List<Session> sessions;
 
-        SessionListAdapter() {
-            try {
-                databaseAccess = new DatabaseAccess(ad);
-                sessions = (List<Session>) databaseAccess.select("session").get();
-
-            } catch (InterruptedException | ExecutionException e) {
-                Log.e("SessionList Adapter", "There was a problem in reading from the database", e);
-            }
+        SessionListAdapter(LayoutInflater flate, List<Session> sessionList) {
+            inflater = flate;
+            sessions = sessionList;
         }
 
         @Override
@@ -79,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getView(int i, View convertView, ViewGroup container) {
             if (convertView == null) {
-                convertView = getLayoutInflater().inflate(
+                convertView = inflater.inflate(
                     R.layout.session_list_item,
                     container,
                     false
