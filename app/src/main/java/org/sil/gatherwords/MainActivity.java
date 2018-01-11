@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.preference_menu:
-                //Toast.makeText(this, "ADD!", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(this, PreferencesActivity.class);
                 startActivity(i);
                 return true;
