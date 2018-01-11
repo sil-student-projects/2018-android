@@ -17,7 +17,7 @@ public interface SessionDao {
 	List<Session> getAll();
 
 	@Query("SELECT :columns FROM session")
-	List<String> getAll(List<String> columns);
+	List<String> get(List<String> columns);
 
 	@Query("SELECT :columns FROM session WHERE :comparisonString")
 	List<String> getWhere(List<String> columns, String comparisonString);

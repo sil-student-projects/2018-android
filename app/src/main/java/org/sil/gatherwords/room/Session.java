@@ -3,6 +3,12 @@ package org.sil.gatherwords.room;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Entity class for a vernacular gathering session
  */
@@ -13,7 +19,7 @@ public class Session {
 	public int id = 0;
 
 	// Define the columns
-	public Long date = generateDate();
+	public String date = generateDate();
 	public String speaker;
 	public String recorder;
 	public String vernacular;
@@ -26,7 +32,16 @@ public class Session {
 	 * Generate the current unix timestamp
 	 * @return The 64-bit timestamp
 	 */
-	public Long generateDate(){
-		return System.currentTimeMillis()/1000L;
+	public String generateDate(){
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+		df.setTimeZone(tz);
+		return df.format(new Date());
+	}
+
+	@Override
+	public String toString() {
+		String[] out = {"ID: " + String.valueOf(id), "Date: " + date, "Speaker: " + speaker, "Recorder: " + recorder, "Vernacular: " + vernacular, "listLanguage: " + listLanguages, "Location: " + location, "GPS: " + gps, "Location: " + location};
+		return Arrays.toString(out);
 	}
 }
