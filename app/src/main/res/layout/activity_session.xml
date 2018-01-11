@@ -84,6 +84,7 @@
                         android:id="@+id/session_create_date"/>
                 </android.support.design.widget.TextInputLayout>
 
+
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -109,19 +110,19 @@
                         android:textSize="24sp"
                         android:id="@+id/session_create_time_zone"/>
                 </android.support.design.widget.TextInputLayout>
-                <android.support.v7.widget.AppCompatTextView
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp"
                     android:text="World List Template"
                     android:textSize="12sp"/>
-                <android.support.v7.widget.AppCompatSpinner
+                <Spinner
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/word_list_spinner"
                     android:spinnerMode="dialog"
                     android:paddingTop="8dp">
-                </android.support.v7.widget.AppCompatSpinner>
+                </Spinner>
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
