@@ -38,12 +38,14 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     AppCompatSpinner spinner;
     String worldListToLoad;
 
+    public static final String CREATING_SESSION = "creating_session";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
 
-        creatingNewSession = getIntent().getBooleanExtra("creating_session", true);
+        creatingNewSession = getIntent().getBooleanExtra(CREATING_SESSION, true);
 
 
         locationEnabled = false;
