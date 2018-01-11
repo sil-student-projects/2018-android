@@ -77,7 +77,8 @@ public class EntryActivity extends AppCompatActivity {
         mFileName += "/audiorecordtest.3gp";
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
-        LinearLayout ll = (LinearLayout) findViewById(R.id.footer_controls);
+        // TODO: Define these in XML instead of dynamically.
+        LinearLayout ll = findViewById(R.id.footer_controls);
         mRecordButton = new RecordButton(this);
         ll.addView(mRecordButton,
                 new LinearLayout.LayoutParams(

@@ -29,8 +29,10 @@ import org.sil.gatherwords.room.SessionDao;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
     // Used to track location through multiple methods
     private FusedLocationProviderClient mFusedLocationClient;
     boolean locationEnabled;
@@ -65,7 +67,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         timeZoneField= findViewById(R.id.session_create_time_zone);
 
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         dateField.setText(sdf.format(date));
         sdf.applyPattern("HH:mm");
         timeField.setText(sdf.format(date));
@@ -108,6 +110,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
+            // Easter egg
             i = new Intent(this, ShipItActivity.class);
         } else {
             i = new Intent(this, MainActivity.class);
@@ -144,7 +147,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        1);
+                        REQUEST_LOCATION_PERMISSION);
             } else {
                 locationEnabled = true;
             }
@@ -179,9 +182,9 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     // Runs when the user selects whether to grant a permission
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case 1: { // Case 1 - Location
+            case REQUEST_LOCATION_PERMISSION:
                 // Permission granted
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -193,8 +196,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                     SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
                     sw.setChecked(false);
                 }
-                return;
-            }
+                break;
         }
     }
 
