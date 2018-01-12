@@ -14,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,13 +24,22 @@ import android.widget.Spinner;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
 import org.sil.gatherwords.room.SessionDao;
+import org.sil.gatherwords.room.Word;
+import org.sil.gatherwords.room.WordDao;
 
+import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
@@ -105,8 +115,10 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // TODO: decide on internal format
         // session.date = date.getText().toString();
 
-        // Acquire db instance and insert the session
-        new InsertSessionsTask(AppDatabase.get(this)).execute(session);
+        // Acquire db instance, insert the session and get the id of the session
+        AsyncTask<Session, Void, List<Long>> task = new InsertSessionsTask(AppDatabase.get(this)).execute(session);
+        InsertWordsTask wordsTask =new InsertWordsTask(task, this);
+        wordsTask.execute();
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -118,7 +130,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         startActivity(i);
     }
 
-    private static class InsertSessionsTask extends AsyncTask<Session, Void, Void> {
+    private static class InsertSessionsTask extends AsyncTask<Session, Void, List<Long>> {
         private SessionDao sDAO;
 
         InsertSessionsTask(AppDatabase db) {
@@ -126,9 +138,112 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
 
         @Override
-        protected Void doInBackground(Session... sessions) {
-            sDAO.insertSession(sessions);
+        protected List<Long> doInBackground(Session... sessions) {
+            return sDAO.insertSession(sessions);
+        }
+
+    }
+
+    /**
+     * Async task for inserting words from the selected word list
+     */
+    private static class InsertWordsTask extends AsyncTask<Void, Double, List<Long>> {
+        private WordDao wordDao;
+        private AsyncTask<Session, Void, List<Long>> task;
+        private final ThreadLocal<SessionActivity> sessionActivity = new ThreadLocal<>();
+        private Long sessionID;
+        private int maxProgress;
+
+        InsertWordsTask(AsyncTask<Session, Void, List<Long>> sessionTask, SessionActivity activity) {
+            sessionActivity.set(activity);
+            wordDao = sessionActivity.get().db.wordDao();
+            task = sessionTask;
+        }
+
+        @Override
+        protected List<Long> doInBackground(Void... voids) {
+            List<Long> ids = new ArrayList<>();
+            try {
+                // Wait for the insert session task to finish and get the result (the id(s) of the session)
+                ids = task.get();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.getStackTraceString(e);
+            }
+            if (ids.size() == 1) {
+                sessionID = ids.get(0);
+            }
+            insertFromAsset();
+
             return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Double... values) {
+            super.onProgressUpdate(values);
+            double progress = (values[0] / maxProgress)*100;
+            CharSequence sequence = new DecimalFormat("##.##%").format(progress);
+            // Too slow!!! TODO get quick progress updates
+//            Toast.makeText(sessionActivity.getApplicationContext(), sequence, Toast.LENGTH_SHORT).show();
+        }
+
+        /**
+         * Insert the words from the selected asset or exit if none selected
+         */
+        private void insertFromAsset() {
+            if (sessionActivity.get().worldListToLoad.equals("")) {
+                // There was no file selected
+                return;
+            }
+
+            // Begin the transaction
+            sessionActivity.get().db.beginTransaction();
+            try {
+                JSONArray jsonArray = new JSONArray(loadWordList());
+                maxProgress = jsonArray.length();
+
+                // Iterate through each word from the file
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    Word word = new Word();
+
+                    // Link the word to the session that was just created
+                    word.sessionId = sessionID;
+                    word.meanings = json.getString("entry");
+
+                    // Insert
+                    wordDao.insertWords(word);
+                    this.publishProgress((double) i);
+                }
+
+                // Mark to commit the changes to the DB
+                sessionActivity.get().db.setTransactionSuccessful();
+            } catch (Exception e) {
+                Log.getStackTraceString(e);
+            }
+            finally {
+                // Commit or rollback the database
+                sessionActivity.get().db.endTransaction();
+            }
+        }
+
+        /**
+         * Read the selected file
+         *
+         * @return The contents of the file
+         */
+        private String loadWordList() {
+            String file = "";
+            try {
+                InputStream is = sessionActivity.get().getApplicationContext().getAssets().open("wordLists/" + sessionActivity.get().worldListToLoad);
+                byte[] buffer = new byte[is.available()];
+                is.read(buffer);
+                is.close();
+                file = new String(buffer, "UTF-8");
+            } catch (Exception e) {
+                Log.getStackTraceString(e);
+            }
+
+            return file;
         }
     }
 

@@ -17,7 +17,7 @@ import java.util.TimeZone;
 public class Session {
 	// Define the primary key
 	@PrimaryKey(autoGenerate = true)
-	public int id = 0;
+	public Long id;
 
 	// Define the columns
 	public String date = generateDate();

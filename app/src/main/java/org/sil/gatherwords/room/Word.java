@@ -13,14 +13,14 @@ import java.sql.Blob;
 @Entity
 public class Word {
 	@PrimaryKey (autoGenerate = true)
-	public int id;
+	public Long id;
 
 	@ForeignKey(entity = Session.class,
 	parentColumns = "id",
 	childColumns = "session",
 	onDelete = ForeignKey.CASCADE,
 	onUpdate = ForeignKey.CASCADE)
-	public int sessionId;
+	public Long sessionId;
 
 	public String meanings; // JSON, TODO: possibly split to meanings table
 
