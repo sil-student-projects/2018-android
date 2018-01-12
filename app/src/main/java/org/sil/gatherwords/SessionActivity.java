@@ -252,6 +252,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         @Override
         protected void onPostExecute(List<Session> sessions) {
             SessionActivity sessionActivity = sessionActivityRef.get();
+            if (sessionActivity == null) { return; }
             if ( sessions != null && sessions.size() == 1 ) {
                 Session session = sessions.get(0);
                 // Insert previous date
