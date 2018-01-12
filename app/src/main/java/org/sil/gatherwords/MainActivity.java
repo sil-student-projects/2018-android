@@ -38,13 +38,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         new FillSessionListTask(this).execute();
-
-        //Load preference fragment.
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.mainView, new org.sil.gatherwords.PreferenceFragment())
-                    .commit();
-        }
     }
 
     private static class FillSessionListTask extends AsyncTask<Void, Void, List<Session>> {
