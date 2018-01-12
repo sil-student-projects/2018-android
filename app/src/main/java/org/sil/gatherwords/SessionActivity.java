@@ -42,20 +42,20 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     boolean locationEnabled;
     Location location;
     boolean creatingNewSession;
-    int id;
+    int sessionID;
     Spinner spinner;
     String worldListToLoad;
 
-    public static final String CREATING_SESSION = "creating_session";
-    public static final String ID = "id";
+    public static final String ARG_CREATING_SESSION = "creating_session";
+    public static final String ARG_ID = "id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
 
-        creatingNewSession = getIntent().getBooleanExtra(CREATING_SESSION, true);
-        id = getIntent().getIntExtra(ID, 0);
+        creatingNewSession = getIntent().getBooleanExtra(ARG_CREATING_SESSION, true);
+        sessionID = getIntent().getIntExtra(ARG_ID, 0);
 
         locationEnabled = false;
 
@@ -79,7 +79,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         dateSDF = new SimpleDateFormat("yyyy-MM-dd");
         timeSDF = new SimpleDateFormat("HH:mm");
         timeZoneSDF = new SimpleDateFormat("z");
-
         Date date;
 
         if ( creatingNewSession ) {
@@ -92,7 +91,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // Disables location and loaded word list if not creating a new session
         else {
             // Set fields to fields from database
-            new GetInfoFromDB(this).execute(id);
+            new GetInfoFromDB(this).execute(sessionID);
 
             // Disables changing of location storage
             // May want to allow this
@@ -173,7 +172,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
     // Receives and stores the device's current location
     // TODO: Handle missing location permissions
-//    @SuppressLint("MissingPermission") // Suppress the location permissions warning
+    @SuppressLint("MissingPermission") // Suppress the location permissions warning
     private void setSessionLocation() {
         LocationManager mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // If location services are not enabled, tell the user to enable them and reset switch
@@ -235,6 +234,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
+    //TODO: Rename
     private static class GetInfoFromDB extends AsyncTask<Integer, Void, List<Session>> {
         private SessionDao sDAO;
         private WeakReference<SessionActivity> sessionActivityRef;
@@ -246,13 +246,13 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         @Override
         protected List<Session> doInBackground(Integer... ids) {
-            return sDAO.getSessionByID(ids);
+            return sDAO.getSessionsByID(ids);
         }
 
         @Override
         protected void onPostExecute(List<Session> sessions) {
             SessionActivity sessionActivity = sessionActivityRef.get();
-            if (sessionActivity != null && sessions.size() > 0 ) {
+            if (sessionActivity != null && sessions != null && sessions.size() == 1 ) {
                 Session session = sessions.get(0);
                 // Insert previous date
                 Date date = session.date;
@@ -265,6 +265,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 sessionActivity.labelField.setText(session.label);
                 sessionActivity.speakerField.setText(session.speaker);
                 sessionActivity.eliciterField.setText(session.recorder);
+            } else {
+                Log.e("SessionActivity", "empty or size>1 Session[] grabbed from database");
             }
         }
     }

@@ -42,7 +42,7 @@ public class Session {
 
 	@Override
 	public String toString() {
-		String[] out = {"ID: " + String.valueOf(id), "Date: " + date, "Speaker: " + speaker, "Recorder: " + recorder, "Vernacular: " + vernacular, "listLanguage: " + listLanguages, "Location: " + location, "GPS: " + gps, "Location: " + location};
+		String[] out = {"ARG_ID: " + String.valueOf(id), "Date: " + date, "Speaker: " + speaker, "Recorder: " + recorder, "Vernacular: " + vernacular, "listLanguage: " + listLanguages, "Location: " + location, "GPS: " + gps, "Location: " + location};
 		return Arrays.toString(out);
 	}
 }

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), EntryActivity.class);
                 Session session = (Session) sessionList.getAdapter().getItem(i);
-                intent.putExtra(SessionActivity.ID, session.id);
+                intent.putExtra(SessionActivity.ARG_ID, session.id);
                 // Passes id of selected session into EntryActivity
                 // TODO: EntryActivity currently does nothing with
                 startActivity(intent);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     public void onCreateSessionClick(View v) {
         Intent intent = new Intent(this, SessionActivity.class);
         // To distinguish between creating a session and viewing the settings of an old one
-        intent.putExtra(SessionActivity.CREATING_SESSION, true);
+        intent.putExtra(SessionActivity.ARG_CREATING_SESSION, true);
         startActivity(intent);
     }
 
@@ -109,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), SessionActivity.class);
-                    intent.putExtra(SessionActivity.CREATING_SESSION, false);
-                    intent.putExtra(SessionActivity.ID, session.id);
+                    intent.putExtra(SessionActivity.ARG_CREATING_SESSION, false);
+                    intent.putExtra(SessionActivity.ARG_ID, session.id);
                     startActivity(intent);
                 }
             });

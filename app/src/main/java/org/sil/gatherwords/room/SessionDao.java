@@ -17,7 +17,7 @@ public interface SessionDao {
 	List<Session> getAll();
 
 	@Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
-	List<Session> getSessionByID(Integer... sessionIDs);
+	List<Session> getSessionsByID(Integer... sessionIDs);
 
 	@Query("SELECT :columns FROM session")
 	List<String> get(List<String> columns);
