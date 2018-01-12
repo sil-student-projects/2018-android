@@ -14,7 +14,33 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!-- Preferences - language options strings -->
     <string name="language_options_key">Language Options Key.</string>
     <string name="language_options_title">Language Options Title.</string>
     <string name="language_options_summary">Language Options Summary.</string>
+
+    <!-- Entry activity strings -->
+    <string name="photo">Photo</string>
+
+    <!-- Session activity strings -->
+    <string name="name_of_session">Name of session</string>
+    <string name="eliciter">Eliciter</string>
+    <string name="speaker">Speaker</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="timezone_utc">Timezone (UTC)</string>
+    <string name="world_list_template">World List Template</string>
+    <string name="location">Location</string>
+
+    <!-- Ship it activity strings -->
+    <string name="i_m_proud_of_you">I\'m proud of you</string>
+
+    <!-- Entry field item strings -->
+    <string name="lang_code">*lang-code*</string>
+
+    <!-- Session list item strings -->
+    <string name="label">*label*</string>
+    <string name="_speaker">*speaker*</string>
+    <string name="_date">*date*</string>
+
 </resources>
