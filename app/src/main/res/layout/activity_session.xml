@@ -114,6 +114,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp"
                     android:text="World List Template"
+                    android:id="@+id/word_list_spinner_text_view"
                     android:textSize="12sp"/>
                 <Spinner
                     android:layout_width="fill_parent"

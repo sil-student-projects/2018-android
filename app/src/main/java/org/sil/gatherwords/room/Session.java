@@ -20,7 +20,7 @@ public class Session {
 	public int id = 0;
 
 	// Define the columns
-	public String date = generateDate();
+	public Date date = new Date();
 	public String speaker;
 	public String recorder;
 	public String vernacular;
@@ -32,6 +32,7 @@ public class Session {
 	/**
 	 * Generate the current unix timestamp
 	 * @return The 64-bit timestamp
+	 * Not currently used
 	 */
 	public String generateDate(){
 		TimeZone tz = TimeZone.getTimeZone("UTC");
