@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntryActivity extends AppCompatActivity {
-    private int sessionID;
+    private long sessionID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +40,7 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
         configureItemUpdateControls();
 
-        sessionID = getIntent().getIntExtra(SessionActivity.ARG_ID, 0);
+        sessionID = getIntent().getLongExtra(SessionActivity.ARG_ID, 0);
 
         ViewPager pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
@@ -48,7 +48,7 @@ public class EntryActivity extends AppCompatActivity {
 
     private class EntryPagerAdapter extends FragmentPagerAdapter {
         // Position to ID map.
-        List<Integer> wordIDs = new ArrayList<>();
+        List<Long> wordIDs = new ArrayList<>();
 
         EntryPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -63,7 +63,7 @@ public class EntryActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            int wordID = 0; // Invalid ID, should never yield results.
+            long wordID = 0; // Invalid ID, should never yield results.
             if (position < wordIDs.size()) {
                 wordID = wordIDs.get(position);
             }
@@ -77,24 +77,24 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Integer>> {
+    private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
-        int sessionID;
+        long sessionID;
         WordDao wDAO;
 
-        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, int sID, WordDao dao) {
+        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
         }
 
         @Override
-        protected List<Integer> doInBackground(Void... v) {
+        protected List<Long> doInBackground(Void... v) {
             return wDAO.getIDsForSession(sessionID);
         }
 
         @Override
-        protected void onPostExecute(List<Integer> wordIDs) {
+        protected void onPostExecute(List<Long> wordIDs) {
             EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
             if (pagerAdapter == null || wordIDs == null) {
                 return;

@@ -17,10 +17,10 @@ public interface WordDao {
 	List<Word> getAll();
 
     @Query("SELECT id FROM word WHERE sessionId = :sessionID ORDER BY id ASC")
-    List<Integer> getIDsForSession(int sessionID);
+    List<Long> getIDsForSession(long sessionID);
 
     @Query("SELECT * FROM word WHERE id = :wordID")
-    Word get(int wordID);
+    Word get(long wordID);
 
 	@Query("SELECT :columns FROM word WHERE :comparisonStatement")
 	List<String> getWhere(List<String> columns, String comparisonStatement);

@@ -17,7 +17,7 @@ public interface SessionDao {
 	List<Session> getAll();
 
 	@Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
-	List<Session> getSessionsByID(Integer... sessionIDs);
+	List<Session> getSessionsByID(Long... sessionIDs);
 
 	@Query("SELECT :columns FROM session")
 	List<String> get(List<String> columns);
@@ -31,7 +31,7 @@ public interface SessionDao {
 
 	// INSERT
 	@Insert
-	void insertSession(Session... sessions);
+	long[] insertSession(Session... sessions);
 
 	// Update
 	@Update

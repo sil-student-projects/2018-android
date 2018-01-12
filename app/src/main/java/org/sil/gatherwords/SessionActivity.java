@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -25,10 +26,18 @@ import android.widget.TextView;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
 import org.sil.gatherwords.room.SessionDao;
+import org.sil.gatherwords.room.Word;
+import org.sil.gatherwords.room.WordDao;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,7 +54,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     boolean locationEnabled;
     Location location;
     boolean creatingNewSession;
-    int sessionID;
+    long sessionID;
     Spinner spinner;
     String worldListToLoad;
 
@@ -58,7 +67,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         setContentView(R.layout.activity_session);
 
         creatingNewSession = getIntent().getBooleanExtra(ARG_CREATING_SESSION, true);
-        sessionID = getIntent().getIntExtra(ARG_ID, 0);
+        sessionID = getIntent().getLongExtra(ARG_ID, 0);
 
         locationEnabled = false;
 
@@ -132,7 +141,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // session.date = date.getText().toString();
 
         // Acquire db instance and insert the session
-        new InsertSessionsTask(AppDatabase.get(this)).execute(session);
+        new InsertSessionsTask(this).execute(session);
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -146,15 +155,105 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
     private static class InsertSessionsTask extends AsyncTask<Session, Void, Void> {
         private SessionDao sDAO;
+        private WordDao wordDao;
+        private Long sessionID;
+        private AppDatabase db;
+        private String wordList;
+        private AssetManager assets;
 
-        InsertSessionsTask(AppDatabase db) {
+        InsertSessionsTask(SessionActivity activity) {
+            db = AppDatabase.get(activity.getApplicationContext());
+            wordList = activity.worldListToLoad;
+            wordDao = db.wordDao();
             sDAO = db.sessionDao();
+            assets = activity.getApplicationContext().getAssets();
         }
 
         @Override
         protected Void doInBackground(Session... sessions) {
-            sDAO.insertSession(sessions);
+            long[] ids;
+            ids = sDAO.insertSession(sessions);
+
+            if (ids.length > 0) {
+                sessionID = ids[0];
+                insertFromAsset();
+            }
             return null;
+        }
+
+        /**
+         * Insert the words from the selected asset or exit if none selected
+         */
+        private void insertFromAsset() {
+            if (wordList.isEmpty()) {
+                // There was no file selected
+                return;
+            }
+
+            // Begin the transaction
+            db.beginTransaction();
+            try {
+                JSONArray jsonArray = new JSONArray(loadWordList());
+
+                // Iterate through each word from the file
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    Word word = new Word();
+
+                    // Link the word to the session that was just created
+                    word.sessionId = sessionID;
+                    word.meanings = json.getString("entry");
+
+                    // Insert
+                    wordDao.insertWords(word);
+                }
+
+                // Mark to commit the changes to the DB
+                db.setTransactionSuccessful();
+            } catch (Exception e) {
+                Log.e("InsertSessionsTask", "Exception while inserting words", e);
+            }
+            finally {
+                // Commit or rollback the database
+                db.endTransaction();
+            }
+        }
+
+        /**
+         * Read the selected file
+         *
+         * @return The contents of the file
+         */
+        private String loadWordList() {
+            InputStream is = null;
+            BufferedReader br = null;
+            String file = null;
+            try {
+                is = assets.open("wordLists/" + wordList);
+                br = new BufferedReader(new InputStreamReader(is));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append("\n");
+                    line = br.readLine();
+                }
+                file = sb.toString();
+            } catch (IOException e) {
+                Log.e("InsertSessionsTask", "IOException while reading the word list file", e);
+            } finally {
+                // Assume the input stream is not null because it is used to construct the buffered reader
+                if (br != null) {
+                    try {
+                        is.close();
+                        br.close();
+                    } catch (IOException e) {
+                        Log.e("InsertSessionsTask", "IOException when closing buffered reader and stream", e);
+                    }
+                }
+            }
+            return file;
         }
     }
 
@@ -248,7 +347,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
 
     //TODO: Rename
-    private static class GetInfoFromDB extends AsyncTask<Integer, Void, List<Session>> {
+    private static class GetInfoFromDB extends AsyncTask<Long, Void, List<Session>> {
         private SessionDao sDAO;
         private WeakReference<SessionActivity> sessionActivityRef;
 
@@ -258,7 +357,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
 
         @Override
-        protected List<Session> doInBackground(Integer... ids) {
+        protected List<Session> doInBackground(Long... ids) {
             return sDAO.getSessionsByID(ids);
         }
 

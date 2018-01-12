@@ -25,14 +25,14 @@ public class EntryFragment extends Fragment {
     private static final String ARG_POSITION = "position";
     private static final String ARG_TOTAL = "total";
 
-    private int m_wordID;   // Database ID of the word displayed word.
+    private long m_wordID;  // Database ID of the word displayed word.
     private int m_position; // The index of the displayed word (0-indexed).
     private int m_total;    // Total number of words.
 
-    public static EntryFragment newInstance(int wordID, int position, int total) {
+    public static EntryFragment newInstance(long wordID, int position, int total) {
         EntryFragment fragment = new EntryFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_WORD_ID, wordID);
+        args.putLong(ARG_WORD_ID, wordID);
         args.putInt(ARG_POSITION, position);
         args.putInt(ARG_TOTAL, total);
         fragment.setArguments(args);
@@ -45,7 +45,7 @@ public class EntryFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            m_wordID = args.getInt(ARG_WORD_ID);
+            m_wordID = args.getLong(ARG_WORD_ID);
             m_position = args.getInt(ARG_POSITION);
             m_total = args.getInt(ARG_TOTAL);
         }
@@ -61,7 +61,7 @@ public class EntryFragment extends Fragment {
         return entryPage;
     }
 
-    private static class LoadWordTask extends AsyncTask<Integer, Void, Word> {
+    private static class LoadWordTask extends AsyncTask<Long, Void, Word> {
         WeakReference<View> entryPageRef;
         WordDao wDAO;
         int position;
@@ -75,7 +75,7 @@ public class EntryFragment extends Fragment {
         }
 
         @Override
-        protected Word doInBackground(Integer... wordIDs) {
+        protected Word doInBackground(Long... wordIDs) {
             if (wordIDs == null || wordIDs.length != 1)  {
                 Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
                 return null;
