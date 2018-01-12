@@ -86,7 +86,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             dateField.setText(dateSDF.format(date));
             timeField.setText(timeSDF.format(date));
             String timeZoneString = timeZoneSDF.format(date);
-            timeZoneField.setText(timeZoneString.substring(3, timeZoneString.length()));
+            timeZoneField.setText(timeZoneString.substring(3)); // GMT+X:00 >>> +X:00
         }
         // Disables location and loaded word list if not creating a new session
         else {
@@ -252,7 +252,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         @Override
         protected void onPostExecute(List<Session> sessions) {
             SessionActivity sessionActivity = sessionActivityRef.get();
-            if (sessionActivity != null && sessions != null && sessions.size() == 1 ) {
+            if ( sessions != null && sessions.size() == 1 ) {
                 Session session = sessions.get(0);
                 // Insert previous date
                 Date date = session.date;
