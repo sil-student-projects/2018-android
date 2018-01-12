@@ -33,6 +33,7 @@
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".ShipItActivity" />
         <activity android:name=".PreferencesActivity"
+            android:label="@string/preferences_title"
             android:parentActivityName=".MainActivity">
         </activity>
     </application>
