@@ -138,7 +138,8 @@
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@+id/session_create_gps_tv"
                         android:gravity="end"
-                        android:id="@+id/session_create_gps_swtich"/>
+                        android:id="@+id/session_create_gps_swtich"
+                        android:paddingLeft="16dp"/>
                 </RelativeLayout>
                 <TextView
                     android:layout_width="match_parent"

@@ -47,22 +47,26 @@ import java.util.Locale;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-
-    EditText dateField, timeField, timeZoneField, labelField, speakerField, eliciterField, locationField;
-    SimpleDateFormat dateSDF, timeSDF, timeZoneSDF;
-    SwitchCompat sw;
-    SwitchCompat.OnCheckedChangeListener OnCheckedChangeListener;
-    // Used to track location through multiple methods
-    private FusedLocationProviderClient mFusedLocationClient;
-    boolean gpsEnabled;
-    Location gps;
-    boolean creatingNewSession;
-    long sessionID;
-    Spinner spinner;
-    String worldListToLoad;
-
     public static final String ARG_CREATING_SESSION = "creating_session";
     public static final String ARG_ID = "id";
+
+    // UI Elements
+    private EditText dateField, timeField, timeZoneField, labelField, speakerField, eliciterField, locationField;
+    private SimpleDateFormat dateSDF, timeSDF, timeZoneSDF;
+    private SwitchCompat gpsSwitch;
+    private SwitchCompat.OnCheckedChangeListener gpsSwitchChangeListener;
+    private Spinner wordListSpinner;
+
+    // Activity variables
+    private boolean gpsEnabled, creatingNewSession;
+    private String worldListToLoad;
+
+    // Session variables
+    private long sessionID;
+    private FusedLocationProviderClient mFusedLocationClient; // Used to track gps through multiple methods
+    private Date date;
+    private Location gps;
+    private Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,22 +78,22 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         gpsEnabled = false;
 
-        spinner = findViewById(R.id.word_list_spinner);
+        wordListSpinner = findViewById(R.id.word_list_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.word_lists, R.layout.world_list_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
+        wordListSpinner.setAdapter(adapter);
+        wordListSpinner.setOnItemSelectedListener(this);
 
         // Sets the input_gps() function to run when the switch is clicked or slid across
         // Fixes bug where input_gps() was only run when clicked
-        OnCheckedChangeListener = new SwitchCompat.OnCheckedChangeListener() {
+        gpsSwitchChangeListener = new SwitchCompat.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton sw, boolean isChecked) {
-                input_gps(findViewById(R.id.session_create_gps_swtich));
+            input_gps(findViewById(R.id.session_create_gps_swtich));
             }
         };
-        sw = findViewById(R.id.session_create_gps_swtich);
-        sw.setOnCheckedChangeListener(OnCheckedChangeListener);
+        gpsSwitch = findViewById(R.id.session_create_gps_swtich);
+        gpsSwitch.setOnCheckedChangeListener(gpsSwitchChangeListener);
 
         // Find lable, speaker, eliciter EditTexts
         labelField = findViewById(R.id.session_create_name);
@@ -99,13 +103,12 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // Set date, time, timezone, and gps fields
         dateField = findViewById(R.id.session_create_date);
         timeField = findViewById(R.id.session_create_time);
-        timeZoneField= findViewById(R.id.session_create_time_zone);
+        timeZoneField = findViewById(R.id.session_create_time_zone);
         locationField = findViewById(R.id.session_create_location);
 
         dateSDF = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         timeSDF = new SimpleDateFormat("HH:mm", Locale.US);
         timeZoneSDF = new SimpleDateFormat("z", Locale.US);
-        Date date;
 
         if (creatingNewSession) {
             date = new Date();
@@ -119,32 +122,40 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             // Set fields to fields from database
             new LoadSessionDataFromDB(this).execute(sessionID);
 
-            // Disables changing of location storage
-            // May want to allow this
-            sw.setEnabled(false);
-
             // Hides the spinner
-            spinner.setEnabled(false);
-            spinner.setVisibility(View.GONE);
+            wordListSpinner.setEnabled(false);
+            wordListSpinner.setVisibility(View.GONE);
             TextView spinnerText = findViewById(R.id.word_list_spinner_text_view);
             spinnerText.setVisibility(View.GONE);
 
         }
+
+        //FIXME: Because we are storing a Date object, changing the text fields has no effect
+        dateField.setEnabled(false);
+        timeField.setEnabled(false);
+        timeZoneField.setEnabled(false);
     }
 
     //TODO: Save settings instead of write to new session
-    // Run when the FAB is pressed, right now it creates a session and returns to Main
-    // Seconds not currently recorded
+    /* Run when the FAB is pressed
+
+     */
     public void save_settings_fab_pressed(View view) {
-        EditText name = findViewById(R.id.session_create_name);
-        EditText eliciter = findViewById(R.id.session_create_eliciter);
-        EditText speaker = findViewById(R.id.session_create_speaker);
-        EditText date = findViewById(R.id.session_create_date);
-        EditText time = findViewById(R.id.session_create_time);
-        EditText timeZone = findViewById(R.id.session_create_time_zone);
+        if (creatingNewSession) {
+            create_new_session();
+        } else {
+            update_session();
+        }
+    }
+
+    /* Creates a new session in the database with the information in the current fields
+
+     */
+    private void create_new_session() {
+        session = new Session();
 
         // TODO: Formatting for gps string?
-        String gpsString = "";
+        String gpsString = null;
         if ( gps != null ) {
             gpsString = Location.convert(gps.getLatitude(), Location.FORMAT_SECONDS)
                     + "," + Location.convert(gps.getLongitude(), Location.FORMAT_SECONDS);
@@ -152,8 +163,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // TODO: Implement iso8601 somewhere
         //String iso8601 = date.getText().toString() + "T" + time.getText().toString() + ":00" + timeZone.getText().toString();
 
-
-        Session session = new Session();
         session.label = labelField.getText().toString();
         session.recorder = eliciterField.getText().toString();
         session.speaker = speakerField.getText().toString();
@@ -281,6 +290,30 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
+    /* Updates the session in the database with the information in the EditTexts
+
+     */
+    private void update_session() {
+        String gpsString = null;
+        if (gps != null) {
+            gpsString = Location.convert(gps.getLatitude(), Location.FORMAT_SECONDS)
+                    + "," + Location.convert(gps.getLongitude(), Location.FORMAT_SECONDS);
+        }
+        // TODO: Implement iso8601 somewhere
+        //String iso8601 = date.getText().toString() + "T" + time.getText().toString() + ":00" + timeZone.getText().toString();
+
+        session.label = labelField.getText().toString();
+        session.recorder = eliciterField.getText().toString();
+        session.speaker = speakerField.getText().toString();
+        session.location = locationField.getText().toString();
+        session.gps = gpsString;
+
+        new UpdateSessionDataToDB(this).execute(session);
+
+        //TODO: Update this to start EntryActivity when it can be used
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
+    }
     // Run when the gps switch is toggled
     public void input_gps(View view) {
         // If gps was set, remove it
@@ -290,7 +323,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // Else set attempt to set gps
         } else {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            gps = new Location("vanDellen 362");
             gpsEnabled = false;
 
             // If location permission is not granted, request it. Otherwise prep location getAll.
@@ -349,7 +381,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Permission denied
                 } else {
                     gpsEnabled = false;
-                    sw.setChecked(false);
+                    gpsSwitch.setChecked(false);
                 }
                 break;
         }
@@ -358,7 +390,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     @Override
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
-        switch ( pos ) {
+        switch (pos) {
             case 0:
                 worldListToLoad = "";
                 break;
@@ -375,8 +407,9 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         worldListToLoad = "";
     }
 
+    /* Database access when loading information from a previously created session
 
-    //TODO: Rename
+     */
     private static class LoadSessionDataFromDB extends AsyncTask<Long, Void, List<Session>> {
         private SessionDao sDAO;
         private WeakReference<SessionActivity> sessionActivityRef;
@@ -400,6 +433,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
             if (sessions != null && sessions.size() == 1) {
                 Session session = sessions.get(0);
+                sessionActivity.session = session;
+
                 // Insert previous date
                 Date date = session.date;
                 sessionActivity.dateField.setText(sessionActivity.dateSDF.format(date));
@@ -415,21 +450,38 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Insert previous location and set switch based on whether gps was set
                 sessionActivity.locationField.setText(session.location);
                 // If no location was stored, show the switch to be unchecked
-                if (session.gps.isEmpty()) {
-                    sessionActivity.sw.setChecked(false);
+                if (session.gps == null) {
+                    sessionActivity.gpsSwitch.setChecked(false);
                 // Else set to be checked. Disable checked listener to not toggle event
                 } else {
-                    sessionActivity.sw.setOnCheckedChangeListener(null);
-                    sessionActivity.sw.setChecked(true);
-                    sessionActivity.sw.setHighlightColor(sessionActivity.getResources().getColor(R.color.colorAccent));
-                    sessionActivity.sw.setOnCheckedChangeListener(sessionActivity.OnCheckedChangeListener);
+                    sessionActivity.gpsSwitch.setOnCheckedChangeListener(null);
+                    sessionActivity.gpsSwitch.setChecked(true);
+                    sessionActivity.gpsSwitch.setHighlightColor(sessionActivity.getResources().getColor(R.color.colorAccent));
+                    sessionActivity.gpsSwitch.setOnCheckedChangeListener(sessionActivity.gpsSwitchChangeListener);
                 }
                 // Disable the toggling of the switch. May want to change this
-                sessionActivity.sw.setEnabled(false);
+                sessionActivity.gpsSwitch.setEnabled(false);
 
             } else {
                 Log.e("SessionActivity", "empty or size>1 Session[] grabbed from database");
             }
+        }
+    }
+
+    /* Make a call to update the current session in the DB
+
+     */
+    private static class UpdateSessionDataToDB extends AsyncTask<Session, Void, Void> {
+        private SessionDao sDAO;
+
+        UpdateSessionDataToDB(SessionActivity sessionActivity) {
+            sDAO = AppDatabase.get(sessionActivity).sessionDao();
+        }
+
+        @Override
+        protected Void doInBackground(Session... sessions) {
+            sDAO.updateSession(sessions);
+            return null;
         }
     }
 }
