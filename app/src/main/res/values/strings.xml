@@ -33,6 +33,7 @@
     <string name="timezone_utc">Timezone (UTC)</string>
     <string name="world_list_template">World List Template</string>
     <string name="location">Location</string>
+    <string name="gps">GPS</string>
 
     <!-- Ship it activity strings -->
     <string name="i_m_proud_of_you">I\'m proud of you</string>

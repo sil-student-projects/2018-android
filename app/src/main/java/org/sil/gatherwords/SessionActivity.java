@@ -39,12 +39,14 @@ import java.util.Locale;
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
 
-    EditText dateField, timeField, timeZoneField, labelField, speakerField, eliciterField;
+    EditText dateField, timeField, timeZoneField, labelField, speakerField, eliciterField, locationField;
     SimpleDateFormat dateSDF, timeSDF, timeZoneSDF;
-    // Used to track location through multiple methods
+    SwitchCompat sw;
+    SwitchCompat.OnCheckedChangeListener OnCheckedChangeListener;
+    // Used to track gps through multiple methods
     private FusedLocationProviderClient mFusedLocationClient;
-    boolean locationEnabled;
-    Location location;
+    boolean gpsEnabled;
+    Location gps;
     boolean creatingNewSession;
     int sessionID;
     Spinner spinner;
@@ -61,7 +63,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         creatingNewSession = getIntent().getBooleanExtra(ARG_CREATING_SESSION, true);
         sessionID = getIntent().getIntExtra(ARG_ID, 0);
 
-        locationEnabled = false;
+        gpsEnabled = false;
 
         spinner = findViewById(R.id.word_list_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -70,24 +72,26 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
-        // Sets the input_location() function to run when the switch is clicked or slid across
-        // Fixes bug where input_location() was only run when clicked
-        SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
-        sw.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener() {
+        // Sets the input_gps() function to run when the switch is clicked or slid across
+        // Fixes bug where input_gps() was only run when clicked
+        OnCheckedChangeListener = new SwitchCompat.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton sw, boolean isChecked) {
-                input_location(findViewById(R.id.session_create_location_swtich));
+                input_gps(findViewById(R.id.session_create_gps_swtich));
             }
-        });
+        };
+        sw = findViewById(R.id.session_create_gps_swtich);
+        sw.setOnCheckedChangeListener(OnCheckedChangeListener);
 
         // Find lable, speaker, eliciter EditTexts
         labelField = findViewById(R.id.session_create_name);
         speakerField = findViewById(R.id.session_create_speaker);
         eliciterField = findViewById(R.id.session_create_eliciter);
 
-        // Set date, time, and timezone fields
+        // Set date, time, timezone, and gps fields
         dateField = findViewById(R.id.session_create_date);
         timeField = findViewById(R.id.session_create_time);
         timeZoneField= findViewById(R.id.session_create_time_zone);
+        locationField = findViewById(R.id.session_create_location);
 
         dateSDF = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         timeSDF = new SimpleDateFormat("HH:mm", Locale.US);
@@ -101,14 +105,11 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             String timeZoneString = timeZoneSDF.format(date);
             timeZoneField.setText(timeZoneString.substring(3)); // GMT+X:00 >>> +X:00
         }
-        // Disables location and loaded word list if not creating a new session
+        // Disables gps and loaded word list if not creating a new session
         else {
             // Set fields to fields from database
-            new GetInfoFromDB(this).execute(sessionID);
+            new LoadSessionDataFromDB(this).execute(sessionID);
 
-            // Disables changing of location storage
-            // May want to allow this
-            sw.setEnabled(false);
 
             // Hides the spinner
             spinner.setEnabled(false);
@@ -123,19 +124,24 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     // Run when the FAB is pressed, right now it creates a session and returns to Main
     // Seconds not currently recorded
     public void save_settings_fab_pressed(View view) {
-        EditText name = findViewById(R.id.session_create_name);
-        EditText eliciter = findViewById(R.id.session_create_eliciter);
-        EditText speaker = findViewById(R.id.session_create_speaker);
-        EditText date = findViewById(R.id.session_create_date);
-        EditText time = findViewById(R.id.session_create_time);
-        EditText timeZone = findViewById(R.id.session_create_time_zone);
 
-        String iso8601 = date.getText().toString() + "T" + time.getText().toString() + ":00" + timeZone.getText().toString();
+        // TODO: Formatting for gps string?
+        String gpsString = "";
+        if ( gps != null ) {
+            gpsString = Location.convert(gps.getLatitude(), Location.FORMAT_SECONDS)
+                    + "," + Location.convert(gps.getLongitude(), Location.FORMAT_SECONDS);
+        }
+        // TODO: Implement iso8601 somewhere
+        //String iso8601 = date.getText().toString() + "T" + time.getText().toString() + ":00" + timeZone.getText().toString();
+
 
         Session session = new Session();
-        session.label = name.getText().toString();
-        session.recorder = eliciter.getText().toString();
-        session.speaker = speaker.getText().toString();
+        session.label = labelField.getText().toString();
+        session.recorder = eliciterField.getText().toString();
+        session.speaker = speakerField.getText().toString();
+        session.location = locationField.getText().toString();
+        session.gps = gpsString;
+
 
         // TODO: decide on internal format
         // session.date = date.getText().toString();
@@ -144,7 +150,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         new InsertSessionsTask(AppDatabase.get(this)).execute(session);
 
         Intent i;
-        if ( name.getText().toString().equals("shipit_") ) {
+        if ( labelField.getText().toString().equals("shipit_") ) {
             // Easter egg
             i = new Intent(this, ShipItActivity.class);
         } else {
@@ -167,49 +173,56 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
-    // Run when the location switch is toggled
-    public void input_location(View view) {
-        // If location was set, remove it
-        if (locationEnabled) {
-            locationEnabled = false;
-            location = null;
+    // Run when the gps switch is toggled
+    public void input_gps(View view) {
+        // If gps was set, remove it
+        if (gpsEnabled) {
+            gpsEnabled = false;
+            gps = null;
+        // Else set attempt to set gps
         } else {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            location = new Location("vanDellen 362");
-            locationEnabled = false;
+            gps = new Location("vanDellen 362");
+            gpsEnabled = false;
 
-            // If location permission is not granted, request it. Otherwise prep location getAll.
+            // If gps permission is not granted, request it. Otherwise prep gps getAll.
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_LOCATION_PERMISSION);
             } else {
-                locationEnabled = true;
+                gpsEnabled = true;
             }
 
-            if (locationEnabled) {
-                setSessionLocation();
+            if (gpsEnabled) {
+                setSessionGPS();
             }
         }
     }
 
-    // Receives and stores the device's current location
-    // TODO: Handle missing location permissions
-    @SuppressLint("MissingPermission") // Suppress the location permissions warning
-    private void setSessionLocation() {
+    // Receives and stores the device's current gps
+    // TODO: Handle missing gps permissions. May be done or may not be
+    @SuppressLint("MissingPermission") // Suppress the gps permissions warning
+    private void setSessionGPS() {
         LocationManager mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        // If location services are not enabled, tell the user to enable them and reset switch
+        SwitchCompat sw = findViewById(R.id.session_create_gps_swtich);
+        // If gps services are not enabled, tell the user to enable them and reset switch
         if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
             sw.setChecked(false);
             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_layout),
-                    "Please enable location services to access this feature", Snackbar.LENGTH_LONG);
+                    "Please enable gps services to access this feature", Snackbar.LENGTH_LONG);
             mySnackbar.show();
-            locationEnabled = false;
-        //Otherwise grab location
+            gpsEnabled = false;
+        //Otherwise grab gps
         } else {
-            location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            //TODO: Something with this location
+            gps = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if ( gps == null) {
+                sw.setChecked(false);
+                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_layout),
+                        "Device does not have a gps. Please try again.", Snackbar.LENGTH_LONG);
+                mySnackbar.show();
+                gpsEnabled = false;
+            }
         }
 
     }
@@ -223,12 +236,11 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Permission granted
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.locationEnabled = true;
-                    setSessionLocation();
+                    this.gpsEnabled = true;
+                    setSessionGPS();
                 // Permission denied
                 } else {
-                    locationEnabled = false;
-                    SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
+                    gpsEnabled = false;
                     sw.setChecked(false);
                 }
                 break;
@@ -257,11 +269,11 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
 
     //TODO: Rename
-    private static class GetInfoFromDB extends AsyncTask<Integer, Void, List<Session>> {
+    private static class LoadSessionDataFromDB extends AsyncTask<Integer, Void, List<Session>> {
         private SessionDao sDAO;
         private WeakReference<SessionActivity> sessionActivityRef;
 
-        GetInfoFromDB(SessionActivity sessionActivity) {
+        LoadSessionDataFromDB(SessionActivity sessionActivity) {
             sDAO = AppDatabase.get(sessionActivity).sessionDao();
             sessionActivityRef = new WeakReference<>(sessionActivity);
         }
@@ -291,6 +303,22 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 sessionActivity.labelField.setText(session.label);
                 sessionActivity.speakerField.setText(session.speaker);
                 sessionActivity.eliciterField.setText(session.recorder);
+
+                // Insert previous location and set switch based on whether gps was set
+                sessionActivity.locationField.setText(session.location);
+                // If no location was stored, show the switch to be unchecked
+                if ( session.gps.equals("") ) {
+                    sessionActivity.sw.setChecked(false);
+                // Else set to be checked. Disable checked listener to not toggle event
+                } else {
+                    sessionActivity.sw.setOnCheckedChangeListener(null);
+                    sessionActivity.sw.setChecked(true);
+                    sessionActivity.sw.setHighlightColor(sessionActivity.getResources().getColor(R.color.colorAccent));
+                    sessionActivity.sw.setOnCheckedChangeListener(sessionActivity.OnCheckedChangeListener);
+                }
+                // Disable the toggling of the switch. May want to change this
+                sessionActivity.sw.setEnabled(false);
+
             } else {
                 Log.e("SessionActivity", "empty or size>1 Session[] grabbed from database");
             }
