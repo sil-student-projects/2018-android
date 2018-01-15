@@ -14,7 +14,7 @@ import java.util.List;
 @Dao
 public interface SessionDao {
 	// SELECTS
-	@Query("SELECT * FROM session")
+	@Query("SELECT * FROM session WHERE deletedAt IS NULL")
 	List<Session> getAll();
 
 	@Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
@@ -37,9 +37,5 @@ public interface SessionDao {
 	// Update
 	@Update
 	int updateSession(Session... sessions);
-
-	// Delete
-	@Delete
-	int deleteSession(Session... sessions);
 
 }

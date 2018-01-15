@@ -28,6 +28,7 @@ public class Session {
 	public String location; // Human readable location
 	public String gps; // google map gps string
 	public String label;
+	public Date deletedAt = null;
 
 	/**
 	 * Generate the current unix timestamp

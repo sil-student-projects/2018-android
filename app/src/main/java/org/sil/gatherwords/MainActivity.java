@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,6 +24,7 @@ import org.sil.gatherwords.room.SessionDao;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -154,8 +156,8 @@ public class MainActivity extends AppCompatActivity {
             TextView speaker = convertView.findViewById(R.id.session_list_speaker);
             speaker.setText(session.speaker);
 
-            ImageButton button = convertView.findViewById(R.id.session_list_button);
-            button.setOnClickListener(new View.OnClickListener() {
+            ImageButton editButton = convertView.findViewById(R.id.session_list_button_edit);
+            editButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Context context = inflater.getContext();
                     Intent intent = new Intent(context, SessionActivity.class);
@@ -165,7 +167,41 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            ImageButton deleteButton = convertView.findViewById(R.id.session_list_button_delete);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Context context = inflater.getContext();
+                    session.deletedAt = new Date();
+                    new UpdateSessionDataToDB(context).execute(session);
+
+                }
+            });
+
             return convertView;
+        }
+    }
+
+    private static class UpdateSessionDataToDB extends AsyncTask<Session, Void, List<Session>> {
+        private SessionDao sDAO;
+        private WeakReference<MainActivity> mainActivityRef;
+
+        UpdateSessionDataToDB(Context context) {
+            sDAO = AppDatabase.get(context).sessionDao();
+            mainActivityRef = new WeakReference<>((MainActivity) context);
+        }
+
+        @Override
+        protected List<Session> doInBackground(Session... sessions) {
+            sDAO.updateSession(sessions);
+            return sDAO.getAll();
+        }
+
+        @Override
+        protected void onPostExecute(List<Session> sessions) {
+            MainActivity mainActivity = mainActivityRef.get();
+            SessionListAdapter sessionListAdapter = (SessionListAdapter) ((ListView) mainActivity.findViewById(R.id.session_list)).getAdapter();
+            sessionListAdapter.sessions = sessions;
+            sessionListAdapter.notifyDataSetChanged();
         }
     }
 }
