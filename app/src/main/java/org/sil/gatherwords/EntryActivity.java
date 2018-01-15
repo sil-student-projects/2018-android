@@ -119,12 +119,6 @@ public class EntryActivity extends AppCompatActivity {
     private PlayButton   mPlayButton = null;
     private MediaPlayer   mPlayer = null;
 
-    private String TAKE_PHOTO_LABEL = "Photo";
-    private String START_RECORDING_LABEL = "Record";
-    private String STOP_RECORDING_LABEL = "Stop";
-    private String START_PLAYING_LABEL = "Play";
-    private String STOP_PLAYING_LABEL = "Stop";
-
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
@@ -135,7 +129,7 @@ public class EntryActivity extends AppCompatActivity {
     private void configureItemUpdateControls() {
         // Record to the external cache directory for visibility
         mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
+        mFileName += getString(R.string.audiorecordtest_3gp);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
         // TODO: Define these in XML instead of dynamically.
@@ -228,9 +222,9 @@ public class EntryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 onRecord(mStartRecording);
                 if (mStartRecording) {
-                    setText(STOP_RECORDING_LABEL);
+                    setText(R.string.STOP_RECORDING_LABEL);
                 } else {
-                    setText(START_RECORDING_LABEL);
+                    setText(R.string.START_RECORDING_LABEL);
                 }
                 mStartRecording = !mStartRecording;
             }
@@ -238,7 +232,7 @@ public class EntryActivity extends AppCompatActivity {
 
         public RecordButton(Context ctx) {
             super(ctx);
-            setText(START_RECORDING_LABEL);
+            setText(R.string.START_RECORDING_LABEL);
             setOnClickListener(clicker);
         }
     }
@@ -250,9 +244,9 @@ public class EntryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 onPlay(mStartPlaying);
                 if (mStartPlaying) {
-                    setText(STOP_PLAYING_LABEL);
+                    setText(R.string.STOP_PLAYING_LABEL);
                 } else {
-                    setText(START_PLAYING_LABEL);
+                    setText(R.string.START_PLAYING_LABEL);
                 }
                 mStartPlaying = !mStartPlaying;
             }
@@ -260,7 +254,7 @@ public class EntryActivity extends AppCompatActivity {
 
         public PlayButton(Context ctx) {
             super(ctx);
-            setText(START_PLAYING_LABEL);
+            setText(R.string.START_PLAYING_LABEL);
             setOnClickListener(clicker);
         }
     }

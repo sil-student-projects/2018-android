@@ -194,7 +194,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
             sw.setChecked(false);
             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.session_create_layout),
-                    "Please enable location services to access this feature", Snackbar.LENGTH_LONG);
+                    R.string.en_loc_services, Snackbar.LENGTH_LONG);
             mySnackbar.show();
             locationEnabled = false;
         //Otherwise grab location
