@@ -37,8 +37,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -149,7 +149,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         @Override
         protected Void doInBackground(Session... sessions) {
-            List<Long> ids;
+            List<Long> ids = new ArrayList<>();
             ids = sDAO.insertSession(sessions);
 
             if (ids.size() > 0 && ids.get(0) != null) {
@@ -157,18 +157,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 insertFromAsset();
             }
             return null;
-        }
-
-        /**
-         * Update the main thread (the UI) with some indication of progress
-         */
-        @Override
-        protected void onProgressUpdate(Double... values) {
-            super.onProgressUpdate(values);
-            double progress = (values[0] / maxProgress)*100;
-            CharSequence sequence = new DecimalFormat("##.##%").format(progress);
-            // Too slow!!! TODO get quick progress updates
-//            Toast.makeText(sessionActivity.getApplicationContext(), sequence, Toast.LENGTH_SHORT).show();
         }
 
         /**
@@ -197,7 +185,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
                     // Insert
                     wordDao.insertWords(word);
-                    this.publishProgress((double) i);
                 }
 
                 // Mark to commit the changes to the DB
