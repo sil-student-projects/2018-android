@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -36,7 +37,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -131,18 +131,17 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     private static class InsertSessionsTask extends AsyncTask<Session, Double, Void> {
         private SessionDao sDAO;
         private WordDao wordDao;
-        private WeakReference<SessionActivity> sessionActivityReference;
         private Long sessionID;
-        private int maxProgress;
         private AppDatabase db;
         private String wordList;
+        private AssetManager assets;
 
         InsertSessionsTask(SessionActivity activity) {
-            sessionActivityReference = new WeakReference<>(activity);
-            db = AppDatabase.get(sessionActivityReference.get().getApplicationContext());
+            db = AppDatabase.get(activity.getApplicationContext());
             wordList = activity.worldListToLoad;
             wordDao = db.wordDao();
             sDAO = db.sessionDao();
+            assets = activity.getApplicationContext().getAssets();
         }
 
         @Override
@@ -170,7 +169,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             db.beginTransaction();
             try {
                 JSONArray jsonArray = new JSONArray(loadWordList());
-                maxProgress = jsonArray.length();
 
                 // Iterate through each word from the file
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -206,7 +204,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             BufferedReader br = null;
             String file = null;
             try {
-                is = sessionActivityReference.get().getApplicationContext().getAssets().open("wordLists/" + wordList);
+                is = assets.open("wordLists/" + wordList);
                 br = new BufferedReader(new InputStreamReader(is));
                 StringBuilder sb = new StringBuilder();
                 String line = br.readLine();
