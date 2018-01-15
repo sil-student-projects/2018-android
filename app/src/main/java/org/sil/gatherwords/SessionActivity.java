@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -69,6 +70,15 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
+        // Sets the input_location() function to run when the switch is clicked or slid across
+        // Fixes bug where input_location() was only run when clicked
+        SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
+        sw.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton sw, boolean isChecked) {
+                input_location(findViewById(R.id.session_create_location_swtich));
+            }
+        });
+
         // Find lable, speaker, eliciter EditTexts
         labelField = findViewById(R.id.session_create_name);
         speakerField = findViewById(R.id.session_create_speaker);
@@ -98,7 +108,6 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
             // Disables changing of location storage
             // May want to allow this
-            SwitchCompat sw = findViewById(R.id.session_create_location_swtich);
             sw.setEnabled(false);
 
             // Hides the spinner

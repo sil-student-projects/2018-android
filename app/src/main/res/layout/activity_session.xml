@@ -140,7 +140,6 @@
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@+id/session_create_location_tv"
                         android:gravity="end"
-                        android:onClick="input_location"
                         android:id="@+id/session_create_location_swtich"/>
                 </RelativeLayout>
             </LinearLayout>
