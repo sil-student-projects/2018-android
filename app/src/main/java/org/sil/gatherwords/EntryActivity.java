@@ -218,7 +218,7 @@ public class EntryActivity extends AppCompatActivity {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
-        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
+        // TODO: Store the audio file in the DB (or copy file to a permanent gps and store a link).
     }
 
     class RecordButton extends AppCompatButton {
