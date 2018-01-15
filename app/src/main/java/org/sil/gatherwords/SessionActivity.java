@@ -153,10 +153,14 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         private final ThreadLocal<SessionActivity> sessionActivity = new ThreadLocal<>();
         private Long sessionID;
         private int maxProgress;
+        private AppDatabase db;
+        private String wordList;
 
         InsertWordsTask(AsyncTask<Session, Void, List<Long>> sessionTask, SessionActivity activity) {
             sessionActivity.set(activity);
-            wordDao = sessionActivity.get().db.wordDao();
+            db = activity.db;
+            wordList = activity.worldListToLoad;
+            wordDao = db.wordDao();
             task = sessionTask;
         }
 
@@ -190,13 +194,13 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
          * Insert the words from the selected asset or exit if none selected
          */
         private void insertFromAsset() {
-            if (sessionActivity.get().worldListToLoad.equals("")) {
+            if (wordList.equals("")) {
                 // There was no file selected
                 return;
             }
 
             // Begin the transaction
-            sessionActivity.get().db.beginTransaction();
+           db.beginTransaction();
             try {
                 JSONArray jsonArray = new JSONArray(loadWordList());
                 maxProgress = jsonArray.length();
@@ -216,13 +220,13 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 }
 
                 // Mark to commit the changes to the DB
-                sessionActivity.get().db.setTransactionSuccessful();
+                db.setTransactionSuccessful();
             } catch (Exception e) {
                 Log.e("InsertWordsTask", "Exception while inserting words", e);
             }
             finally {
                 // Commit or rollback the database
-                sessionActivity.get().db.endTransaction();
+                db.endTransaction();
             }
         }
 
@@ -234,7 +238,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         private String loadWordList() {
             String file = "";
             try {
-                InputStream is = sessionActivity.get().getApplicationContext().getAssets().open("wordLists/" + sessionActivity.get().worldListToLoad);
+                InputStream is = sessionActivity.get().getApplicationContext().getAssets().open("wordLists/" + wordList);
                 byte[] buffer = new byte[is.available()];
                 is.read(buffer);
                 is.close();
