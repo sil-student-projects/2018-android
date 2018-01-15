@@ -2,6 +2,8 @@ package org.sil.gatherwords;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -27,11 +29,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+    boolean connected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        connected = checkConnection();
 
         final ListView sessionList = findViewById(R.id.session_list);
 
@@ -51,13 +55,29 @@ public class MainActivity extends AppCompatActivity {
         new FillSessionListTask(this).execute();
     }
 
+    /**
+     * Check the current connection.
+     *
+     * @return true if currently connected, false otherwise
+     */
+    private boolean checkConnection() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        if (activeNetworkInfo == null) {
+            return false;
+        }
+        return activeNetworkInfo.isConnected();
+    }
+
     private static class FillSessionListTask extends AsyncTask<Void, Void, List<Session>> {
         private SessionDao sDAO;
         private WeakReference<MainActivity> mainActivityRef;
+        private boolean connected = false;
 
         FillSessionListTask(MainActivity mainActivity) {
             sDAO = AppDatabase.get(mainActivity).sessionDao();
             mainActivityRef = new WeakReference<>(mainActivity);
+            connected = mainActivity.connected;
         }
 
         @Override
@@ -72,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
                 ListView sessionList = mainActivity.findViewById(R.id.session_list);
                 sessionList.setAdapter(new SessionListAdapter(
                     mainActivity.getLayoutInflater(),
-                    sessions
+                    sessions,
+                        connected
                 ));
             }
         }
@@ -112,10 +133,12 @@ public class MainActivity extends AppCompatActivity {
     private static class SessionListAdapter extends BaseAdapter {
         private LayoutInflater inflater;
         private List<Session> sessions;
+        private boolean connected = false;
 
-        SessionListAdapter(LayoutInflater flate, List<Session> sessionList) {
+        SessionListAdapter(LayoutInflater flate, List<Session> sessionList, boolean connection) {
             inflater = flate;
             sessions = sessionList;
+            connected = connection;
         }
 
         @Override
@@ -154,14 +177,23 @@ public class MainActivity extends AppCompatActivity {
             TextView speaker = convertView.findViewById(R.id.session_list_speaker);
             speaker.setText(session.speaker);
 
-            ImageButton button = convertView.findViewById(R.id.session_list_button);
-            button.setOnClickListener(new View.OnClickListener() {
+            ImageButton editButton = convertView.findViewById(R.id.session_list_button);
+            editButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Context context = inflater.getContext();
                     Intent intent = new Intent(context, SessionActivity.class);
                     intent.putExtra(SessionActivity.ARG_CREATING_SESSION, false);
                     intent.putExtra(SessionActivity.ARG_ID, session.id);
                     context.startActivity(intent);
+                }
+            });
+
+            ImageButton uploadButton = convertView.findViewById(R.id.upload_session);
+            uploadButton.setVisibility((connected) ? View.VISIBLE : View.GONE);
+            uploadButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO upload
                 }
             });
 
