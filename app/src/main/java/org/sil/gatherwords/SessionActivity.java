@@ -167,7 +167,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Wait for the insert session task to finish and get the result (the id(s) of the session)
                 ids = task.get();
             } catch (InterruptedException | ExecutionException e) {
-                Log.getStackTraceString(e);
+                Log.e("InsertWordsTask", "Getting the id of the session failed", e);
             }
             if (ids.size() == 1) {
                 sessionID = ids.get(0);
@@ -218,7 +218,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Mark to commit the changes to the DB
                 sessionActivity.get().db.setTransactionSuccessful();
             } catch (Exception e) {
-                Log.getStackTraceString(e);
+                Log.e("InsertWordsTask", "Exception while inserting words", e);
             }
             finally {
                 // Commit or rollback the database
@@ -240,7 +240,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 is.close();
                 file = new String(buffer, "UTF-8");
             } catch (Exception e) {
-                Log.getStackTraceString(e);
+                Log.e("InsertWordsTask", "Exception while loading the word list", e);
             }
 
             return file;
