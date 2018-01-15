@@ -6,7 +6,7 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
- * Entity class for each word of a session
+ * Entity class for each meaning of a word
  */
 @Entity(foreignKeys = @ForeignKey(entity = Word.class,
                                   parentColumns = "id",

@@ -171,30 +171,26 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         session.location = locationField.getText().toString();
         session.gps = gpsString;
 
-
         // TODO: decide on internal format
         // session.date = date.getText().toString();
 
-        // Acquire db instance and insert the session
-        new InsertSessionsTask(this).execute(session);
-
-        Intent i;
         if ( labelField.getText().toString().equals("shipit_") ) {
             // Easter egg
-            i = new Intent(this, ShipItActivity.class);
+            startActivity(new Intent(this, ShipItActivity.class));
         } else {
-            i = new Intent(this, MainActivity.class);
+            // Acquire db instance and insert the session
+            new InsertSessionsTask(this).execute(session);
         }
-        startActivity(i);
     }
 
     private static class InsertSessionsTask extends AsyncTask<Session, Void, Void> {
         private SessionDao sDAO;
         private WordDao wordDao;
-        private Long sessionID;
+        private long sessionID;
         private AppDatabase db;
         private String wordList;
         private AssetManager assets;
+        private WeakReference<SessionActivity> sessionActivityRef;
 
         InsertSessionsTask(SessionActivity activity) {
             db = AppDatabase.get(activity.getApplicationContext());
@@ -202,6 +198,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             wordDao = db.wordDao();
             sDAO = db.sessionDao();
             assets = activity.getApplicationContext().getAssets();
+            sessionActivityRef = new WeakReference<>(activity);
         }
 
         @Override
@@ -254,8 +251,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 db.setTransactionSuccessful();
             } catch (Exception e) {
                 Log.e("InsertSessionsTask", "Exception while inserting words", e);
-            }
-            finally {
+            } finally {
                 // Commit or rollback the database
                 db.endTransaction();
             }
@@ -296,6 +292,18 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 }
             }
             return file;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            SessionActivity sessionActivity = sessionActivityRef.get();
+            if (sessionActivity == null) {
+                return;
+            }
+            Intent intent = new Intent(sessionActivity, EntryActivity.class);
+            intent.putExtra(sessionActivity.ARG_ID, sessionID);
+            sessionActivity.startActivity(intent);
+            sessionActivity.finish();
         }
     }
 

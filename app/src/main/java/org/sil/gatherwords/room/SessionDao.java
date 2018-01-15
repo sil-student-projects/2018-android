@@ -12,9 +12,9 @@ import java.util.List;
  */
 @Dao
 public interface SessionDao {
-	// SELECTS
-	@Query("SELECT * FROM session")
-	List<Session> getAll();
+    // SELECTS
+    @Query("SELECT * FROM session WHERE deletedAt IS NULL ORDER BY date DESC")
+    List<Session> getAll();
 
 	@Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
 	List<Session> getSessionsByID(Long... sessionIDs);
@@ -33,8 +33,11 @@ public interface SessionDao {
 	@Insert
 	long[] insertSession(Session... sessions);
 
-	// Update
-	@Update
-	int updateSession(Session... sessions);
+    // UPDATE
+    @Update
+    void updateSession(Session... sessions);
 
+    @Query("UPDATE session SET deletedAt = NULL WHERE deletedAt = " +
+           "(SELECT MAX(deletedAt) FROM session)")
+    void undoLastDeleted();
 }
