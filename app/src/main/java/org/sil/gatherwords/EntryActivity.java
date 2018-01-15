@@ -50,6 +50,7 @@ public class EntryActivity extends AppCompatActivity {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String mFileName = null;
+    private static final String LOG_TAG = "AudioRecordTest";
 
     private RecordButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
@@ -121,7 +122,7 @@ public class EntryActivity extends AppCompatActivity {
             mPlayer.prepare();
             mPlayer.start();
         } catch (IOException e) {
-            Log.e(getString(R.string.LOG_TAG), getString(R.string.prepare_failed));
+            Log.e(LOG_TAG, "prepare() failed");
         }
     }
 
@@ -140,7 +141,7 @@ public class EntryActivity extends AppCompatActivity {
         try {
             mRecorder.prepare();
         } catch (IOException e) {
-            Log.e(getString(R.string.LOG_TAG), getString(R.string.prepare_failed));
+            Log.e(LOG_TAG, "prepare() failed");
         }
 
         mRecorder.start();
