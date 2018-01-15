@@ -10,7 +10,7 @@ import org.sil.gatherwords.R;
 /**
  * The database class.
  */
-@Database(entities = {Session.class, Word.class}, version = 4)
+@Database(entities = {Session.class, Word.class}, version = 5)
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton db instance; avoids expensive init.
     private static AppDatabase INSTANCE = null;

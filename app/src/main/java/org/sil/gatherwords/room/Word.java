@@ -13,7 +13,7 @@ import java.sql.Blob;
 @Entity
 public class Word {
 	@PrimaryKey (autoGenerate = true)
-	public Long id;
+	public long id;
 
 	@ForeignKey(entity = Session.class,
 	parentColumns = "id",

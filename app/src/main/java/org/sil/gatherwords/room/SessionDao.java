@@ -28,7 +28,7 @@ public interface SessionDao {
 
 	// INSERT
 	@Insert
-	List<Long> insertSession(Session... sessions);
+	long[] insertSession(Session... sessions);
 
 	// Update
 	@Update

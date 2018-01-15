@@ -38,9 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -149,11 +147,11 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         @Override
         protected Void doInBackground(Session... sessions) {
-            List<Long> ids = new ArrayList<>();
+            long[] ids;
             ids = sDAO.insertSession(sessions);
 
-            if (ids.size() > 0 && ids.get(0) != null) {
-                sessionID = ids.get(0);
+            if (ids.length > 0) {
+                sessionID = ids[0];
                 insertFromAsset();
             }
             return null;
