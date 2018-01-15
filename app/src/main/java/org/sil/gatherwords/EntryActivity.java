@@ -109,9 +109,9 @@ public class EntryActivity extends AppCompatActivity {
     // Audio recording features
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
 
-    private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String mFileName = null;
+    private static final String LOG_TAG = "AudioRecordTest";
 
     private RecordButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
