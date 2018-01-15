@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:myapp="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/uploadButton"
+        android:icon="@android:drawable/stat_sys_upload"
+        android:title="@string/upload_title"
+        myapp:showAsAction="ifRoom" />
+    <item
         android:id="@+id/preference_menu"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/app_name"
