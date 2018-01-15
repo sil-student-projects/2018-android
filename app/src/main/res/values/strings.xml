@@ -21,8 +21,26 @@
     <string name="language_options_title">Language Options Title.</string>
     <string name="language_options_summary">Language Options Summary.</string>
 
+    <!-- Main activity strings -->
+    <string name="yyyy_MM_dd">yyyy-MM-dd</string>
+
     <!-- Entry activity strings -->
     <string name="photo">Photo</string>
+    <string name="TAKE_PHOTO_LABEL">Photo</string>
+    <string name="START_RECORDING_LABEL">Record</string>
+    <string name="STOP_RECORDING_LABEL">Stop</string>
+    <string name="START_PLAYING_LABEL">Play</string>
+    <string name="STOP_PLAYING_LABEL">Stop</string>
+    <string name="LOG_TAG">AudioRecordTest</string>
+    <string name="mFileName">null</string>
+    <string name="prepare_failed">prepare() failed</string>
+    <string name="audiorecordtest_3gp">/audiorecordtest.3gp</string>
+
+    <!-- Entry fragment strings -->
+    <string name="ARG_POSITION">position</string>
+    <string name="ARG_TOTAL">total</string>
+    <string name="lang1">lang1</string>
+    <string name="lang2">lang2</string>
 
     <!-- Session activity strings -->
     <string name="name_of_session">Name of session</string>
@@ -33,6 +51,8 @@
     <string name="timezone_utc">Timezone (UTC)</string>
     <string name="world_list_template">World List Template</string>
     <string name="location">Location</string>
+    <string name="ARG_CREATING_SESSION">creating_session</string>
+    <string name="ARG_ID">id</string>
 
     <!-- Ship it activity strings -->
     <string name="i_m_proud_of_you">I\'m proud of you</string>

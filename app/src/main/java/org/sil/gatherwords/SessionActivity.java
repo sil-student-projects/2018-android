@@ -57,8 +57,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
 
-        creatingNewSession = getIntent().getBooleanExtra(ARG_CREATING_SESSION, true);
-        sessionID = getIntent().getIntExtra(ARG_ID, 0);
+        creatingNewSession = getIntent().getBooleanExtra(getString(R.string.ARG_CREATING_SESSION), true);
+        sessionID = getIntent().getIntExtra(getString(R.string.ARG_ID), 0);
 
         locationEnabled = false;
 

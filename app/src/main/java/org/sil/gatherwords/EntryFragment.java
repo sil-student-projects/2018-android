@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 
 public class EntryFragment extends Fragment {
+
     private static final String ARG_POSITION = "position";
     private static final String ARG_TOTAL = "total";
 
@@ -46,7 +47,7 @@ public class EntryFragment extends Fragment {
         );
 
         ListView entryFields = entryPage.findViewById(R.id.entry_fields);
-        String[] langs = {"lang1", "lang2"};
+        String[] langs = {getString(R.string.lang1), getString(R.string.lang2)};
         entryFields.setAdapter(new ArrayAdapter<String>(getContext(), 0, langs) {
             @NonNull
             @Override
