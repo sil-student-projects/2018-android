@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -132,19 +133,15 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     private static class InsertSessionsTask extends AsyncTask<Session, Double, Void> {
         private SessionDao sDAO;
         private WordDao wordDao;
-        // TODO: fix null object reference so we don't risk a data leak with the context
-//        private final ThreadLocal<SessionActivity> sessionActivity = new ThreadLocal<>();
+        private WeakReference<SessionActivity> sessionActivityReference;
         private Long sessionID;
         private int maxProgress;
         private AppDatabase db;
         private String wordList;
-        private final Context context;
 
         InsertSessionsTask(SessionActivity activity) {
-//            sessionActivity.set(activity);
-//            db = AppDatabase.get(sessionActivity.get().getApplicationContext());
-            context = activity.getApplicationContext();
-            db = AppDatabase.get(context);
+            sessionActivityReference = new WeakReference<>(activity);
+            db = AppDatabase.get(sessionActivityReference.get().getApplicationContext());
             wordList = activity.worldListToLoad;
             wordDao = db.wordDao();
             sDAO = db.sessionDao();
@@ -152,9 +149,10 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         @Override
         protected Void doInBackground(Session... sessions) {
-            List<Long> ids = sDAO.insertSession(sessions);
+            List<Long> ids;
+            ids = sDAO.insertSession(sessions);
 
-            if (ids.get(0) != null) {
+            if (ids.size() > 0 && ids.get(0) != null) {
                 sessionID = ids.get(0);
                 insertFromAsset();
             }
@@ -223,8 +221,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             BufferedReader br = null;
             String file = null;
             try {
-//                is = sessionActivity.get().getApplicationContext().getAssets().open("wordLists/" + wordList);
-                is = context.getAssets().open("wordLists/" + wordList);
+                is = sessionActivityReference.get().getApplicationContext().getAssets().open("wordLists/" + wordList);
                 br = new BufferedReader(new InputStreamReader(is));
                 StringBuilder sb = new StringBuilder();
                 String line = br.readLine();
