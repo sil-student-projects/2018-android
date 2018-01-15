@@ -32,7 +32,10 @@ import org.sil.gatherwords.room.SessionDao;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -129,15 +132,19 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     private static class InsertSessionsTask extends AsyncTask<Session, Double, Void> {
         private SessionDao sDAO;
         private WordDao wordDao;
-        private final ThreadLocal<SessionActivity> sessionActivity = new ThreadLocal<>();
+        // TODO: fix null object reference so we don't risk a data leak with the context
+//        private final ThreadLocal<SessionActivity> sessionActivity = new ThreadLocal<>();
         private Long sessionID;
         private int maxProgress;
         private AppDatabase db;
         private String wordList;
+        private final Context context;
 
         InsertSessionsTask(SessionActivity activity) {
-            sessionActivity.set(activity);
-            db = AppDatabase.get(sessionActivity.get().getApplicationContext());
+//            sessionActivity.set(activity);
+//            db = AppDatabase.get(sessionActivity.get().getApplicationContext());
+            context = activity.getApplicationContext();
+            db = AppDatabase.get(context);
             wordList = activity.worldListToLoad;
             wordDao = db.wordDao();
             sDAO = db.sessionDao();
@@ -198,7 +205,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Mark to commit the changes to the DB
                 db.setTransactionSuccessful();
             } catch (Exception e) {
-                Log.e("InsertWordsTask", "Exception while inserting words", e);
+                Log.e("InsertSessionsTask", "Exception while inserting words", e);
             }
             finally {
                 // Commit or rollback the database
@@ -212,20 +219,37 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
          * @return The contents of the file
          */
         private String loadWordList() {
-            String file = "";
+            InputStream is = null;
+            BufferedReader br = null;
+            String file = null;
             try {
-                InputStream is = sessionActivity.get().getApplicationContext().getAssets().open("wordLists/" + wordList);
-                byte[] buffer = new byte[is.available()];
-                is.read(buffer);
-                is.close();
-                file = new String(buffer, "UTF-8");
-            } catch (Exception e) {
-                Log.e("InsertWordsTask", "Exception while loading the word list", e);
-            }
+//                is = sessionActivity.get().getApplicationContext().getAssets().open("wordLists/" + wordList);
+                is = context.getAssets().open("wordLists/" + wordList);
+                br = new BufferedReader(new InputStreamReader(is));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
 
+                while (line != null) {
+                    sb.append(line);
+                    sb.append("\n");
+                    line = br.readLine();
+                }
+                file = sb.toString();
+            } catch (IOException e) {
+                Log.e("InsertSessionsTask", "IOException while reading the word list file", e);
+            }finally {
+                // Assume the input stream is not null because it is used to construct the buffered reader
+                if (br != null) {
+                    try {
+                        is.close();
+                        br.close();
+                    } catch (IOException e) {
+                        Log.e("InsertSessionsTask", "IOException when closing buffered reader and stream", e);
+                    }
+                }
+            }
             return file;
         }
-
     }
 
     // Run when the location switch is toggled
