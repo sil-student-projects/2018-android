@@ -16,8 +16,11 @@ public interface WordDao {
 	@Query("SELECT * FROM word")
 	List<Word> getAll();
 
-	@Query("SELECT :columns FROM word")
-	List<String> get(List<String> columns);
+    @Query("SELECT id FROM word WHERE sessionId = :sessionID ORDER BY id ASC")
+    List<Integer> getIDsForSession(int sessionID);
+
+    @Query("SELECT * FROM word WHERE id = :wordID")
+    Word get(int wordID);
 
 	@Query("SELECT :columns FROM word WHERE :comparisonStatement")
 	List<String> getWhere(List<String> columns, String comparisonStatement);

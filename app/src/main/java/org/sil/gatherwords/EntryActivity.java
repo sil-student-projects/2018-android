@@ -7,11 +7,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -21,9 +23,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.WordDao;
+
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EntryActivity extends AppCompatActivity {
+    private int sessionID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,18 +40,70 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
         configureItemUpdateControls();
 
+        sessionID = getIntent().getIntExtra(SessionActivity.ARG_ID, 0);
+
         ViewPager pager = findViewById(R.id.viewpager);
-        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int position) {
-                return EntryFragment.newInstance(position, getCount());
+        pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
+    }
+
+    private class EntryPagerAdapter extends FragmentPagerAdapter {
+        // Position to ID map.
+        List<Integer> wordIDs = new ArrayList<>();
+
+        EntryPagerAdapter(FragmentManager fm) {
+            super(fm);
+
+            // Task will trigger update after IDs are loaded.
+            new LoadWordIDsTask(
+                this,
+                sessionID,
+                AppDatabase.get(getApplicationContext()).wordDao()
+            ).execute();
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            int wordID = 0; // Invalid ID, should never yield results.
+            if (position < wordIDs.size()) {
+                wordID = wordIDs.get(position);
+            }
+            return EntryFragment.newInstance(wordID, position, getCount());
+        }
+
+        @Override
+        public int getCount() {
+            // TODO: Is 0 okay?  Add special create-first-word page?
+            return wordIDs.size();
+        }
+    }
+
+    private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Integer>> {
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
+        int sessionID;
+        WordDao wDAO;
+
+        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, int sID, WordDao dao) {
+            pagerAdapterRef = new WeakReference<>(pagerAdapter);
+            sessionID = sID;
+            wDAO = dao;
+        }
+
+        @Override
+        protected List<Integer> doInBackground(Void... v) {
+            return wDAO.getIDsForSession(sessionID);
+        }
+
+        @Override
+        protected void onPostExecute(List<Integer> wordIDs) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || wordIDs == null) {
+                return;
             }
 
-            @Override
-            public int getCount() {
-                return 10;
-            }
-        });
+            pagerAdapter.wordIDs = wordIDs;
+            // Publish results.
+            pagerAdapter.notifyDataSetChanged();
+        }
     }
 
     // Audio recording features
