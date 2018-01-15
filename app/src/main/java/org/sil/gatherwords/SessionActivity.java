@@ -35,11 +35,9 @@ import org.sil.gatherwords.room.WordDao;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
@@ -115,10 +113,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         // TODO: decide on internal format
         // session.date = date.getText().toString();
 
-        // Acquire db instance, insert the session and get the id of the session
-        AsyncTask<Session, Void, List<Long>> task = new InsertSessionsTask(AppDatabase.get(this)).execute(session);
-        InsertWordsTask wordsTask =new InsertWordsTask(task, this);
-        wordsTask.execute();
+        // Acquire db instance, and insert the session
+        new InsertSessionsTask(this).execute(session);
 
         Intent i;
         if ( name.getText().toString().equals("shipit_") ) {
@@ -130,57 +126,37 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         startActivity(i);
     }
 
-    private static class InsertSessionsTask extends AsyncTask<Session, Void, List<Long>> {
+    private static class InsertSessionsTask extends AsyncTask<Session, Double, Void> {
         private SessionDao sDAO;
-
-        InsertSessionsTask(AppDatabase db) {
-            sDAO = db.sessionDao();
-        }
-
-        @Override
-        protected List<Long> doInBackground(Session... sessions) {
-            return sDAO.insertSession(sessions);
-        }
-
-    }
-
-    /**
-     * Async task for inserting words from the selected word list
-     */
-    private static class InsertWordsTask extends AsyncTask<Void, Double, List<Long>> {
         private WordDao wordDao;
-        private AsyncTask<Session, Void, List<Long>> task;
         private final ThreadLocal<SessionActivity> sessionActivity = new ThreadLocal<>();
         private Long sessionID;
         private int maxProgress;
         private AppDatabase db;
         private String wordList;
 
-        InsertWordsTask(AsyncTask<Session, Void, List<Long>> sessionTask, SessionActivity activity) {
+        InsertSessionsTask(SessionActivity activity) {
             sessionActivity.set(activity);
-            db = activity.db;
+            db = AppDatabase.get(sessionActivity.get().getApplicationContext());
             wordList = activity.worldListToLoad;
             wordDao = db.wordDao();
-            task = sessionTask;
+            sDAO = db.sessionDao();
         }
 
         @Override
-        protected List<Long> doInBackground(Void... voids) {
-            List<Long> ids = new ArrayList<>();
-            try {
-                // Wait for the insert session task to finish and get the result (the id(s) of the session)
-                ids = task.get();
-            } catch (InterruptedException | ExecutionException e) {
-                Log.e("InsertWordsTask", "Getting the id of the session failed", e);
-            }
-            if (ids.size() == 1) {
-                sessionID = ids.get(0);
-            }
-            insertFromAsset();
+        protected Void doInBackground(Session... sessions) {
+            List<Long> ids = sDAO.insertSession(sessions);
 
+            if (ids.get(0) != null) {
+                sessionID = ids.get(0);
+                insertFromAsset();
+            }
             return null;
         }
 
+        /**
+         * Update the main thread (the UI) with some indication of progress
+         */
         @Override
         protected void onProgressUpdate(Double... values) {
             super.onProgressUpdate(values);
@@ -200,7 +176,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             }
 
             // Begin the transaction
-           db.beginTransaction();
+            db.beginTransaction();
             try {
                 JSONArray jsonArray = new JSONArray(loadWordList());
                 maxProgress = jsonArray.length();
@@ -249,6 +225,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
             return file;
         }
+
     }
 
     // Run when the location switch is toggled
