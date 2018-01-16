@@ -10,11 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.sil.gatherwords.room.AppDatabase;
-import org.sil.gatherwords.room.Word;
+import org.sil.gatherwords.room.FilledWord;
+import org.sil.gatherwords.room.Meaning;
 import org.sil.gatherwords.room.WordDao;
 
 import java.lang.ref.WeakReference;
@@ -61,7 +63,7 @@ public class EntryFragment extends Fragment {
         return entryPage;
     }
 
-    private static class LoadWordTask extends AsyncTask<Long, Void, Word> {
+    private static class LoadWordTask extends AsyncTask<Long, Void, FilledWord> {
         WeakReference<View> entryPageRef;
         WordDao wDAO;
         int position;
@@ -75,7 +77,7 @@ public class EntryFragment extends Fragment {
         }
 
         @Override
-        protected Word doInBackground(Long... wordIDs) {
+        protected FilledWord doInBackground(Long... wordIDs) {
             if (wordIDs == null || wordIDs.length != 1)  {
                 Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
                 return null;
@@ -85,7 +87,7 @@ public class EntryFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Word word) {
+        protected void onPostExecute(FilledWord word) {
             View entryPage = entryPageRef.get();
             if (entryPage == null || word == null) {
                 return;
@@ -100,8 +102,7 @@ public class EntryFragment extends Fragment {
             );
 
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
-            String[] langs = {"lang1", "lang2"};
-            entryFields.setAdapter(new ArrayAdapter<String>(context, 0, langs) {
+            entryFields.setAdapter(new ArrayAdapter<Meaning>(context, 0, word.meanings) {
                 @NonNull
                 @Override
                 public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -113,8 +114,14 @@ public class EntryFragment extends Fragment {
                         );
                     }
 
-                    TextView langCodeField = convertView.findViewById(R.id.lang_code);
-                    langCodeField.setText(getItem(position));
+                    Meaning meaning = getItem(position);
+                    if (meaning != null) {
+                        TextView langCodeField = convertView.findViewById(R.id.lang_code);
+                        langCodeField.setText(meaning.type);
+
+                        EditText langDataField = convertView.findViewById(R.id.lang_data);
+                        langDataField.setText(meaning.data);
+                    }
 
                     return convertView;
                 }

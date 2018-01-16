@@ -18,7 +18,7 @@ public interface WordDao {
     List<Long> getIDsForSession(long sessionID);
 
     @Query("SELECT * FROM word WHERE id = :wordID")
-    Word get(long wordID);
+    FilledWord get(long wordID);
 
     @Query("SELECT :columns FROM word WHERE :comparisonStatement")
     List<String> getWhere(List<String> columns, String comparisonStatement);
