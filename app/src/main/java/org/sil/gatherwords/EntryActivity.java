@@ -32,7 +32,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntryActivity extends AppCompatActivity {
+    static final int REQUEST_IMAGE_CAPTURE = 1;
     private long sessionID;
+
+    // Audio recording features
+    // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
+    private static final String LOG_TAG = "AudioRecordTest";
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static String mFileName = null;
+    private RecordButton mRecordButton = null;
+    private MediaRecorder mRecorder = null;
+    private PlayButton   mPlayButton = null;
+    private MediaPlayer   mPlayer = null;
+
+    // Requesting permission to RECORD_AUDIO
+    private boolean permissionToRecordAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,35 +61,132 @@ public class EntryActivity extends AppCompatActivity {
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
     }
 
-    private class EntryPagerAdapter extends FragmentPagerAdapter {
-        // Position to ID map.
-        List<Long> wordIDs = new ArrayList<>();
+    /**
+     * This function configures the audio recording buttons and temp storage.
+     */
+    private void configureItemUpdateControls() {
+        // Record to the external cache directory for visibility
+        mFileName = getExternalCacheDir().getAbsolutePath();
+        mFileName += getString(R.string.audiorecordtest_3gp);
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
-        EntryPagerAdapter(FragmentManager fm) {
-            super(fm);
+        // TODO: Define these in XML instead of dynamically.
+        LinearLayout ll = findViewById(R.id.footer_controls);
+        mRecordButton = new RecordButton(this);
+        ll.addView(mRecordButton,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        0));
+        mPlayButton = new PlayButton(this);
+        ll.addView(mPlayButton,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        0));
+    }
 
-            // Task will trigger update after IDs are loaded.
-            new LoadWordIDsTask(
-                this,
-                sessionID,
-                AppDatabase.get(getApplicationContext()).wordDao()
-            ).execute();
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mRecorder != null) {
+            mRecorder.release();
+            mRecorder = null;
         }
 
-        @Override
-        public Fragment getItem(int position) {
-            long wordID = 0; // Invalid ID, should never yield results.
-            if (position < wordIDs.size()) {
-                wordID = wordIDs.get(position);
-            }
-            return EntryFragment.newInstance(wordID, position, getCount());
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
+    }
+
+    private void onRecord(boolean start) {
+        if (start) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+    private void startRecording() {
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFile(mFileName);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
         }
 
-        @Override
-        public int getCount() {
-            // TODO: Is 0 okay?  Add special create-first-word page?
-            return wordIDs.size();
+        mRecorder.start();
+    }
+
+    private void stopRecording() {
+        mRecorder.stop();
+        mRecorder.release();
+        mRecorder = null;
+        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
+    }
+
+    private void onPlay(boolean start) {
+        if (start) {
+            startPlaying();
+        } else {
+            stopPlaying();
         }
+    }
+
+    private void startPlaying() {
+        mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(mFileName);
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+    }
+
+    private void stopPlaying() {
+        mPlayer.release();
+        mPlayer = null;
+    }
+
+    /**
+     * If there is an image capture activity out there, dispatch an intent to take a picture.
+     *
+     * @param view the view from which the photo request originated
+     */
+    public void dispatchTakePictureIntent(View view) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Handle the result of a photo-taking activity.
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            // TODO: Store the bitmap.
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted ) finish();
+
     }
 
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
@@ -106,113 +218,39 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    // Audio recording features
-    // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
 
-    private static final String LOG_TAG = "AudioRecordTest";
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String mFileName = null;
+    // Camera/Image processing
+    // based on https://developer.android.com/training/camera/photobasics.html
 
-    private RecordButton mRecordButton = null;
-    private MediaRecorder mRecorder = null;
+    private class EntryPagerAdapter extends FragmentPagerAdapter {
+        // Position to ID map.
+        List<Long> wordIDs = new ArrayList<>();
 
-    private PlayButton   mPlayButton = null;
-    private MediaPlayer   mPlayer = null;
+        EntryPagerAdapter(FragmentManager fm) {
+            super(fm);
 
-    // Requesting permission to RECORD_AUDIO
-    private boolean permissionToRecordAccepted = false;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-
-    /**
-     * This function configures the audio recording buttons and temp storage.
-     */
-    private void configureItemUpdateControls() {
-        // Record to the external cache directory for visibility
-        mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += getString(R.string.audiorecordtest_3gp);
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
-        // TODO: Define these in XML instead of dynamically.
-        LinearLayout ll = findViewById(R.id.footer_controls);
-        mRecordButton = new RecordButton(this);
-        ll.addView(mRecordButton,
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        0));
-        mPlayButton = new PlayButton(this);
-        ll.addView(mPlayButton,
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        0));
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                break;
-        }
-        if (!permissionToRecordAccepted ) finish();
-
-    }
-
-    private void onRecord(boolean start) {
-        if (start) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
-
-    private void onPlay(boolean start) {
-        if (start) {
-            startPlaying();
-        } else {
-            stopPlaying();
-        }
-    }
-
-    private void startPlaying() {
-        mPlayer = new MediaPlayer();
-        try {
-            mPlayer.setDataSource(mFileName);
-            mPlayer.prepare();
-            mPlayer.start();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
-    }
-
-    private void stopPlaying() {
-        mPlayer.release();
-        mPlayer = null;
-    }
-
-    private void startRecording() {
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(mFileName);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
+            // Task will trigger update after IDs are loaded.
+            new LoadWordIDsTask(
+                this,
+                sessionID,
+                AppDatabase.get(getApplicationContext()).wordDao()
+            ).execute();
         }
 
-        mRecorder.start();
-    }
+        @Override
+        public Fragment getItem(int position) {
+            long wordID = 0; // Invalid ID, should never yield results.
+            if (position < wordIDs.size()) {
+                wordID = wordIDs.get(position);
+            }
+            return EntryFragment.newInstance(wordID, position, getCount());
+        }
 
-    private void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
-        mRecorder = null;
-        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
+        @Override
+        public int getCount() {
+            // TODO: Is 0 okay?  Add special create-first-word page?
+            return wordIDs.size();
+        }
     }
 
     class RecordButton extends AppCompatButton {
@@ -256,48 +294,6 @@ public class EntryActivity extends AppCompatActivity {
             super(ctx);
             setText(R.string.START_PLAYING_LABEL);
             setOnClickListener(clicker);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mRecorder != null) {
-            mRecorder.release();
-            mRecorder = null;
-        }
-
-        if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
-        }
-    }
-
-
-    // Camera/Image processing
-    // based on https://developer.android.com/training/camera/photobasics.html
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-
-    /**
-     * If there is an image capture activity out there, dispatch an intent to take a picture.
-     *
-     * @param view the view from which the photo request originated
-     */
-    public void dispatchTakePictureIntent(View view) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Handle the result of a photo-taking activity.
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            // TODO: Store the bitmap.
         }
     }
 
