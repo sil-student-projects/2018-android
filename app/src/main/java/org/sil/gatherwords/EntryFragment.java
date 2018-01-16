@@ -172,7 +172,10 @@ public class EntryFragment extends Fragment {
             View entryPage = entryPageRef.get();
             ImageView picture = entryPage.findViewById(R.id.pic_viewer);
             if (word.picture != null) {
+                picture.setVisibility(View.VISIBLE);
                 picture.setImageBitmap(word.picture);
+            } else {
+                picture.setVisibility(View.GONE);
             }
         }
     }
