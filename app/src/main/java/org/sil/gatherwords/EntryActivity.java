@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
 import java.io.IOException;
@@ -32,8 +33,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntryActivity extends AppCompatActivity {
-    static final int REQUEST_IMAGE_CAPTURE = 1;
+    // Camera/Image processing
+    // based on https://developer.android.com/training/camera/photobasics.html
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+
     private long sessionID;
+    private ViewPager pager;
 
     // Audio recording features
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
@@ -57,7 +62,7 @@ public class EntryActivity extends AppCompatActivity {
 
         sessionID = getIntent().getLongExtra(SessionActivity.ARG_ID, 0);
 
-        ViewPager pager = findViewById(R.id.viewpager);
+        pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
     }
 
@@ -172,8 +177,10 @@ public class EntryActivity extends AppCompatActivity {
         // Handle the result of a photo-taking activity.
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            // TODO: Store the bitmap.
+            if (extras != null) {
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                new StorePicturesTask(this).execute(imageBitmap);
+            }
         }
     }
 
@@ -187,6 +194,16 @@ public class EntryActivity extends AppCompatActivity {
         }
         if (!permissionToRecordAccepted ) finish();
 
+    }
+
+    /**
+     * Get the current fragment
+     * @return The currently shown fragment
+     */
+    public Fragment getCurrentFragment() {
+        int currentItem = pager.getCurrentItem();
+        EntryPagerAdapter adapter = (EntryPagerAdapter) pager.getAdapter();
+        return adapter.getItem(currentItem);
     }
 
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
@@ -218,9 +235,39 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
+    private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Void> {
 
-    // Camera/Image processing
-    // based on https://developer.android.com/training/camera/photobasics.html
+        private AppDatabase db;
+        private WordDao wordDao;
+        private long wordId;
+
+        StorePicturesTask(EntryActivity activity) {
+            db = AppDatabase.get(activity.getApplicationContext());
+            wordDao = db.wordDao();
+            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
+            wordId = fragment.getWordID();
+        }
+
+        @Override
+        protected Void doInBackground(Bitmap... bitmaps) {
+            db.beginTransaction();
+            try {
+                Word currentWord = wordDao.get(wordId);
+                if (currentWord != null) {
+                    currentWord.picture = bitmaps[0];
+
+                    wordDao.updateWords(currentWord);
+                    db.setTransactionSuccessful();
+                }
+            } catch (Exception e) {
+                Log.e("StorePicturesTask", "Exception while updating the Word", e);
+            } finally {
+                db.endTransaction();
+            }
+
+            return null;
+        }
+    }
 
     private class EntryPagerAdapter extends FragmentPagerAdapter {
         // Position to ID map.

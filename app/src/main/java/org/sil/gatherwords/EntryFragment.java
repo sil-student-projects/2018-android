@@ -11,12 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
+import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
 import java.lang.ref.WeakReference;
@@ -63,6 +65,25 @@ public class EntryFragment extends Fragment {
         return entryPage;
     }
 
+    /**
+     * Will run after the view is created and after the picture is taken.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        new UpdateAfterPicture(getView()).execute(m_wordID);
+    }
+
+    /**
+     * Gets the current wordId
+     *
+     * It seems m_wordID is not set when returning from taking a picture.
+     * @return The wordID of the current Word
+     */
+    public long getWordID() {
+        return getArguments().getLong(ARG_WORD_ID);
+    }
+
     private static class LoadWordTask extends AsyncTask<Long, Void, FilledWord> {
         WeakReference<View> entryPageRef;
         WordDao wDAO;
@@ -83,7 +104,7 @@ public class EntryFragment extends Fragment {
                 return null;
             }
 
-            return wDAO.get(wordIDs[0]);
+            return wDAO.getFilled(wordIDs[0]);
         }
 
         @Override
@@ -129,4 +150,43 @@ public class EntryFragment extends Fragment {
         }
     }
 
+    /**
+     * Update the Image viewer with the stored image
+     */
+    private static class UpdateAfterPicture extends AsyncTask<Long, Void, Word> {
+
+        private WeakReference<View> entryPageRef;
+        private WordDao wd;
+
+        UpdateAfterPicture(View entryPage) {
+            entryPageRef = new WeakReference<>(entryPage);
+            wd = AppDatabase.get(entryPage.getContext()).wordDao();
+        }
+
+        @Override
+        protected Word doInBackground(Long... wordIDs) {
+            if (wordIDs == null || wordIDs.length != 1) {
+                Log.e(UpdateAfterPicture.class.getSimpleName(), "Did not receive exactly 1 wordID");
+                return null;
+            }
+
+            return wd.get(wordIDs[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Word word) {
+            View entryPage = entryPageRef.get();
+            if (entryPage == null || word == null) {
+                return;
+            }
+
+            ImageView picture = entryPage.findViewById(R.id.pic_viewer);
+            if (word.picture != null) {
+                picture.setVisibility(View.VISIBLE);
+                picture.setImageBitmap(word.picture);
+            } else {
+                picture.setVisibility(View.GONE);
+            }
+        }
+    }
 }

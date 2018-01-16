@@ -16,6 +16,14 @@
     <ListView
         android:id="@+id/entry_fields"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:id="@+id/pic_viewer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/ic_menu_camera" />
 
 </LinearLayout>
