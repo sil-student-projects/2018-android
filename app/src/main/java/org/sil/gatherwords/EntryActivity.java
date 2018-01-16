@@ -236,13 +236,12 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Void> {
-
         private AppDatabase db;
         private WordDao wordDao;
         private long wordId;
 
         StorePicturesTask(EntryActivity activity) {
-            db = AppDatabase.get(activity.getApplicationContext());
+            db = AppDatabase.get(activity);
             wordDao = db.wordDao();
             EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
             wordId = fragment.getWordID();

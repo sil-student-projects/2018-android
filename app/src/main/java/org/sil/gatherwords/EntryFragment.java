@@ -18,6 +18,7 @@ import android.widget.TextView;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
+import org.sil.gatherwords.room.MeaningDao;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
@@ -75,6 +76,36 @@ public class EntryFragment extends Fragment {
     }
 
     /**
+     * Update lexical entries upon stopping the fragment (occurs after user swipes to another screen).
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        ListView listView;
+        EditText wordText;
+        String translation = "";
+
+        try {
+            listView = getView().findViewById(R.id.entry_fields);
+
+            for (int i = 0; i < listView.getCount(); i++) {
+                wordText = listView.getChildAt(i).findViewById(R.id.lang_data);
+
+                translation = wordText.getText().toString();
+
+                //TODO - replace hardcoded "type" field.
+                Meaning newMeaning = new Meaning(this.m_wordID, "en", translation);
+
+                //Begin background task.
+                new UpdateMeaningTask(AppDatabase.get(getActivity().getApplicationContext())).execute(newMeaning);
+            }
+        } catch(Exception e) {
+            Log.e("EntryFragment.java", "Null pointer exception - failed to find ListView and/or EditText object", e);
+        }
+    }
+
+    /**
      * Gets the current wordId
      *
      * It seems m_wordID is not set when returning from taking a picture.
@@ -99,7 +130,7 @@ public class EntryFragment extends Fragment {
 
         @Override
         protected FilledWord doInBackground(Long... wordIDs) {
-            if (wordIDs == null || wordIDs.length != 1)  {
+            if (wordIDs == null || wordIDs.length != 1) {
                 Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
                 return null;
             }
@@ -147,6 +178,24 @@ public class EntryFragment extends Fragment {
                     return convertView;
                 }
             });
+        }
+    }
+
+    /**
+     * Performs background task to update meanings for lexical entries in database.
+     */
+    private static class UpdateMeaningTask extends AsyncTask<Meaning, Void, Void> {
+        private MeaningDao mDAO;
+
+        //Constructor.
+        UpdateMeaningTask(AppDatabase db) {
+            mDAO = db.meaningDao();
+        }
+
+        @Override
+        protected Void doInBackground(Meaning... meanings) {
+            mDAO.updateMeanings(meanings);
+            return null;
         }
     }
 
