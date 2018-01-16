@@ -30,6 +30,8 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Meaning;
+import org.sil.gatherwords.room.MeaningDao;
 import org.sil.gatherwords.room.Session;
 import org.sil.gatherwords.room.SessionDao;
 import org.sil.gatherwords.room.Word;
@@ -226,6 +228,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             // Begin the transaction
             db.beginTransaction();
             try {
+                MeaningDao meaningDao = db.meaningDao();
+
                 JSONArray jsonArray = new JSONArray(loadWordList());
 
                 // Iterate through each word from the file
@@ -234,11 +238,16 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                     Word word = new Word();
 
                     // Link the word to the session that was just created
-                    word.sessionId = sessionID;
-                    word.meanings = json.getString("entry");
+                    word.sessionID = sessionID;
 
                     // Insert
-                    wordDao.insertWords(word);
+                    long wordID = wordDao.insertWord(word);
+
+                    meaningDao.insertMeanings(
+                        new Meaning(wordID, "entry", json.getString("entry")),
+                        new Meaning(wordID, "pos", json.getString("pos")),
+                        new Meaning(wordID, "notes", json.getString("notes"))
+                    );
                 }
 
                 // Mark to commit the changes to the DB
