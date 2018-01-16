@@ -31,7 +31,6 @@
     <string name="STOP_RECORDING_LABEL">Stop</string>
     <string name="START_PLAYING_LABEL">Play</string>
     <string name="STOP_PLAYING_LABEL">Stop</string>
-    <string name="mFileName">null</string>
     <string name="audiorecordtest_3gp">/audiorecordtest.3gp</string>
 
     <!-- Entry fragment strings -->
@@ -48,6 +47,7 @@
     <string name="world_list_template">World List Template</string>
     <string name="location">Location</string>
     <string name="en_loc_services">Please enable location services to access this feature</string>
+    <string name="gps">GPS</string>
 
     <!-- Ship it activity strings -->
     <string name="i_m_proud_of_you">I\'m proud of you</string>
