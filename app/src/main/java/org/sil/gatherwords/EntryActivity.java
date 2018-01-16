@@ -34,7 +34,7 @@ import java.util.List;
 
 public class EntryActivity extends AppCompatActivity {
     private long sessionID;
-    private long wordId;
+    private ViewPager pager;
 
     // Camera/Image processing
     // based on https://developer.android.com/training/camera/photobasics.html
@@ -62,7 +62,7 @@ public class EntryActivity extends AppCompatActivity {
 
         sessionID = getIntent().getLongExtra(SessionActivity.ARG_ID, 0);
 
-        ViewPager pager = findViewById(R.id.viewpager);
+        pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
     }
 
@@ -194,13 +194,6 @@ public class EntryActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Used by EntryFragment to notify this activity that it has passed its wordId value upstream
-     */
-    public void notifyWordIdStored() {
-        wordId = getIntent().getLongExtra(getString(R.string.intent_word_id_key), 0);
-    }
-
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
         long sessionID;
@@ -239,7 +232,8 @@ public class EntryActivity extends AppCompatActivity {
         StorePicturesTask(EntryActivity activity) {
             db = AppDatabase.get(activity.getApplicationContext());
             wordDao = db.wordDao();
-            wordId = activity.wordId;
+            EntryFragment fragment = (EntryFragment)((EntryPagerAdapter) activity.pager.getAdapter()).getItem(activity.pager.getCurrentItem());
+            wordId = fragment.getWordID();
         }
 
         @Override

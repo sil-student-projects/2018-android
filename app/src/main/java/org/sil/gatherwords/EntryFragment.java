@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -50,10 +51,6 @@ public class EntryFragment extends Fragment {
             m_total = args.getInt(ARG_TOTAL);
         }
 
-        // Send the word id back upstream so that the activity can store the pictures and audio
-        EntryActivity activity = (EntryActivity) getActivity();
-        activity.getIntent().putExtra(getString(R.string.intent_word_id_key), m_wordID);
-        activity.notifyWordIdStored();
     }
 
     @Override
@@ -64,6 +61,25 @@ public class EntryFragment extends Fragment {
         new LoadWordTask(entryPage, m_position, m_total).execute(m_wordID);
 
         return entryPage;
+    }
+
+    /**
+     * Will run after the view is created and after the picture is taken.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        new UpdateAfterPicture(getView()).execute(m_wordID);
+    }
+
+    /**
+     * Gets the current wordId
+     *
+     * Sometimes m_wordID is not yet set for some reason
+     * @return The wordID of the current Word
+     */
+    public long getWordID() {
+        return getArguments().getLong(ARG_WORD_ID);
     }
 
     private static class LoadWordTask extends AsyncTask<Long, Void, Word> {
@@ -127,4 +143,37 @@ public class EntryFragment extends Fragment {
         }
     }
 
+    /**
+     * Update the Image viewer with the stored image
+     */
+    private static class UpdateAfterPicture extends AsyncTask<Long, Void, Word>{
+
+        private WeakReference<View> entryPageRef;
+        private WordDao wd;
+
+        UpdateAfterPicture(View entryPage) {
+            entryPageRef = new WeakReference<>(entryPage);
+            wd = AppDatabase.get(entryPage.getContext()).wordDao();
+        }
+
+        @Override
+        protected Word doInBackground(Long... wordIDs) {
+            if (wordIDs == null || wordIDs.length != 1)  {
+                Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
+                return null;
+            }
+
+            return wd.get(wordIDs[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Word word) {
+            super.onPostExecute(word);
+            View entryPage = entryPageRef.get();
+            ImageView picture = entryPage.findViewById(R.id.pic_viewer);
+            if (word.picture != null) {
+                picture.setImageBitmap(word.picture);
+            }
+        }
+    }
 }
