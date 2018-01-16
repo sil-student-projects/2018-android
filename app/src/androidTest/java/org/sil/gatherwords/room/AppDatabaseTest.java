@@ -67,7 +67,7 @@ public class AppDatabaseTest {
 
 		Word w1 = new Word();
 		Word w2 = new Word();
-		w2.sessionId = 3;
+		w2.sessionID = 3;
 		wordDao.insertWords(w1, w2);
 		// TODO Get foreign key working
 //		try {
@@ -99,8 +99,7 @@ public class AppDatabaseTest {
 		}
 		Assert.assertEquals("audio", w1.audio, w2.audio);
 		Assert.assertEquals("picture", w1.picture, w2.picture);
-		Assert.assertEquals("meanings", w1.meanings, w2.meanings);
-		Assert.assertEquals("session", w1.sessionId, w2.sessionId);
+		Assert.assertEquals("session", w1.sessionID, w2.sessionID);
 
 	}
 
