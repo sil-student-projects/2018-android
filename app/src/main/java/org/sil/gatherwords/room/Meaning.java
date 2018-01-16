@@ -20,7 +20,10 @@ public class Meaning {
 
     public long wordID;
 
+    // Potentially something like "en" or "IPA".
+    // TODO: Should this field be renamed to something like "language"?
     public String type;
+    // Description word/phrase for this type.
     public String data;
 
     public Meaning(long wordID, String type, String data) {
