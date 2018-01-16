@@ -6,12 +6,16 @@
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
+    <string name="Undo">undo</string>
 
     <string-array name="word_lists">
         <item>None (Blank Template)</item>
         <item>swadesh-100</item>
         <item>swadesh-207</item>
     </string-array>
+
+    <!--MainActivity strings-->
+    <string name="session_delete">Session deleted</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
