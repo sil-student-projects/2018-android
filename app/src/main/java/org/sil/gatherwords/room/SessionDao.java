@@ -26,9 +26,6 @@ public interface SessionDao {
 	@Query("SELECT :columns FROM session WHERE :comparisonString")
 	List<String> getWhere(List<String> columns, String comparisonString);
 
-	@Query("UPDATE session SET deletedAt = NULL WHERE deletedAt = " +
-			"(SELECT MAX(deletedAt) FROM session)")
-	void undoLastDeleted();
 
 	// DELETE
 	@Query("DELETE FROM session WHERE :comparisonString")
@@ -41,5 +38,9 @@ public interface SessionDao {
 	// Update
 	@Update
 	int updateSession(Session... sessions);
+
+	@Query("UPDATE session SET deletedAt = NULL WHERE deletedAt = " +
+			"(SELECT MAX(deletedAt) FROM session)")
+	void undoLastDeleted();
 
 }

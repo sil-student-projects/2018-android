@@ -35,12 +35,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Moved to onResume() so that the ListView is reconstructed when the back button was pressed
         final ListView sessionList = findViewById(R.id.session_list);
 
         sessionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -50,10 +45,15 @@ public class MainActivity extends AppCompatActivity {
                 Session session = (Session) sessionList.getAdapter().getItem(i);
                 intent.putExtra(SessionActivity.ARG_ID, session.id);
                 // Passes id of selected session into EntryActivity
-                // TODO: EntryActivity currently does nothing with
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Moved to onResume() so that the ListView is reconstructed when the back button was pressed
 
         new FillSessionListTask(this).execute();
     }
@@ -179,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Context context = inflater.getContext();
-                    session.deletedAt = new Date();
                     new DeleteSessionFromDB(context).execute(session);
 
                 }
@@ -200,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected List<Session> doInBackground(Session... sessions) {
+            sessions[0].deletedAt = new Date();
             sDAO.updateSession(sessions);
             return sDAO.getAll();
         }
@@ -226,7 +226,6 @@ public class MainActivity extends AppCompatActivity {
     public class UndoListener implements View.OnClickListener {
         @Override
         public void onClick( View v ) {
-            //Toast.makeText(MainActivity.this, "I am calling the DB", Toast.LENGTH_SHORT).show();
             new UndoDeleteSessionFromDB(MainActivity.this).execute();
         }
     }

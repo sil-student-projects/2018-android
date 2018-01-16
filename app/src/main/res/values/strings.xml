@@ -14,9 +14,6 @@
         <item>swadesh-207</item>
     </string-array>
 
-    <!--MainActivity strings-->
-    <string name="session_delete">Session deleted</string>
-
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -27,6 +24,7 @@
 
     <!-- Main activity strings -->
     <string name="yyyy_MM_dd">yyyy-MM-dd</string>
+    <string name="session_delete">Session deleted</string>
 
     <!-- Entry activity strings -->
     <string name="photo">Photo</string>
