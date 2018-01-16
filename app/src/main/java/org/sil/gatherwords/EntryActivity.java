@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
 import java.io.IOException;
@@ -32,8 +33,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntryActivity extends AppCompatActivity {
-    static final int REQUEST_IMAGE_CAPTURE = 1;
     private long sessionID;
+    private long wordId;
+
+    // Camera/Image processing
+    // based on https://developer.android.com/training/camera/photobasics.html
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     // Audio recording features
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
@@ -173,7 +178,7 @@ public class EntryActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            // TODO: Store the bitmap.
+            new StorePicturesTask(this).execute(imageBitmap);
         }
     }
 
@@ -187,6 +192,13 @@ public class EntryActivity extends AppCompatActivity {
         }
         if (!permissionToRecordAccepted ) finish();
 
+    }
+
+    /**
+     * Used by EntryFragment to notify this activity that it has passed its wordId value upstream
+     */
+    public void notifyWordIdStored() {
+        wordId = getIntent().getLongExtra(getString(R.string.intent_word_id_key), 0);
     }
 
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
@@ -218,9 +230,38 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
+    private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Void> {
 
-    // Camera/Image processing
-    // based on https://developer.android.com/training/camera/photobasics.html
+        private final AppDatabase db;
+        private final WordDao wordDao;
+        private final long wordId;
+
+        StorePicturesTask(EntryActivity activity) {
+            db = AppDatabase.get(activity.getApplicationContext());
+            wordDao = db.wordDao();
+            wordId = activity.wordId;
+        }
+
+        @Override
+        protected Void doInBackground(Bitmap... bitmaps) {
+            db.beginTransaction();
+            try {
+                Word currentWord = wordDao.get(wordId);
+                if (currentWord != null) {
+                    currentWord.picture = bitmaps[0];
+
+                    wordDao.updateWords(currentWord);
+                    db.setTransactionSuccessful();
+                }
+            } catch (Exception e) {
+                Log.e("StorePicturesTask", "Exception while updating the Word", e);
+            } finally {
+                db.endTransaction();
+            }
+
+            return null;
+        }
+    }
 
     private class EntryPagerAdapter extends FragmentPagerAdapter {
         // Position to ID map.

@@ -49,6 +49,11 @@ public class EntryFragment extends Fragment {
             m_position = args.getInt(ARG_POSITION);
             m_total = args.getInt(ARG_TOTAL);
         }
+
+        // Send the word id back upstream so that the activity can store the pictures and audio
+        EntryActivity activity = (EntryActivity) getActivity();
+        activity.getIntent().putExtra(getString(R.string.intent_word_id_key), m_wordID);
+        activity.notifyWordIdStored();
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.graphics.Bitmap;
 
 import java.sql.Blob;
 
@@ -27,6 +28,5 @@ public class Word {
 	@Ignore
 	public Blob audio; // NOTE: LF does NOT support multiple audio files
 
-	@Ignore
-	public Blob picture; // NOTE: LF DOES support multiple picture files
+	public Bitmap picture; // NOTE: LF DOES support multiple picture files
 }

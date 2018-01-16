@@ -60,4 +60,7 @@
     <string name="_speaker">*speaker*</string>
     <string name="_date">*date*</string>
 
+    <!-- Intent item key strings -->
+    <string name="intent_word_id_key">word id</string>
+
 </resources>
