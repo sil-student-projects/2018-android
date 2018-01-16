@@ -181,7 +181,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             // Easter egg
             i = new Intent(this, ShipItActivity.class);
         } else {
-            i = new Intent(this, MainActivity.class);
+            i = new Intent(this, EntryActivity.class);
+            i.putExtra(ARG_ID, session.id);
         }
         startActivity(i);
     }

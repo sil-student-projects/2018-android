@@ -14,10 +14,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
@@ -215,11 +213,11 @@ public class MainActivity extends AppCompatActivity {
     private void showUndoSnackbar() {
         Snackbar mySnackbar = Snackbar.make(findViewById(R.id.mainView),
                 R.string.session_delete, Snackbar.LENGTH_LONG);
-        mySnackbar.setAction(R.string.undo, new MyUndoListener() );
+        mySnackbar.setAction(R.string.undo, new UndoListener() );
         mySnackbar.show();
     }
 
-    public class MyUndoListener implements View.OnClickListener{
+    public class UndoListener implements View.OnClickListener{
 
         @Override
         public void onClick(View v) {
