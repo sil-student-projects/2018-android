@@ -6,6 +6,7 @@
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
+    <string name="undo">Undo</string>
 
     <string-array name="word_lists">
         <item>None (Blank Template)</item>
@@ -23,6 +24,7 @@
 
     <!-- Main activity strings -->
     <string name="yyyy_MM_dd">yyyy-MM-dd</string>
+    <string name="session_delete">Session deleted</string>
 
     <!-- Entry activity strings -->
     <string name="photo">Photo</string>
