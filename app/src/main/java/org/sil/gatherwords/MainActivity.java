@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.undo_session_delete:
                 new UndoDeleteSessionFromDB(this).execute();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -213,14 +214,13 @@ public class MainActivity extends AppCompatActivity {
     private void showUndoSnackbar() {
         Snackbar mySnackbar = Snackbar.make(findViewById(R.id.mainView),
                 R.string.session_delete, Snackbar.LENGTH_LONG);
-        mySnackbar.setAction(R.string.undo, new UndoListener() );
+        mySnackbar.setAction( R.string.undo, new UndoListener() );
         mySnackbar.show();
     }
 
-    public class UndoListener implements View.OnClickListener{
-
+    public class UndoListener implements View.OnClickListener {
         @Override
-        public void onClick(View v) {
+        public void onClick( View v ) {
             //Toast.makeText(MainActivity.this, "I am calling the DB", Toast.LENGTH_SHORT).show();
             new UndoDeleteSessionFromDB(MainActivity.this).execute();
         }

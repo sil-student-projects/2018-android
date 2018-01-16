@@ -6,7 +6,7 @@
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
-    <string name="undo">undo</string>
+    <string name="Undo">undo</string>
 
     <string-array name="word_lists">
         <item>None (Blank Template)</item>
