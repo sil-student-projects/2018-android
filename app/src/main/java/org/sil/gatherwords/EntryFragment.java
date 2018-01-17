@@ -159,7 +159,7 @@ public class EntryFragment extends Fragment {
         @Override
         protected Word doInBackground(Long... wordIDs) {
             if (wordIDs == null || wordIDs.length != 1)  {
-                Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
+                Log.e(UpdateAfterPicture.class.getSimpleName(), "Did not receive exactly 1 wordID");
                 return null;
             }
 
@@ -168,8 +168,12 @@ public class EntryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Word word) {
-            super.onPostExecute(word);
             View entryPage = entryPageRef.get();
+            if (entryPage == null || word == null) {
+                Log.d(UpdateAfterPicture.class.getSimpleName(), "The Entry Page Reference");
+                return;
+            }
+
             ImageView picture = entryPage.findViewById(R.id.pic_viewer);
             if (word.picture != null) {
                 picture.setVisibility(View.VISIBLE);
