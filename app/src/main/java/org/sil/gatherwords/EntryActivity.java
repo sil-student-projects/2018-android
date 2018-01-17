@@ -194,6 +194,16 @@ public class EntryActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Get the current fragment
+     * @return The currently shown fragment
+     */
+    public Fragment getCurrentFragment() {
+        int currentItem = pager.getCurrentItem();
+        EntryPagerAdapter adapter = (EntryPagerAdapter) pager.getAdapter();
+        return adapter.getItem(currentItem);
+    }
+
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
         long sessionID;
@@ -225,14 +235,14 @@ public class EntryActivity extends AppCompatActivity {
 
     private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Void> {
 
-        private final AppDatabase db;
-        private final WordDao wordDao;
-        private final long wordId;
+        private AppDatabase db;
+        private WordDao wordDao;
+        private long wordId;
 
         StorePicturesTask(EntryActivity activity) {
             db = AppDatabase.get(activity.getApplicationContext());
             wordDao = db.wordDao();
-            EntryFragment fragment = (EntryFragment)((EntryPagerAdapter) activity.pager.getAdapter()).getItem(activity.pager.getCurrentItem());
+            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
             wordId = fragment.getWordID();
         }
 
