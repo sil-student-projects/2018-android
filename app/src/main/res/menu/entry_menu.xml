@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:myapp="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/undo_session_delete"
+        android:id="@+id/undo_entry_delete"
         android:icon="@drawable/ic_undo_white_24dp"
         android:title="@string/undo"
         myapp:showAsAction="ifRoom" />
     <item
-        android:id="@+id/preference_menu"
-        android:icon="@drawable/ic_settings_white_24dp"
-        android:title="@string/app_name"
+        android:id="@+id/entry_delete"
+        android:icon="@drawable/ic_delete_red_24dp"
+        android:title="@string/delete"
         myapp:showAsAction="ifRoom" />
 </menu>

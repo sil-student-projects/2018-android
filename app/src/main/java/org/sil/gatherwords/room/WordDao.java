@@ -6,6 +6,7 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
 @Dao
 public interface WordDao {
     // SELECT
-    @Query("SELECT id FROM word WHERE sessionId = :sessionID ORDER BY id ASC")
+    @Query("SELECT id FROM word WHERE sessionId = :sessionID AND deletedAt IS NULL ORDER BY id ASC")
     List<Long> getIDsForSession(long sessionID);
 
     @Query("SELECT * FROM word WHERE id = :wordID")
@@ -30,9 +31,16 @@ public interface WordDao {
     @Update
     void updateWords(Word... words);
 
+    @Query("UPDATE word SET deletedAt = NULL WHERE deletedAt = " +
+            "(SELECT MAX(deletedAt) FROM word WHERE sessionID = :sessionID)")
+    long undoLastDeleted(long sessionID);
+
     // DELETE
     @Delete
     void deleteWords(Word... words);
+
+    @Query("UPDATE word SET deletedAt = :deletedAt WHERE id IN (:wordIDs)")
+    void softDeleteWords(Date deletedAt, Long... wordIDs);
 
     // INSERT
     @Insert

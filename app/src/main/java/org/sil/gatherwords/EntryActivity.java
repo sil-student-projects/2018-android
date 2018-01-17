@@ -20,6 +20,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -33,6 +35,7 @@ import org.sil.gatherwords.room.WordDao;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -75,6 +78,38 @@ public class EntryActivity extends AppCompatActivity {
                 new AddNewWordToDB(EntryActivity.this).execute();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.entry_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.entry_delete:
+                EntryFragment entryFragment = (EntryFragment)getCurrentFragment();
+
+                new DeleteWordTask(
+                    (EntryPagerAdapter)pager.getAdapter(),
+                    sessionID,
+                    AppDatabase.get(this).wordDao()
+                ).execute(entryFragment.getWordID());
+                return true;
+
+            case R.id.undo_entry_delete:
+                new UndoLastDeleteWordTask(
+                    (EntryPagerAdapter)pager.getAdapter(),
+                    sessionID,
+                    AppDatabase.get(this).wordDao()
+                ).execute();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**
@@ -231,6 +266,71 @@ public class EntryActivity extends AppCompatActivity {
         @Override
         protected List<Long> doInBackground(Void... v) {
             return wDAO.getIDsForSession(sessionID);
+        }
+
+        @Override
+        protected void onPostExecute(List<Long> wordIDs) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || wordIDs == null) {
+                return;
+            }
+
+            pagerAdapter.wordIDs = wordIDs;
+            // Publish results.
+            pagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class DeleteWordTask extends AsyncTask<Long, Void, List<Long>> {
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
+        long sessionID;
+        WordDao wDAO;
+
+        DeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+            pagerAdapterRef = new WeakReference<>(pagerAdapter);
+            sessionID = sID;
+            wDAO = dao;
+        }
+
+        @Override
+        protected List<Long> doInBackground(Long... wordIDs) {
+            wDAO.softDeleteWords(new Date(), wordIDs);
+            return wDAO.getIDsForSession(sessionID);
+        }
+
+        @Override
+        protected void onPostExecute(List<Long> wordIDs) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || wordIDs == null) {
+                return;
+            }
+
+            pagerAdapter.wordIDs = wordIDs;
+            // Publish results.
+            pagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class UndoLastDeleteWordTask extends AsyncTask<Void, Void, List<Long>> {
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
+        long sessionID;
+        WordDao wDAO;
+
+        UndoLastDeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+            pagerAdapterRef = new WeakReference<>(pagerAdapter);
+            sessionID = sID;
+            wDAO = dao;
+        }
+
+        @Override
+        protected List<Long> doInBackground(Void... v) {
+            long numUpdated = wDAO.undoLastDeleted(sessionID);
+            if (numUpdated > 0) {
+                return wDAO.getIDsForSession(sessionID);
+            }
+
+            // No need to refresh the display.
+            return null;
         }
 
         @Override
