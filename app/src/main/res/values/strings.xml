@@ -34,6 +34,7 @@
     <string name="START_PLAYING_LABEL">Play</string>
     <string name="STOP_PLAYING_LABEL">Stop</string>
     <string name="audiorecordtest_3gp">/audiorecordtest.3gp</string>
+    <string name="delete">Delete</string>
 
     <!-- Entry fragment strings -->
     <string name="lang1">lang1</string>

@@ -8,6 +8,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.graphics.Bitmap;
 
 import java.sql.Blob;
+import java.util.Date;
 
 /**
  * Entity class for each word of a session
@@ -23,6 +24,8 @@ public class Word {
     public long id;
 
     public long sessionID;
+
+    public Date deletedAt;
 
     @Ignore
     public Blob audio; // NOTE: LF does NOT support multiple audio files
