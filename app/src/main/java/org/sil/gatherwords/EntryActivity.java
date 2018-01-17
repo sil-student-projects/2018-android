@@ -24,9 +24,12 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,7 @@ import java.util.List;
 public class EntryActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private long sessionID;
+    private ViewPager pager;
 
     // Audio recording features
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
@@ -57,7 +61,7 @@ public class EntryActivity extends AppCompatActivity {
 
         sessionID = getIntent().getLongExtra(SessionActivity.ARG_ID, 0);
 
-        ViewPager pager = findViewById(R.id.viewpager);
+        pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
     }
 
@@ -128,7 +132,7 @@ public class EntryActivity extends AppCompatActivity {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
-        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
+        new SaveRecordingTask(this).execute(mFileName);
     }
 
     private void onPlay(boolean start) {
@@ -187,6 +191,16 @@ public class EntryActivity extends AppCompatActivity {
         }
         if (!permissionToRecordAccepted ) finish();
 
+    }
+
+    public Fragment getCurrentFragment() {
+        int currentItem = pager.getCurrentItem();
+        EntryPagerAdapter adapter = (EntryPagerAdapter) pager.getAdapter();
+        return adapter.getItem(currentItem);
+    }
+
+    public String getFileName() {
+        return mFileName;
     }
 
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
@@ -297,4 +311,45 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
+    private static class SaveRecordingTask extends AsyncTask<String, Void, Void>{
+        private AppDatabase db;
+        private WordDao wd;
+        private WeakReference<EntryActivity> entryActivityRef;
+        private long wordId;
+
+        SaveRecordingTask(EntryActivity activity) {
+            entryActivityRef = new WeakReference<>(activity);
+            db = AppDatabase.get(activity.getApplicationContext());
+            wd = db.wordDao();
+            EntryFragment fragment = (EntryFragment) activity.getCurrentFragment();
+            wordId = fragment.getWordId();
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            EntryActivity activity = entryActivityRef.get();
+            String filename = activity.getFileName();
+            if (activity == null || filename == null) {
+                return null;
+            }
+            byte[] audio = null;
+            try {
+                InputStream is = new FileInputStream(filename);
+                audio = new byte[is.available()];
+                int remainder = is.read(audio);
+                if (remainder != 0) {
+                    Log.e(SaveRecordingTask.class.getSimpleName(), "Not all the file was read");
+                    // Continue or exit?
+                }
+            } catch (IOException e) {
+                Log.e(SaveRecordingTask.class.getSimpleName(), "IOException while reading the file", e);
+            }
+            // Get the word
+            Word word = wd.get(wordId);
+            word.audio = audio;
+
+            wd.updateWords(word);
+            return null;
+        }
+    }
 }

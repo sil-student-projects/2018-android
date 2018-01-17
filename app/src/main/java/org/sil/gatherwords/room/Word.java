@@ -23,8 +23,7 @@ public class Word {
 
     public long sessionID;
 
-    @Ignore
-    public Blob audio; // NOTE: LF does NOT support multiple audio files
+    public byte[] audio; // NOTE: LF does NOT support multiple audio files
 
     @Ignore
     public Blob picture; // NOTE: LF DOES support multiple picture files

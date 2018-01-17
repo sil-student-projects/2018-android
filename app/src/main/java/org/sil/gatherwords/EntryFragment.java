@@ -63,6 +63,10 @@ public class EntryFragment extends Fragment {
         return entryPage;
     }
 
+    public long getWordId() {
+        return getArguments().getLong(ARG_WORD_ID, 0);
+    }
+
     private static class LoadWordTask extends AsyncTask<Long, Void, FilledWord> {
         WeakReference<View> entryPageRef;
         WordDao wDAO;
@@ -83,7 +87,7 @@ public class EntryFragment extends Fragment {
                 return null;
             }
 
-            return wDAO.get(wordIDs[0]);
+            return wDAO.getFilled(wordIDs[0]);
         }
 
         @Override
