@@ -170,7 +170,7 @@ public class EntryFragment extends Fragment {
         protected void onPostExecute(Word word) {
             View entryPage = entryPageRef.get();
             if (entryPage == null || word == null) {
-                Log.d(UpdateAfterPicture.class.getSimpleName(), "The Entry Page Reference");
+                Log.d(UpdateAfterPicture.class.getSimpleName(), "Garbage collection took the entry page reference");
                 return;
             }
 
