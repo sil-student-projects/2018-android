@@ -17,6 +17,9 @@ public interface MeaningDao {
     @Query("SELECT * FROM meaning WHERE wordID = :wordID ORDER BY id ASC")
     List<Meaning> getAll(long wordID);
 
+    @Query("SELECT * FROM meaning WHERE wordID = :wordID and type = :type")
+    Meaning getByType(long wordID, String type);
+
     // UPDATES
     @Update
     void updateMeanings(Meaning... meanings);

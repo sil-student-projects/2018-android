@@ -18,6 +18,7 @@ import android.widget.TextView;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
+import org.sil.gatherwords.room.MeaningDao;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
@@ -75,6 +76,48 @@ public class EntryFragment extends Fragment {
     }
 
     /**
+     * Update lexical entries upon stopping the fragment (occurs after user swipes to another screen).
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        try {
+            View rootView = getView();
+            if (rootView == null) {
+                Log.e(
+                    EntryFragment.class.getSimpleName(),
+                    "Root view not found"
+                );
+                return;
+            }
+
+            ListView entryFields = rootView.findViewById(R.id.entry_fields);
+
+            Meaning[] meanings = new Meaning[entryFields.getCount()];
+            for (int i = 0; i < entryFields.getCount(); i++) {
+                View entryField = entryFields.getChildAt(i);
+                TextView langCodeField = entryField.findViewById(R.id.lang_code);
+                EditText langDataField = entryField.findViewById(R.id.lang_data);
+
+                if (langCodeField == null || langDataField == null) {
+                    continue;
+                }
+
+                meanings[i] = new Meaning(
+                    m_wordID,
+                    langCodeField.getText().toString(),
+                    langDataField.getText().toString()
+                );
+            }
+
+            new UpdateMeaningTask(getContext()).execute(meanings);
+        } catch (Exception e) {
+            Log.e("EntryFragment.java", "Null pointer exception - failed to find ListView and/or EditText object", e);
+        }
+    }
+
+    /**
      * Gets the current wordId
      *
      * It seems m_wordID is not set when returning from taking a picture.
@@ -99,7 +142,7 @@ public class EntryFragment extends Fragment {
 
         @Override
         protected FilledWord doInBackground(Long... wordIDs) {
-            if (wordIDs == null || wordIDs.length != 1)  {
+            if (wordIDs == null || wordIDs.length != 1) {
                 Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
                 return null;
             }
@@ -147,6 +190,57 @@ public class EntryFragment extends Fragment {
                     return convertView;
                 }
             });
+        }
+    }
+
+    /**
+     * Performs background task to update meanings for lexical entries in database.
+     */
+    private static class UpdateMeaningTask extends AsyncTask<Meaning, Void, Void> {
+        private AppDatabase db;
+
+        //Constructor.
+        UpdateMeaningTask(Context context) {
+            db = AppDatabase.get(context);
+        }
+
+        @Override
+        protected Void doInBackground(Meaning... meanings) {
+            MeaningDao mDAO = db.meaningDao();
+
+            db.beginTransaction();
+            try {
+                for (Meaning meaning : meanings) {
+                    if (meaning == null) {
+                        continue;
+                    }
+
+                    Meaning currentState = mDAO.getByType(meaning.wordID, meaning.type);
+                    if (currentState == null) {
+                        // New entry? Insert.
+                        mDAO.insertMeanings(meaning);
+                    }
+                    else {
+                        // Pull the ID for update key.
+                        meaning.id = currentState.id;
+                        mDAO.updateMeanings(meaning);
+                    }
+                }
+
+                db.setTransactionSuccessful();
+            } catch (Exception e) {
+                Log.e(
+                    EntryFragment.class.getSimpleName(),
+                    "Error updating meanings",
+                    e
+                );
+            } finally {
+                // Commit or rollback the database.
+                db.endTransaction();
+            }
+
+            mDAO.updateMeanings(meanings);
+            return null;
         }
     }
 
