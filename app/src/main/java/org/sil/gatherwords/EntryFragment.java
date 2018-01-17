@@ -62,6 +62,10 @@ public class EntryFragment extends Fragment {
         View entryPage = inflater.inflate(R.layout.fragment_entry, container, false);
 
         new LoadWordTask(entryPage, m_position, m_total).execute(m_wordID);
+        TextView pageStatus = entryPage.findViewById(R.id.page_status);
+        pageStatus.setText(
+            getString(R.string.entry_status_line, "Word", m_position + 1, m_total)
+        );
 
         return entryPage;
     }
@@ -160,10 +164,6 @@ public class EntryFragment extends Fragment {
             Context context = entryPage.getContext();
 
             // TODO: Fill with real data from `word`.
-            TextView pageStatus = entryPage.findViewById(R.id.page_status);
-            pageStatus.setText(
-                context.getString(R.string.entry_status_line, "Word", position + 1, total)
-            );
 
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
             entryFields.setAdapter(new ArrayAdapter<Meaning>(context, 0, word.meanings) {

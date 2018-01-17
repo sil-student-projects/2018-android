@@ -9,12 +9,13 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -24,6 +25,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Meaning;
+import org.sil.gatherwords.room.MeaningDao;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
@@ -31,6 +34,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class EntryActivity extends AppCompatActivity {
     // Camera/Image processing
@@ -64,6 +68,13 @@ public class EntryActivity extends AppCompatActivity {
 
         pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
+
+        findViewById(R.id.new_word_fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AddNewWordToDB(EntryActivity.this).execute();
+            }
+        });
     }
 
     /**
@@ -268,7 +279,7 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private class EntryPagerAdapter extends FragmentPagerAdapter {
+    private class EntryPagerAdapter extends FragmentStatePagerAdapter {
         // Position to ID map.
         List<Long> wordIDs = new ArrayList<>();
 
@@ -296,6 +307,12 @@ public class EntryActivity extends AppCompatActivity {
         public int getCount() {
             // TODO: Is 0 okay?  Add special create-first-word page?
             return wordIDs.size();
+        }
+
+        // Forces recreate of pages in order to update total number of pages
+        @Override
+        public int getItemPosition(Object obj) {
+            return POSITION_NONE;
         }
     }
 
@@ -343,4 +360,51 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
+    private static class AddNewWordToDB extends AsyncTask<Void, Void, Void> {
+        WeakReference<EntryActivity> entryActivityRef;
+        WordDao wDAO;
+        MeaningDao mDAO;
+        Long sessionID;
+        Set<String> sharedPrefs;
+        String[] languages;
+
+        AddNewWordToDB(EntryActivity entryActivity) {
+            entryActivityRef = new WeakReference<>(entryActivity);
+            wDAO = AppDatabase.get(entryActivity).wordDao();
+            mDAO = AppDatabase.get(entryActivity).meaningDao();
+            sessionID = entryActivity.sessionID;
+            sharedPrefs = PreferenceManager.getDefaultSharedPreferences(entryActivity).
+                    getStringSet(entryActivity.getString(R.string.language_options_key), null);
+            languages = entryActivity.getResources().getStringArray(R.array.language_options_entries);
+        }
+
+        @Override
+        protected Void doInBackground(Void... v) {
+            // Insert new Word
+            Word newWord = new Word();
+            newWord.sessionID = sessionID;
+            long wordID = wDAO.insertWord(newWord);
+
+            // Insert blank Meanings for all preferences currently selected
+            int idx = 0;
+            Meaning[] meaningList = new Meaning[sharedPrefs.size()];
+            for (String pref : sharedPrefs) {
+                 meaningList[idx] = new Meaning(wordID, languages[Integer.parseInt(pref) - 1], "");
+                 idx++;
+            }
+            mDAO.insertMeanings(meaningList);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            final EntryActivity entryActivity = entryActivityRef.get();
+            if (entryActivity == null) {
+                return;
+            }
+            ViewPager pager = entryActivity.findViewById(R.id.viewpager);
+            new LoadWordIDsTask((EntryPagerAdapter)pager.getAdapter(), sessionID, wDAO).execute();
+        }
+    }
 }
