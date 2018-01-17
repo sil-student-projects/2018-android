@@ -4,14 +4,17 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Word;
@@ -57,6 +60,10 @@ public class EntryFragment extends Fragment {
         View entryPage = inflater.inflate(R.layout.fragment_entry, container, false);
 
         new LoadWordTask(entryPage, m_position, m_total).execute(m_wordID);
+        TextView pageStatus = entryPage.findViewById(R.id.page_status);
+        pageStatus.setText(
+                getString(R.string.entry_status_line, "Word", m_position + 1, m_total)
+        );
 
         return entryPage;
     }
@@ -86,7 +93,7 @@ public class EntryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Word word) {
-            View entryPage = entryPageRef.get();
+            final View entryPage = entryPageRef.get();
             if (entryPage == null || word == null) {
                 return;
             }
@@ -94,10 +101,6 @@ public class EntryFragment extends Fragment {
             Context context = entryPage.getContext();
 
             // TODO: Fill with real data from `word`.
-            TextView pageStatus = entryPage.findViewById(R.id.page_status);
-            pageStatus.setText(
-                context.getString(R.string.entry_status_line, "Word", position + 1, total)
-            );
 
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
             String[] langs = {"lang1", "lang2"};
@@ -121,5 +124,4 @@ public class EntryFragment extends Fragment {
             });
         }
     }
-
 }

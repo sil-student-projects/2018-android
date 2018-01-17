@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.sil.gatherwords.EntryActivity">
 
     <android.support.v4.view.ViewPager
@@ -11,12 +13,26 @@
         android:layout_height="match_parent"
         android:layout_above="@id/footer_controls" />
 
+    <!--FIXME: Fix FAB position-->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/new_word_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/viewpager"
+        app:layout_anchorGravity="bottom|right|end"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="48dp"
+        android:clickable="true"
+        android:src="@drawable/ic_add_white_24dp"
+        android:focusable="true" />
+
     <LinearLayout
         android:id="@+id/footer_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom">
 
         <Button
             android:id="@+id/photo_button"
@@ -27,4 +43,4 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
