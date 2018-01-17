@@ -14,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Word;
@@ -93,7 +92,7 @@ public class EntryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Word word) {
-            final View entryPage = entryPageRef.get();
+            View entryPage = entryPageRef.get();
             if (entryPage == null || word == null) {
                 return;
             }
