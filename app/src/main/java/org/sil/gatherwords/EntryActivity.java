@@ -24,9 +24,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Converters;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +54,7 @@ public class EntryActivity extends AppCompatActivity {
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+    private File audioFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +140,8 @@ public class EntryActivity extends AppCompatActivity {
 
     private void onPlay(boolean start) {
         if (start) {
-            startPlaying();
+            new ReadRecordingTask(this).execute();
+//            startPlaying();
         } else {
             stopPlaying();
         }
@@ -146,7 +150,7 @@ public class EntryActivity extends AppCompatActivity {
     private void startPlaying() {
         mPlayer = new MediaPlayer();
         try {
-            mPlayer.setDataSource(mFileName);
+            mPlayer.setDataSource(audioFile.getAbsolutePath());
             mPlayer.prepare();
             mPlayer.start();
         } catch (IOException e) {
@@ -337,7 +341,7 @@ public class EntryActivity extends AppCompatActivity {
                 InputStream is = new FileInputStream(filename);
                 audio = new byte[is.available()];
                 int remainder = is.read(audio);
-                if (remainder != 0) {
+                if (remainder != -1) {
                     Log.e(SaveRecordingTask.class.getSimpleName(), "Not all the file was read");
                     // Continue or exit?
                 }
@@ -352,4 +356,44 @@ public class EntryActivity extends AppCompatActivity {
             return null;
         }
     }
+
+    private static class ReadRecordingTask extends AsyncTask<Void, Void, Word> {
+        private WeakReference<EntryActivity> entryActivityRef;
+        private AppDatabase db;
+        private WordDao wordDao;
+        private long wordId;
+
+        ReadRecordingTask(EntryActivity entryActivity){
+            entryActivityRef = new WeakReference<>(entryActivity);
+            db = AppDatabase.get(entryActivity);
+            wordDao = db.wordDao();
+
+            EntryFragment fragment = (EntryFragment) entryActivity.getCurrentFragment();
+            wordId = fragment.getWordId();
+        }
+
+        @Override
+        protected Word doInBackground(Void... voids) {
+            return wordDao.get(wordId);
+        }
+
+        @Override
+        protected void onPostExecute(Word word) {
+            EntryActivity activity = entryActivityRef.get();
+            if (activity == null || word == null) {
+                return;
+            }
+
+            // Create the path string for the temporary file
+            String playbackFile = activity.getExternalCacheDir().getAbsolutePath();
+            playbackFile += activity.getString(R.string.audio_playback_file);
+
+            // Create the File from the byte[] and file path and store it
+            activity.audioFile = Converters.byteArrayToFile(word.audio, playbackFile);
+
+            // Tell the media player to start
+            activity.startPlaying();
+        }
+    }
+
 }
