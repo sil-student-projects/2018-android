@@ -38,6 +38,7 @@
     <!-- Entry fragment strings -->
     <string name="lang1">lang1</string>
     <string name="lang2">lang2</string>
+    <string name="semantic_domain">Semantic Domain</string>
 
     <!-- Session activity strings -->
     <string name="name_of_session">Name of session</string>
