@@ -3,13 +3,12 @@ package org.sil.gatherwords;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -23,6 +22,7 @@ import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 
 public class EntryFragment extends Fragment {
@@ -165,31 +165,12 @@ public class EntryFragment extends Fragment {
 
             // TODO: Fill with real data from `word`.
 
+
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
-            entryFields.setAdapter(new ArrayAdapter<Meaning>(context, 0, word.meanings) {
-                @NonNull
-                @Override
-                public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                    if (convertView == null) {
-                        convertView = LayoutInflater.from(parent.getContext()).inflate(
-                            R.layout.entry_field_item,
-                            parent,
-                            false
-                        );
-                    }
-
-                    Meaning meaning = getItem(position);
-                    if (meaning != null) {
-                        TextView langCodeField = convertView.findViewById(R.id.lang_code);
-                        langCodeField.setText(meaning.type);
-
-                        EditText langDataField = convertView.findViewById(R.id.lang_data);
-                        langDataField.setText(meaning.data);
-                    }
-
-                    return convertView;
-                }
-            });
+            entryFields.setAdapter(new EntryFieldAdapter(
+                LayoutInflater.from(context),
+                word.meanings
+            ));
         }
     }
 
@@ -281,6 +262,53 @@ public class EntryFragment extends Fragment {
             } else {
                 picture.setVisibility(View.GONE);
             }
+        }
+    }
+
+    private static class EntryFieldAdapter extends BaseAdapter {
+        private LayoutInflater inflater;
+        private List<Meaning> meaningList;
+
+        EntryFieldAdapter(LayoutInflater flate, List<Meaning> meanList) {
+            inflater = flate;
+            meaningList = meanList;
+        }
+
+        @Override
+        public int getCount() {
+            return meaningList.size();
+        }
+
+        @Override
+        public Meaning getItem(int i) {
+            return meaningList.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup container) {
+            if (convertView == null) {
+                convertView = inflater.inflate(
+                    R.layout.entry_field_item,
+                    container,
+                    false
+                );
+            }
+
+            Meaning meaning = getItem(i);
+            if (meaning != null) {
+                TextView langCodeField = convertView.findViewById(R.id.lang_code);
+                langCodeField.setText(meaning.type);
+
+                EditText langDataField = convertView.findViewById(R.id.lang_data);
+                langDataField.setText(meaning.data);
+            }
+
+            return convertView;
         }
     }
 }
