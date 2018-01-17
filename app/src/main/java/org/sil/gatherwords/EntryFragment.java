@@ -82,25 +82,37 @@ public class EntryFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
-        ListView listView;
-        EditText wordText;
-        String translation = "";
-
         try {
-            listView = getView().findViewById(R.id.entry_fields);
-
-            for (int i = 0; i < listView.getCount(); i++) {
-                wordText = listView.getChildAt(i).findViewById(R.id.lang_data);
-
-                translation = wordText.getText().toString();
-
-                //TODO - replace hardcoded "type" field.
-                Meaning newMeaning = new Meaning(this.m_wordID, "en", translation);
-
-                //Begin background task.
-                new UpdateMeaningTask(AppDatabase.get(getActivity().getApplicationContext())).execute(newMeaning);
+            View rootView = getView();
+            if (rootView == null) {
+                Log.e(
+                    EntryFragment.class.getSimpleName(),
+                    "Root view not found"
+                );
+                return;
             }
-        } catch(Exception e) {
+
+            ListView entryFields = rootView.findViewById(R.id.entry_fields);
+
+            Meaning[] meanings = new Meaning[entryFields.getCount()];
+            for (int i = 0; i < entryFields.getCount(); i++) {
+                View entryField = entryFields.getChildAt(i);
+                TextView langCodeField = entryField.findViewById(R.id.lang_code);
+                EditText langDataField = entryField.findViewById(R.id.lang_data);
+
+                if (langCodeField == null || langDataField == null) {
+                    continue;
+                }
+
+                meanings[i] = new Meaning(
+                    m_wordID,
+                    langCodeField.getText().toString(),
+                    langDataField.getText().toString()
+                );
+            }
+
+            new UpdateMeaningTask(getContext()).execute(meanings);
+        } catch (Exception e) {
             Log.e("EntryFragment.java", "Null pointer exception - failed to find ListView and/or EditText object", e);
         }
     }
@@ -185,15 +197,48 @@ public class EntryFragment extends Fragment {
      * Performs background task to update meanings for lexical entries in database.
      */
     private static class UpdateMeaningTask extends AsyncTask<Meaning, Void, Void> {
-        private MeaningDao mDAO;
+        private AppDatabase db;
 
         //Constructor.
-        UpdateMeaningTask(AppDatabase db) {
-            mDAO = db.meaningDao();
+        UpdateMeaningTask(Context context) {
+            db = AppDatabase.get(context);
         }
 
         @Override
         protected Void doInBackground(Meaning... meanings) {
+            MeaningDao mDAO = db.meaningDao();
+
+            db.beginTransaction();
+            try {
+                for (Meaning meaning : meanings) {
+                    if (meaning == null) {
+                        continue;
+                    }
+
+                    Meaning currentState = mDAO.getByType(meaning.wordID, meaning.type);
+                    if (currentState == null) {
+                        // New entry? Insert.
+                        mDAO.insertMeanings(meaning);
+                    }
+                    else {
+                        // Pull the ID for update key.
+                        meaning.id = currentState.id;
+                        mDAO.updateMeanings(meaning);
+                    }
+                }
+
+                db.setTransactionSuccessful();
+            } catch (Exception e) {
+                Log.e(
+                    EntryFragment.class.getSimpleName(),
+                    "Error updating meanings",
+                    e
+                );
+            } finally {
+                // Commit or rollback the database.
+                db.endTransaction();
+            }
+
             mDAO.updateMeanings(meanings);
             return null;
         }

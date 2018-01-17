@@ -13,7 +13,7 @@ import android.arch.persistence.room.PrimaryKey;
                                   childColumns = "wordID",
                                   onDelete = ForeignKey.CASCADE,
                                   onUpdate = ForeignKey.CASCADE),
-        indices = @Index("wordID"))
+        indices = @Index(value = {"wordID", "type"}, unique = true))
 public class Meaning {
     @PrimaryKey (autoGenerate = true)
     public long id;
