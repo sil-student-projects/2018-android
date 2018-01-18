@@ -10,7 +10,9 @@
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/footer_controls" />
+        android:layout_above="@id/footer_controls"
+        android:layout_marginBottom="48dp"
+        />
 
     <!--FIXME: Fix FAB position-->
     <android.support.design.widget.FloatingActionButton

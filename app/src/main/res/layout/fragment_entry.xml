@@ -13,8 +13,18 @@
         android:text="@string/entry_status_line"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-    <ListView
-        android:id="@+id/entry_fields"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <ListView
+            android:id="@+id/entry_fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:footerDividersEnabled="false"
+            android:headerDividersEnabled="false">
+
+        </ListView>
+    </ScrollView>
 </LinearLayout>
