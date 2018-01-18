@@ -80,12 +80,25 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         gpsEnabled = false;
 
-        wordListSpinner = findViewById(R.id.word_list_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.word_lists, R.layout.world_list_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        wordListSpinner.setAdapter(adapter);
-        wordListSpinner.setOnItemSelectedListener(this);
+        // Display list of files for word spinner from /assets directory.
+        try {
+            String[] assets = getAssets().list("wordLists");
+
+            wordListSpinner = findViewById(R.id.word_list_spinner);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                R.layout.world_list_spinner_item,
+                assets
+            );
+
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            wordListSpinner.setAdapter(adapter);
+            wordListSpinner.setOnItemSelectedListener(this);
+
+        } catch (IOException e) {
+            Log.e("SessionActivity.java", "Failed to get assets", e);
+        }
 
         // Sets the input_gps() function to run when the switch is clicked or slid across
         // Fixes bug where input_gps() was only run when clicked
@@ -274,7 +287,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
                 while (line != null) {
                     sb.append(line);
-                    sb.append("\n");
+                    sb.append('\n');
                     line = br.readLine();
                 }
                 file = sb.toString();
@@ -301,7 +314,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 return;
             }
             Intent intent = new Intent(sessionActivity, EntryActivity.class);
-            intent.putExtra(sessionActivity.ARG_ID, sessionID);
+            intent.putExtra(ARG_ID, sessionID);
             sessionActivity.startActivity(intent);
             sessionActivity.finish();
         }
@@ -404,20 +417,13 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
+    /**
+     * Method sets the selected .JSON file to load.
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
-        switch (pos) {
-            case 0:
-                worldListToLoad = "";
-                break;
-            case 1:
-                worldListToLoad = "swadesh-100.json";
-                break;
-            case 2:
-                worldListToLoad = "swadesh-207.json";
-                break;
-        }
+        worldListToLoad = parent.getItemAtPosition(pos).toString();
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
