@@ -170,6 +170,13 @@ public class EntryActivity extends AppCompatActivity {
     private void stopPlaying() {
         mPlayer.release();
         mPlayer = null;
+
+        // Just checking
+        if (audioFile.exists()) {
+            if (!audioFile.delete()) {
+                Log.e(this.getClass().getSimpleName(), "Failed to delete the temporary playback file");
+            }
+        }
     }
 
     /**
@@ -341,8 +348,12 @@ public class EntryActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             EntryActivity activity = entryActivityRef.get();
+            if (activity == null) {
+                return null;
+            }
             String filename = activity.getFileName();
-            if (activity == null || filename == null) {
+            if (filename == null) {
+                Log.e(this.getClass().getSimpleName(), "There is no file name");
                 return null;
             }
             byte[] audio = null;
@@ -363,6 +374,25 @@ public class EntryActivity extends AppCompatActivity {
 
             wd.updateWords(word);
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            EntryActivity activity = entryActivityRef.get();
+            if (activity == null) {
+                return;
+            }
+            String filename = activity.getFileName();
+            if (filename == null) {
+                Log.e(this.getClass().getSimpleName(), "There is no file name");
+                return;
+            }
+            File file = new File(filename);
+            if (file.exists()) {
+                if (!file.delete()) {
+                    Log.e(this.getClass().getSimpleName(), "Failed to delete the temporary recording file");
+                }
+            }
         }
     }
 
