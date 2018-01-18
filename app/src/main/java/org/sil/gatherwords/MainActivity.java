@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import org.sil.gatherwords.room.SessionDao;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
         final ListView sessionList = findViewById(R.id.session_list);
 
-        // TODO: This doesn't seem to work currently
         sessionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -47,11 +48,15 @@ public class MainActivity extends AppCompatActivity {
                 Session session = (Session) sessionList.getAdapter().getItem(i);
                 intent.putExtra(SessionActivity.ARG_ID, session.id);
                 // Passes id of selected session into EntryActivity
-                // TODO: EntryActivity currently does nothing with
                 startActivity(intent);
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Insure the ListView is updated when the back button is pressed.
         new FillSessionListTask(this).execute();
     }
 
@@ -117,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent(this, PreferencesActivity.class);
                 startActivity(i);
                 return true;
+            case R.id.undo_session_delete:
+                new UndoDeleteSessionFromDB(this).execute();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -177,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
             TextView speaker = convertView.findViewById(R.id.session_list_speaker);
             speaker.setText(session.speaker);
 
-            ImageButton editButton = convertView.findViewById(R.id.session_list_button);
+            ImageButton editButton = convertView.findViewById(R.id.session_list_button_edit);
             editButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Context context = inflater.getContext();
@@ -197,7 +205,86 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            ImageButton deleteButton = convertView.findViewById(R.id.session_list_button_delete);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Context context = inflater.getContext();
+                    new DeleteSessionFromDB(context).execute(session);
+
+                }
+            });
+
             return convertView;
+        }
+    }
+
+    private static class DeleteSessionFromDB extends AsyncTask<Session, Void, List<Session>> {
+        private SessionDao sDAO;
+        private WeakReference<MainActivity> mainActivityRef;
+
+        DeleteSessionFromDB(Context context) {
+            sDAO = AppDatabase.get(context).sessionDao();
+            mainActivityRef = new WeakReference<>((MainActivity) context);
+        }
+
+        @Override
+        protected List<Session> doInBackground(Session... sessions) {
+            for (Session session : sessions) {
+                session.deletedAt = new Date();
+            }
+            sDAO.updateSession(sessions);
+            return sDAO.getAll();
+        }
+
+        @Override
+        protected void onPostExecute(List<Session> sessions) {
+            MainActivity mainActivity = mainActivityRef.get();
+            if (mainActivity != null) {
+                SessionListAdapter sessionListAdapter = (SessionListAdapter) ((ListView) mainActivity.findViewById(R.id.session_list)).getAdapter();
+                sessionListAdapter.sessions = sessions;
+                sessionListAdapter.notifyDataSetChanged();
+                mainActivity.showUndoSnackbar();
+            }
+        }
+    }
+
+    private void showUndoSnackbar() {
+        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.mainView),
+                R.string.session_delete, Snackbar.LENGTH_LONG);
+        mySnackbar.setAction(R.string.undo, new UndoListener());
+        mySnackbar.show();
+    }
+
+    public class UndoListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            new UndoDeleteSessionFromDB(MainActivity.this).execute();
+        }
+    }
+
+    private static class UndoDeleteSessionFromDB extends AsyncTask<Void, Void, List<Session>> {
+        private SessionDao sDAO;
+        private WeakReference<MainActivity> mainActivityRef;
+
+        UndoDeleteSessionFromDB(MainActivity mainActivity) {
+            sDAO = AppDatabase.get(mainActivity).sessionDao();
+            mainActivityRef = new WeakReference<>(mainActivity);
+        }
+
+        @Override
+        protected List<Session> doInBackground(Void... v) {
+            sDAO.undoLastDeleted();
+            return sDAO.getAll();
+        }
+
+        @Override
+        protected void onPostExecute(List<Session> sessions) {
+            MainActivity mainActivity = mainActivityRef.get();
+            if (mainActivity != null) {
+                SessionListAdapter sessionListAdapter = (SessionListAdapter) ((ListView) mainActivity.findViewById(R.id.session_list)).getAdapter();
+                sessionListAdapter.sessions = sessions;
+                sessionListAdapter.notifyDataSetChanged();
+            }
         }
     }
 }

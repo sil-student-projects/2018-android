@@ -11,7 +11,7 @@ import org.sil.gatherwords.R;
 /**
  * The database class.
  */
-@Database(entities = {Session.class, Word.class}, version = 5)
+@Database(entities = {Session.class, Word.class, Meaning.class}, version = 11)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton db instance; avoids expensive init.
@@ -36,4 +36,5 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract SessionDao sessionDao();
     public abstract WordDao wordDao();
+    public abstract MeaningDao meaningDao();
 }

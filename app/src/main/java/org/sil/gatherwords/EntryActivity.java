@@ -7,23 +7,59 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Meaning;
+import org.sil.gatherwords.room.MeaningDao;
+import org.sil.gatherwords.room.Word;
+import org.sil.gatherwords.room.WordDao;
+
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class EntryActivity extends AppCompatActivity {
+    // Camera/Image processing
+    // based on https://developer.android.com/training/camera/photobasics.html
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    private long sessionID;
+    private ViewPager pager;
+
+    // Audio recording features
+    // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
+    private static final String LOG_TAG = "AudioRecordTest";
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static String mFileName = null;
+    private RecordButton mRecordButton = null;
+    private MediaRecorder mRecorder = null;
+    private PlayButton   mPlayButton = null;
+    private MediaPlayer   mPlayer = null;
+
+    // Requesting permission to RECORD_AUDIO
+    private boolean permissionToRecordAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,42 +67,50 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
         configureItemUpdateControls();
 
-        ViewPager pager = findViewById(R.id.viewpager);
-        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int position) {
-                return EntryFragment.newInstance(position, getCount());
-            }
+        sessionID = getIntent().getLongExtra(SessionActivity.ARG_ID, 0);
 
+        pager = findViewById(R.id.viewpager);
+        pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
+
+        findViewById(R.id.new_word_fab).setOnClickListener(new View.OnClickListener() {
             @Override
-            public int getCount() {
-                return 10;
+            public void onClick(View v) {
+                new AddNewWordToDB(EntryActivity.this).execute();
             }
         });
     }
 
-    // Audio recording features
-    // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.entry_menu, menu);
+        return true;
+    }
 
-    private static final String LOG_TAG = "AudioRecordTest";
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String mFileName = null;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.entry_delete:
+                EntryFragment entryFragment = (EntryFragment)getCurrentFragment();
 
-    private RecordButton mRecordButton = null;
-    private MediaRecorder mRecorder = null;
+                new DeleteWordTask(
+                    (EntryPagerAdapter)pager.getAdapter(),
+                    sessionID,
+                    AppDatabase.get(this).wordDao()
+                ).execute(entryFragment.getWordID());
+                return true;
 
-    private PlayButton   mPlayButton = null;
-    private MediaPlayer   mPlayer = null;
+            case R.id.undo_entry_delete:
+                new UndoLastDeleteWordTask(
+                    (EntryPagerAdapter)pager.getAdapter(),
+                    sessionID,
+                    AppDatabase.get(this).wordDao()
+                ).execute();
+                return true;
 
-    private String TAKE_PHOTO_LABEL = "Photo";
-    private String START_RECORDING_LABEL = "Record";
-    private String STOP_RECORDING_LABEL = "Stop";
-    private String START_PLAYING_LABEL = "Play";
-    private String STOP_PLAYING_LABEL = "Stop";
-
-    // Requesting permission to RECORD_AUDIO
-    private boolean permissionToRecordAccepted = false;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     /**
      * This function configures the audio recording buttons and temp storage.
@@ -74,7 +118,7 @@ public class EntryActivity extends AppCompatActivity {
     private void configureItemUpdateControls() {
         // Record to the external cache directory for visibility
         mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
+        mFileName += getString(R.string.audiorecordtest_3gp);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
         // TODO: Define these in XML instead of dynamically.
@@ -94,15 +138,17 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                break;
+    public void onStop() {
+        super.onStop();
+        if (mRecorder != null) {
+            mRecorder.release();
+            mRecorder = null;
         }
-        if (!permissionToRecordAccepted ) finish();
 
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
     }
 
     private void onRecord(boolean start) {
@@ -111,6 +157,29 @@ public class EntryActivity extends AppCompatActivity {
         } else {
             stopRecording();
         }
+    }
+
+    private void startRecording() {
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFile(mFileName);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+
+        mRecorder.start();
+    }
+
+    private void stopRecording() {
+        mRecorder.stop();
+        mRecorder.release();
+        mRecorder = null;
+        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
     }
 
     private void onPlay(boolean start) {
@@ -137,93 +206,6 @@ public class EntryActivity extends AppCompatActivity {
         mPlayer = null;
     }
 
-    private void startRecording() {
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(mFileName);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
-
-        mRecorder.start();
-    }
-
-    private void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
-        mRecorder = null;
-        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
-    }
-
-    class RecordButton extends AppCompatButton {
-        boolean mStartRecording = true;
-
-        OnClickListener clicker = new OnClickListener() {
-            public void onClick(View v) {
-                onRecord(mStartRecording);
-                if (mStartRecording) {
-                    setText(STOP_RECORDING_LABEL);
-                } else {
-                    setText(START_RECORDING_LABEL);
-                }
-                mStartRecording = !mStartRecording;
-            }
-        };
-
-        public RecordButton(Context ctx) {
-            super(ctx);
-            setText(START_RECORDING_LABEL);
-            setOnClickListener(clicker);
-        }
-    }
-
-    class PlayButton extends AppCompatButton {
-        boolean mStartPlaying = true;
-
-        OnClickListener clicker = new View.OnClickListener() {
-            public void onClick(View v) {
-                onPlay(mStartPlaying);
-                if (mStartPlaying) {
-                    setText(STOP_PLAYING_LABEL);
-                } else {
-                    setText(START_PLAYING_LABEL);
-                }
-                mStartPlaying = !mStartPlaying;
-            }
-        };
-
-        public PlayButton(Context ctx) {
-            super(ctx);
-            setText(START_PLAYING_LABEL);
-            setOnClickListener(clicker);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mRecorder != null) {
-            mRecorder.release();
-            mRecorder = null;
-        }
-
-        if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
-        }
-    }
-
-
-    // Camera/Image processing
-    // based on https://developer.android.com/training/camera/photobasics.html
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-
     /**
      * If there is an image capture activity out there, dispatch an intent to take a picture.
      *
@@ -241,9 +223,288 @@ public class EntryActivity extends AppCompatActivity {
         // Handle the result of a photo-taking activity.
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            // TODO: Store the bitmap.
+            if (extras != null) {
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                new StorePicturesTask(this).execute(imageBitmap);
+            }
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted ) finish();
+
+    }
+
+    /**
+     * Get the current fragment
+     * @return The currently shown fragment
+     */
+    public Fragment getCurrentFragment() {
+        int currentItem = pager.getCurrentItem();
+        EntryPagerAdapter adapter = (EntryPagerAdapter) pager.getAdapter();
+        return adapter.getItem(currentItem);
+    }
+
+    private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
+        long sessionID;
+        WordDao wDAO;
+
+        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+            pagerAdapterRef = new WeakReference<>(pagerAdapter);
+            sessionID = sID;
+            wDAO = dao;
+        }
+
+        @Override
+        protected List<Long> doInBackground(Void... v) {
+            return wDAO.getIDsForSession(sessionID);
+        }
+
+        @Override
+        protected void onPostExecute(List<Long> wordIDs) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || wordIDs == null) {
+                return;
+            }
+
+            pagerAdapter.wordIDs = wordIDs;
+            // Publish results.
+            pagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class DeleteWordTask extends AsyncTask<Long, Void, List<Long>> {
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
+        long sessionID;
+        WordDao wDAO;
+
+        DeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+            pagerAdapterRef = new WeakReference<>(pagerAdapter);
+            sessionID = sID;
+            wDAO = dao;
+        }
+
+        @Override
+        protected List<Long> doInBackground(Long... wordIDs) {
+            wDAO.softDeleteWords(new Date(), wordIDs);
+            return wDAO.getIDsForSession(sessionID);
+        }
+
+        @Override
+        protected void onPostExecute(List<Long> wordIDs) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || wordIDs == null) {
+                return;
+            }
+
+            pagerAdapter.wordIDs = wordIDs;
+            // Publish results.
+            pagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class UndoLastDeleteWordTask extends AsyncTask<Void, Void, List<Long>> {
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
+        long sessionID;
+        WordDao wDAO;
+
+        UndoLastDeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+            pagerAdapterRef = new WeakReference<>(pagerAdapter);
+            sessionID = sID;
+            wDAO = dao;
+        }
+
+        @Override
+        protected List<Long> doInBackground(Void... v) {
+            long numUpdated = wDAO.undoLastDeleted(sessionID);
+            if (numUpdated > 0) {
+                return wDAO.getIDsForSession(sessionID);
+            }
+
+            // No need to refresh the display.
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<Long> wordIDs) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || wordIDs == null) {
+                return;
+            }
+
+            pagerAdapter.wordIDs = wordIDs;
+            // Publish results.
+            pagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Void> {
+        private AppDatabase db;
+        private WordDao wordDao;
+        private long wordId;
+
+        StorePicturesTask(EntryActivity activity) {
+            db = AppDatabase.get(activity);
+            wordDao = db.wordDao();
+            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
+            wordId = fragment.getWordID();
+        }
+
+        @Override
+        protected Void doInBackground(Bitmap... bitmaps) {
+            db.beginTransaction();
+            try {
+                Word currentWord = wordDao.get(wordId);
+                if (currentWord != null) {
+                    currentWord.picture = bitmaps[0];
+
+                    wordDao.updateWords(currentWord);
+                    db.setTransactionSuccessful();
+                }
+            } catch (Exception e) {
+                Log.e("StorePicturesTask", "Exception while updating the Word", e);
+            } finally {
+                db.endTransaction();
+            }
+
+            return null;
+        }
+    }
+
+    private class EntryPagerAdapter extends FragmentStatePagerAdapter {
+        // Position to ID map.
+        List<Long> wordIDs = new ArrayList<>();
+
+        EntryPagerAdapter(FragmentManager fm) {
+            super(fm);
+
+            // Task will trigger update after IDs are loaded.
+            new LoadWordIDsTask(
+                this,
+                sessionID,
+                AppDatabase.get(getApplicationContext()).wordDao()
+            ).execute();
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            long wordID = 0; // Invalid ID, should never yield results.
+            if (position < wordIDs.size()) {
+                wordID = wordIDs.get(position);
+            }
+            return EntryFragment.newInstance(wordID, position, getCount());
+        }
+
+        @Override
+        public int getCount() {
+            // TODO: Is 0 okay?  Add special create-first-word page?
+            return wordIDs.size();
+        }
+
+        // Forces recreate of pages in order to update total number of pages
+        @Override
+        public int getItemPosition(Object obj) {
+            return POSITION_NONE;
+        }
+    }
+
+    class RecordButton extends AppCompatButton {
+        boolean mStartRecording = true;
+
+        OnClickListener clicker = new OnClickListener() {
+            public void onClick(View v) {
+                onRecord(mStartRecording);
+                if (mStartRecording) {
+                    setText(R.string.STOP_RECORDING_LABEL);
+                } else {
+                    setText(R.string.START_RECORDING_LABEL);
+                }
+                mStartRecording = !mStartRecording;
+            }
+        };
+
+        public RecordButton(Context ctx) {
+            super(ctx);
+            setText(R.string.START_RECORDING_LABEL);
+            setOnClickListener(clicker);
+        }
+    }
+
+    class PlayButton extends AppCompatButton {
+        boolean mStartPlaying = true;
+
+        OnClickListener clicker = new View.OnClickListener() {
+            public void onClick(View v) {
+                onPlay(mStartPlaying);
+                if (mStartPlaying) {
+                    setText(R.string.STOP_PLAYING_LABEL);
+                } else {
+                    setText(R.string.START_PLAYING_LABEL);
+                }
+                mStartPlaying = !mStartPlaying;
+            }
+        };
+
+        public PlayButton(Context ctx) {
+            super(ctx);
+            setText(R.string.START_PLAYING_LABEL);
+            setOnClickListener(clicker);
+        }
+    }
+
+    private static class AddNewWordToDB extends AsyncTask<Void, Void, Void> {
+        WeakReference<EntryActivity> entryActivityRef;
+        WordDao wDAO;
+        MeaningDao mDAO;
+        Long sessionID;
+        Set<String> sharedPrefs;
+        String[] languages;
+
+        AddNewWordToDB(EntryActivity entryActivity) {
+            entryActivityRef = new WeakReference<>(entryActivity);
+            wDAO = AppDatabase.get(entryActivity).wordDao();
+            mDAO = AppDatabase.get(entryActivity).meaningDao();
+            sessionID = entryActivity.sessionID;
+            sharedPrefs = PreferenceManager.getDefaultSharedPreferences(entryActivity).
+                    getStringSet(entryActivity.getString(R.string.language_options_key), null);
+            languages = entryActivity.getResources().getStringArray(R.array.language_options_entries);
+        }
+
+        @Override
+        protected Void doInBackground(Void... v) {
+            // Insert new Word
+            Word newWord = new Word();
+            newWord.sessionID = sessionID;
+            long wordID = wDAO.insertWord(newWord);
+
+            // Insert blank Meanings for all preferences currently selected
+            int idx = 0;
+            Meaning[] meaningList = new Meaning[sharedPrefs.size()];
+            for (String pref : sharedPrefs) {
+                 meaningList[idx] = new Meaning(wordID, languages[Integer.parseInt(pref) - 1], "");
+                 idx++;
+            }
+            mDAO.insertMeanings(meaningList);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            final EntryActivity entryActivity = entryActivityRef.get();
+            if (entryActivity == null) {
+                return;
+            }
+            ViewPager pager = entryActivity.findViewById(R.id.viewpager);
+            new LoadWordIDsTask((EntryPagerAdapter)pager.getAdapter(), sessionID, wDAO).execute();
+        }
+    }
 }

@@ -17,7 +17,7 @@ import java.util.TimeZone;
 public class Session {
 	// Define the primary key
 	@PrimaryKey(autoGenerate = true)
-	public int id = 0;
+	public long id;
 
 	// Define the columns
 	public Date date = new Date();
@@ -28,6 +28,7 @@ public class Session {
 	public String location; // Human readable location
 	public String gps; // google map gps string
 	public String label;
+	public Date deletedAt = null;
 
 	/**
 	 * Generate the current unix timestamp

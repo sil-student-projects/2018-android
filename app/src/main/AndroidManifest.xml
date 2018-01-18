@@ -31,7 +31,8 @@
         <activity
             android:name=".EntryActivity"
             android:label="@string/entry_title"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".ShipItActivity" />
         <activity android:name=".PreferencesActivity"
             android:label="@string/preferences_title"
