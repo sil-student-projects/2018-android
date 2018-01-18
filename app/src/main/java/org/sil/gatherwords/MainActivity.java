@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -47,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        // Initializes the default preferences so that program does not crash on word creation
+        //  if the settings have not been accessed
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
 
     @Override
