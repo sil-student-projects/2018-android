@@ -73,6 +73,16 @@ public class EntryActivity extends AppCompatActivity {
      */
     private void configureItemUpdateControls() {
         // Record to the external cache directory for visibility
+        File cache = getExternalCacheDir();
+        if (cache == null) {
+            cache = getCacheDir();
+            if (cache == null) {
+                Log.e(this.getClass().getSimpleName(), "No cache directories available");
+
+                // Just leave, and don't show the record button
+                return;
+            }
+        }
         mFileName = getExternalCacheDir().getAbsolutePath();
         mFileName += getString(R.string.audiorecordtest_3gp);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
@@ -141,7 +151,6 @@ public class EntryActivity extends AppCompatActivity {
     private void onPlay(boolean start) {
         if (start) {
             new ReadRecordingTask(this).execute();
-//            startPlaying();
         } else {
             stopPlaying();
         }
@@ -384,8 +393,17 @@ public class EntryActivity extends AppCompatActivity {
                 return;
             }
 
-            // Create the path string for the temporary file
-            String playbackFile = activity.getExternalCacheDir().getAbsolutePath();
+            // Create the path string for the temporary file, preferring external
+            File cache = activity.getExternalCacheDir();
+            if (cache == null) {
+                cache = activity.getCacheDir();
+                if (cache == null) {
+                    Log.e(ReadRecordingTask.class.getSimpleName(), "No locations available for caching");
+                    return;
+                }
+            }
+
+            String playbackFile = cache.getAbsolutePath();
             playbackFile += activity.getString(R.string.audio_playback_file);
 
             // Create the File from the byte[] and file path and store it
