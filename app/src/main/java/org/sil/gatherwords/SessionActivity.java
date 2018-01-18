@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class SessionActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private static final String TAG = SessionActivity.class.getSimpleName();
+
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     public static final String ARG_CREATING_SESSION = "creating_session";
     public static final String ARG_ID = "id";
@@ -97,7 +99,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             wordListSpinner.setOnItemSelectedListener(this);
 
         } catch (IOException e) {
-            Log.e("SessionActivity.java", "Failed to get assets", e);
+            Log.e(TAG, "Failed to get assets", e);
         }
 
         // Sets the input_gps() function to run when the switch is clicked or slid across
@@ -263,7 +265,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 // Mark to commit the changes to the DB
                 db.setTransactionSuccessful();
             } catch (Exception e) {
-                Log.e("InsertSessionsTask", "Exception while inserting words", e);
+                Log.e(TAG, "Exception while inserting words", e);
             } finally {
                 // Commit or rollback the database
                 db.endTransaction();
@@ -292,7 +294,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 }
                 file = sb.toString();
             } catch (IOException e) {
-                Log.e("InsertSessionsTask", "IOException while reading the word list file", e);
+                Log.e(TAG, "IOException while reading the word list file", e);
             } finally {
                 // Assume the input stream is not null because it is used to construct the buffered reader
                 if (br != null) {
@@ -300,7 +302,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                         is.close();
                         br.close();
                     } catch (IOException e) {
-                        Log.e("InsertSessionsTask", "IOException when closing buffered reader and stream", e);
+                        Log.e(TAG, "IOException when closing buffered reader and stream", e);
                     }
                 }
             }
@@ -486,7 +488,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 sessionActivity.gpsSwitch.setEnabled(false);
 
             } else {
-                Log.e("SessionActivity", "empty or size>1 Session[] grabbed from database");
+                Log.e(TAG, "empty or size>1 Session[] grabbed from database");
             }
         }
     }
