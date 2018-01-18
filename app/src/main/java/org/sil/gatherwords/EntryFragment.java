@@ -1,6 +1,7 @@
 package org.sil.gatherwords;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,12 +9,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
@@ -21,8 +27,16 @@ import org.sil.gatherwords.room.MeaningDao;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 
 public class EntryFragment extends Fragment {
@@ -97,9 +111,10 @@ public class EntryFragment extends Fragment {
             }
 
             ListView entryFields = rootView.findViewById(R.id.entry_fields);
-
-            Meaning[] meanings = new Meaning[entryFields.getCount()];
-            for (int i = 0; i < entryFields.getCount(); i++) {
+            // The last item in the list view is always the semantic domain, which will cause an error if you try
+            // and store it as a Meaning. Hence the -1(s)
+            Meaning[] meanings = new Meaning[entryFields.getCount() - 1];
+            for (int i = 0; i < entryFields.getCount() - 1; i++) {
                 View entryField = entryFields.getChildAt(i);
                 TextView langCodeField = entryField.findViewById(R.id.lang_code);
                 EditText langDataField = entryField.findViewById(R.id.lang_data);
@@ -169,7 +184,7 @@ public class EntryFragment extends Fragment {
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
             entryFields.setAdapter(new EntryFieldAdapter(
                 LayoutInflater.from(context),
-                word.meanings
+                word.meanings, entryPage
             ));
         }
     }
@@ -266,17 +281,20 @@ public class EntryFragment extends Fragment {
     }
 
     private static class EntryFieldAdapter extends BaseAdapter {
+        private int TYPE_COUNT = 2;
         private LayoutInflater inflater;
         private List<Meaning> meaningList;
+        private View entryPage;
 
-        EntryFieldAdapter(LayoutInflater flate, List<Meaning> meanList) {
+        EntryFieldAdapter(LayoutInflater flate, List<Meaning> meanList, View page) {
             inflater = flate;
             meaningList = meanList;
+            entryPage = page;
         }
 
         @Override
         public int getCount() {
-            return meaningList.size();
+            return meaningList.size() + 1;
         }
 
         @Override
@@ -286,29 +304,83 @@ public class EntryFragment extends Fragment {
 
         @Override
         public long getItemId(int i) {
-            return 0;
+            return i;
         }
 
         @Override
+        public int getViewTypeCount() {
+            return TYPE_COUNT;
+        }
+
+
+        @Override
         public View getView(int i, View convertView, ViewGroup container) {
-            if (convertView == null) {
-                convertView = inflater.inflate(
-                    R.layout.entry_field_item,
-                    container,
-                    false
-                );
-            }
-
-            Meaning meaning = getItem(i);
-            if (meaning != null) {
-                TextView langCodeField = convertView.findViewById(R.id.lang_code);
-                langCodeField.setText(meaning.type);
-
-                EditText langDataField = convertView.findViewById(R.id.lang_data);
-                langDataField.setText(meaning.data);
+            if ( i != meaningList.size() ) {
+                Meaning meaning = getItem(i);
+                convertView = inflater.inflate(R.layout.entry_field_item,
+                        container, false);
+                if (meaning != null) {
+                    TextView langCodeField = convertView.findViewById(R.id.lang_code);
+                    langCodeField.setText(meaning.type);
+                    EditText langDataField = convertView.findViewById(R.id.lang_data);
+                    langDataField.setText(meaning.data);
+                }
+            } else {
+                convertView = inflater.inflate( R.layout.entry_field_semantic_domain_line,
+                                                    container, false );
+                AutoCompleteTextView aCTV = convertView.findViewById(R.id.semantic_domain_auto_complete);
+                aCTV.setAdapter( new ArrayAdapter<String>(convertView.getContext(),
+                                    android.R.layout.simple_dropdown_item_1line, getSemanticDomains() ));
             }
 
             return convertView;
+        }
+
+        private List<String> getSemanticDomains() {
+            InputStream is = null;
+            BufferedReader br = null;
+            String file = null;
+            AssetManager assets = ((EntryActivity) entryPage.getContext()).getAssets();
+            List<String> semanticDomainList = new ArrayList<>();
+            try {
+                is = assets.open("semanticDomain/semanticDomains_en.json");
+                br = new BufferedReader(new InputStreamReader(is));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append("\n");
+                    line = br.readLine();
+                }
+                file = sb.toString();
+
+                JSONObject jsonObjectCluster = new JSONObject( file.trim() );
+                Iterator<String> keys = jsonObjectCluster.keys();
+
+                while( keys.hasNext() ) {
+                    String key = keys.next();
+                    if ( jsonObjectCluster.get(key) instanceof JSONObject ) {
+                        semanticDomainList.add( ((JSONObject) jsonObjectCluster.get(key)).getString("name") );
+                    }
+                }
+
+            } catch (IOException e) {
+                Log.e("InsertSessionsTask", "IOException while reading the semantic domain file", e);
+            } catch (JSONException e) {
+                Log.e("InsertSessionsTask", "JSONException while parsing the semantic domain file", e);
+            } finally {
+                // Assume the input stream is not null because it is used to construct the buffered reader
+                if (br != null) {
+                    try {
+                        is.close();
+                        br.close();
+                    } catch (IOException e) {
+                        Log.e("InsertSessionsTask", "IOException when closing buffered reader and stream", e);
+                    }
+                }
+            }
+            return semanticDomainList;
         }
     }
 }

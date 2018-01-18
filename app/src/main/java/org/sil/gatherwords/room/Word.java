@@ -24,6 +24,8 @@ public class Word {
 
     public long sessionID;
 
+    public String semanticDomain = "None";
+
     @Ignore
     public Blob audio; // NOTE: LF does NOT support multiple audio files
 
