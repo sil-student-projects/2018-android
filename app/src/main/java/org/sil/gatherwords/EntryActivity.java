@@ -346,28 +346,32 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Void> {
+    private static class StorePicturesTask extends AsyncTask<Bitmap, Void, Boolean> {
         private AppDatabase db;
-        private WordDao wordDao;
-        private long wordId;
+        private WordDao wordDAO;
+        private long wordID;
+        WeakReference<EntryPagerAdapter> pagerAdapterRef;
 
         StorePicturesTask(EntryActivity activity) {
             db = AppDatabase.get(activity);
-            wordDao = db.wordDao();
+            wordDAO = db.wordDao();
             EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
-            wordId = fragment.getWordID();
+            wordID = fragment.getWordID();
+            pagerAdapterRef = new WeakReference<>((EntryPagerAdapter)activity.pager.getAdapter());
         }
 
         @Override
-        protected Void doInBackground(Bitmap... bitmaps) {
+        protected Boolean doInBackground(Bitmap... bitmaps) {
+            boolean success = false;
             db.beginTransaction();
             try {
-                Word currentWord = wordDao.get(wordId);
+                Word currentWord = wordDAO.get(wordID);
                 if (currentWord != null) {
                     currentWord.picture = bitmaps[0];
 
-                    wordDao.updateWords(currentWord);
+                    wordDAO.updateWords(currentWord);
                     db.setTransactionSuccessful();
+                    success = true;
                 }
             } catch (Exception e) {
                 Log.e("StorePicturesTask", "Exception while updating the Word", e);
@@ -375,7 +379,17 @@ public class EntryActivity extends AppCompatActivity {
                 db.endTransaction();
             }
 
-            return null;
+            return success;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
+            if (pagerAdapter == null || !success) {
+                return;
+            }
+
+            pagerAdapter.notifyDataSetChanged();
         }
     }
 

@@ -18,11 +18,9 @@ import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
 import org.sil.gatherwords.room.MeaningDao;
-import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 
 public class EntryFragment extends Fragment {
@@ -63,20 +61,13 @@ public class EntryFragment extends Fragment {
 
         new LoadWordTask(entryPage, m_position, m_total).execute(m_wordID);
         TextView pageStatus = entryPage.findViewById(R.id.page_status);
+        // TODO: Hard coded "Word" is intended to be the word this page represents.
+        // What word would that be?
         pageStatus.setText(
             getString(R.string.entry_status_line, "Word", m_position + 1, m_total)
         );
 
         return entryPage;
-    }
-
-    /**
-     * Will run after the view is created and after the picture is taken.
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        new UpdateAfterPicture(getView()).execute(m_wordID);
     }
 
     /**
@@ -169,7 +160,7 @@ public class EntryFragment extends Fragment {
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
             entryFields.setAdapter(new EntryFieldAdapter(
                 LayoutInflater.from(context),
-                word.meanings
+                word
             ));
         }
     }
@@ -220,86 +211,63 @@ public class EntryFragment extends Fragment {
                 db.endTransaction();
             }
 
-            mDAO.updateMeanings(meanings);
             return null;
         }
     }
 
-    /**
-     * Update the Image viewer with the stored image
-     */
-    private static class UpdateAfterPicture extends AsyncTask<Long, Void, Word> {
-
-        private WeakReference<View> entryPageRef;
-        private WordDao wd;
-
-        UpdateAfterPicture(View entryPage) {
-            entryPageRef = new WeakReference<>(entryPage);
-            wd = AppDatabase.get(entryPage.getContext()).wordDao();
-        }
-
-        @Override
-        protected Word doInBackground(Long... wordIDs) {
-            if (wordIDs == null || wordIDs.length != 1) {
-                Log.e(UpdateAfterPicture.class.getSimpleName(), "Did not receive exactly 1 wordID");
-                return null;
-            }
-
-            return wd.get(wordIDs[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Word word) {
-            View entryPage = entryPageRef.get();
-            if (entryPage == null || word == null) {
-                return;
-            }
-
-            ImageView picture = entryPage.findViewById(R.id.pic_viewer);
-            if (word.picture != null) {
-                picture.setVisibility(View.VISIBLE);
-                picture.setImageBitmap(word.picture);
-            } else {
-                picture.setVisibility(View.GONE);
-            }
-        }
-    }
-
     private static class EntryFieldAdapter extends BaseAdapter {
-        private LayoutInflater inflater;
-        private List<Meaning> meaningList;
+        private static final String MEANING_VIEW_TAG = "meaning";
+        private static final String IMAGE_VIEW_TAG = "image";
 
-        EntryFieldAdapter(LayoutInflater flate, List<Meaning> meanList) {
+        private LayoutInflater inflater;
+        private FilledWord word;
+
+        EntryFieldAdapter(LayoutInflater flate, FilledWord filledWord) {
             inflater = flate;
-            meaningList = meanList;
+            word = filledWord;
         }
 
         @Override
         public int getCount() {
-            return meaningList.size();
+            if (word.picture == null) {
+                return word.meanings.size();
+            }
+
+            // Last element is an ImageView.
+            return word.meanings.size() + 1;
         }
 
         @Override
-        public Meaning getItem(int i) {
-            return meaningList.get(i);
+        public Meaning getItem(int pos) {
+            return word.meanings.get(pos);
         }
 
         @Override
-        public long getItemId(int i) {
+        public long getItemId(int pos) {
             return 0;
         }
 
         @Override
-        public View getView(int i, View convertView, ViewGroup container) {
-            if (convertView == null) {
+        public View getView(int pos, View convertView, ViewGroup container) {
+            if (pos == word.meanings.size()) {
+                // Photo shown last.
+                return getImageView(convertView);
+            }
+
+            return getMeaningView(pos, convertView, container);
+        }
+
+        private View getMeaningView(int pos, View convertView, ViewGroup container) {
+            if (convertView == null || !convertView.getTag().equals(MEANING_VIEW_TAG)) {
                 convertView = inflater.inflate(
                     R.layout.entry_field_item,
                     container,
                     false
                 );
+                convertView.setTag(MEANING_VIEW_TAG);
             }
 
-            Meaning meaning = getItem(i);
+            Meaning meaning = getItem(pos);
             if (meaning != null) {
                 TextView langCodeField = convertView.findViewById(R.id.lang_code);
                 langCodeField.setText(meaning.type);
@@ -309,6 +277,18 @@ public class EntryFragment extends Fragment {
             }
 
             return convertView;
+        }
+
+        private View getImageView(View convertView) {
+            if (convertView == null || !convertView.getTag().equals(IMAGE_VIEW_TAG)) {
+                convertView = new ImageView(inflater.getContext());
+                convertView.setTag(IMAGE_VIEW_TAG);
+            }
+
+            ImageView display = (ImageView)convertView;
+            display.setImageBitmap(word.picture);
+
+            return display;
         }
     }
 }
