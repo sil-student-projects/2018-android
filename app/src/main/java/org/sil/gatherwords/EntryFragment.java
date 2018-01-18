@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -216,22 +217,37 @@ public class EntryFragment extends Fragment {
             WordDao wDAO = db.wordDao();
 
             db.beginTransaction();
+            FilledWord filledWord = words[0];
+            boolean updateDate = false;
             try {
-                for (Meaning meaning : words[0].meanings) {
+                for (Meaning meaning : filledWord.meanings) {
                     Meaning currentState = mDAO.getByType(meaning.wordID, meaning.type);
                     if (currentState == null) {
                         // New entry? Insert.
                         mDAO.insertMeanings(meaning);
+                        updateDate = true;
                     }
                     else {
                         // Pull the ID for update key.
                         meaning.id = currentState.id;
+                        if (!meaning.data.equals(currentState.data)) {
+                            updateDate = true;
+                        }
                         mDAO.updateMeanings(meaning);
                     }
                 }
 
-                Word word = wDAO.get(words[0].id);
-                word.semanticDomain = words[0].semanticDomain;
+                Word word = wDAO.get(filledWord.id);
+                if (!word.semanticDomain.equals(filledWord.semanticDomain)) {
+                    updateDate = true;
+                    word.semanticDomain = filledWord.semanticDomain;
+                }
+
+                if (updateDate) {
+                    // Something changed for this word.
+                    word.updatedAt = new Date();
+                }
+
                 wDAO.updateWords(word);
 
                 db.setTransactionSuccessful();

@@ -625,6 +625,7 @@ public class EntryActivity extends AppCompatActivity {
             // Insert new Word
             Word newWord = new Word();
             newWord.sessionID = sessionID;
+            newWord.updatedAt = new Date();
             long wordID = wDAO.insertWord(newWord);
 
             // Insert blank Meanings for all preferences currently selected

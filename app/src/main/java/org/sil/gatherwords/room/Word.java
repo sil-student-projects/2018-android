@@ -24,6 +24,7 @@ public class Word {
     public long sessionID;
 
     public Date deletedAt;
+    public Date updatedAt;
 
     public String semanticDomain = "None";
 
