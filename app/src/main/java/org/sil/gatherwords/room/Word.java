@@ -2,12 +2,10 @@ package org.sil.gatherwords.room;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.graphics.Bitmap;
 
-import java.sql.Blob;
 import java.util.Date;
 
 /**
@@ -27,8 +25,8 @@ public class Word {
 
     public Date deletedAt;
 
-    @Ignore
-    public Blob audio; // NOTE: LF does NOT support multiple audio files
+    // Only filename stored (no path).
+    public String audio; // NOTE: LF does NOT support multiple audio files
 
     public Bitmap picture; // NOTE: LF DOES support multiple picture files
 }

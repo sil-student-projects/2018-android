@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Meaning;
@@ -32,6 +34,7 @@ import org.sil.gatherwords.room.MeaningDao;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDao;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -40,6 +43,8 @@ import java.util.List;
 import java.util.Set;
 
 public class EntryActivity extends AppCompatActivity {
+    private static final String TAG = EntryActivity.class.getSimpleName();
+
     // Camera/Image processing
     // based on https://developer.android.com/training/camera/photobasics.html
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -51,7 +56,7 @@ public class EntryActivity extends AppCompatActivity {
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
     private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String mFileName = null;
+    private File mAudioFile = null;
     private RecordButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
     private PlayButton   mPlayButton = null;
@@ -116,9 +121,6 @@ public class EntryActivity extends AppCompatActivity {
      * This function configures the audio recording buttons and temp storage.
      */
     private void configureItemUpdateControls() {
-        // Record to the external cache directory for visibility
-        mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += getString(R.string.audiorecordtest_3gp);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
         // TODO: Define these in XML instead of dynamically.
@@ -160,10 +162,16 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
+        mAudioFile = getNewDataFile(".3gp");
+        if (mAudioFile == null) {
+            Toast.makeText(this, R.string.record_failed, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(mFileName);
+        mRecorder.setOutputFile(mAudioFile.getAbsolutePath());
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -179,21 +187,24 @@ public class EntryActivity extends AppCompatActivity {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
-        // TODO: Store the audio file in the DB (or copy file to a permanent location and store a link).
+
+        new SaveAudioTask(this).execute(mAudioFile);
+        mAudioFile = null; // File control is taken by SaveAudioTask.
     }
 
     private void onPlay(boolean start) {
         if (start) {
-            startPlaying();
+            new PlayAudioTask(this).execute();
         } else {
             stopPlaying();
         }
     }
 
-    private void startPlaying() {
+    private void startPlaying(String filename) {
         mPlayer = new MediaPlayer();
         try {
-            mPlayer.setDataSource(mFileName);
+            File audioFile = getDataFile(filename);
+            mPlayer.setDataSource(audioFile.getAbsolutePath());
             mPlayer.prepare();
             mPlayer.start();
         } catch (IOException e) {
@@ -202,8 +213,10 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     private void stopPlaying() {
-        mPlayer.release();
-        mPlayer = null;
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
     }
 
     /**
@@ -250,6 +263,22 @@ public class EntryActivity extends AppCompatActivity {
         int currentItem = pager.getCurrentItem();
         EntryPagerAdapter adapter = (EntryPagerAdapter) pager.getAdapter();
         return adapter.getItem(currentItem);
+    }
+
+    @Nullable
+    private File getNewDataFile(String suffix) {
+        File baseDir = getDir("data", MODE_PRIVATE);
+        try {
+            return File.createTempFile("gatherwords", suffix, baseDir);
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to create temp file", e);
+            return null;
+        }
+    }
+
+    private File getDataFile(String filename) {
+        File baseDir = getDir("data", MODE_PRIVATE);
+        return new File(baseDir.getAbsolutePath() + '/' + filename);
     }
 
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
@@ -343,6 +372,106 @@ public class EntryActivity extends AppCompatActivity {
             pagerAdapter.wordIDs = wordIDs;
             // Publish results.
             pagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class SaveAudioTask extends AsyncTask<File, Void, Void> {
+        private AppDatabase db;
+        private long wordID;
+
+        SaveAudioTask(EntryActivity activity) {
+            db = AppDatabase.get(activity);
+            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
+            wordID = fragment.getWordID();
+        }
+
+        @Override
+        protected Void doInBackground(File... files) {
+            if (files == null || files.length != 1) {
+                Log.e(TAG, "Expected exactly 1 audio file");
+                return null;
+            }
+
+            File audioFile = files[0];
+            boolean success = false;
+
+            db.beginTransaction();
+            try {
+                WordDao wordDAO = db.wordDao();
+
+                Word currentWord = wordDAO.get(wordID);
+                if (currentWord != null) {
+                    File oldAudio = null;
+                    if (currentWord.audio != null) {
+                        oldAudio = new File(audioFile.getParent() + '/' + currentWord.audio);
+                    }
+
+                    // Save it.
+                    currentWord.audio = audioFile.getName();
+                    wordDAO.updateWords(currentWord);
+
+                    db.setTransactionSuccessful();
+                    success = true;
+
+                    if (oldAudio != null) {
+                        // Remove since we no longer hold reference to it.
+                        if (!oldAudio.delete()) {
+                            Log.e(TAG, "Failed to delete overridden audio: " + oldAudio.getAbsolutePath());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Exception while updating audio in the Word", e);
+            } finally {
+                db.endTransaction();
+            }
+
+            if (!success) {
+                // Remove the file since we no longer hold reference to it.
+                if (!audioFile.delete()) {
+                    Log.e(TAG, "Failed to delete unsaved audio: " + audioFile.getAbsolutePath());
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private static class PlayAudioTask extends AsyncTask<Void, Void, String> {
+        private WordDao wordDAO;
+        WeakReference<EntryActivity> activityRef;
+        long wordID;
+
+        PlayAudioTask(EntryActivity activity) {
+            wordDAO = AppDatabase.get(activity).wordDao();
+            activityRef = new WeakReference<>(activity);
+
+            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
+            wordID = fragment.getWordID();
+        }
+
+        @Override
+        protected String doInBackground(Void... v) {
+            Word word = wordDAO.get(wordID);
+            if (word == null) {
+                return null;
+            }
+            return word.audio;
+        }
+
+        @Override
+        protected void onPostExecute(String filename) {
+            EntryActivity activity = activityRef.get();
+            if (activity == null) {
+                return;
+            }
+
+            if (filename == null) {
+                Toast.makeText(activity, R.string.no_audio, Toast.LENGTH_SHORT).show();
+            }
+            else {
+                activity.startPlaying(filename);
+            }
         }
     }
 

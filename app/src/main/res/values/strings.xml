@@ -29,6 +29,8 @@
     <string name="STOP_PLAYING_LABEL">Stop</string>
     <string name="audiorecordtest_3gp">/audiorecordtest.3gp</string>
     <string name="delete">Delete</string>
+    <string name="record_failed">Failed to start recording</string>
+    <string name="no_audio">No audio</string>
 
     <!-- Entry fragment strings -->
     <string name="lang1">lang1</string>
