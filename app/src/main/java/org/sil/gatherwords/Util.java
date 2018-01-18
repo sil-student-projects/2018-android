@@ -20,7 +20,7 @@ public class Util {
     public static File getNewCacheFile(Context context, String suffix) {
         File baseDir = context.getExternalCacheDir();
         if (baseDir == null) {
-            baseDir = context.getCacheDir();
+            baseDir = context.getExternalFilesDir("external_cache");
         }
         try {
             return File.createTempFile("gatherwords", suffix, baseDir);
