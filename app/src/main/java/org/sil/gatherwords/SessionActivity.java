@@ -98,8 +98,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             wordListSpinner.setOnItemSelectedListener(this);
 
         } catch (IOException e) {
-            Log.e("Assets_Msg", "Failed to get assets");
-            e.printStackTrace();
+            Log.e("SessionActivity.java", "Failed to get assets");
         }
 
         // Sets the input_gps() function to run when the switch is clicked or slid across
