@@ -4,7 +4,6 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
-import android.graphics.Bitmap;
 
 import java.util.Date;
 
@@ -30,5 +29,6 @@ public class Word {
     // Only filename stored (no path).
     public String audio; // NOTE: LF does NOT support multiple audio files
 
-    public Bitmap picture; // NOTE: LF DOES support multiple picture files
+    // Only filename stored (no path).
+    public String picture; // NOTE: LF DOES support multiple picture files
 }
