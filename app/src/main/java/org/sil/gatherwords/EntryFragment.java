@@ -255,6 +255,9 @@ public class EntryFragment extends Fragment {
         private static final String SEMANTIC_VIEW_TAG = "semantic";
         private static final String IMAGE_VIEW_TAG = "image";
 
+        // static so we only parse once.
+        private static List<String> semanticDomainList = null;
+
         private LayoutInflater inflater;
         private FilledWord word;
 
@@ -362,11 +365,15 @@ public class EntryFragment extends Fragment {
 
          */
         private List<String> getSemanticDomains() {
+            if (semanticDomainList != null) {
+                return semanticDomainList;
+            }
+
             InputStream is = null;
             BufferedReader br = null;
 
             AssetManager assets = inflater.getContext().getAssets();
-            List<String> semanticDomainList = new ArrayList<>();
+            semanticDomainList = new ArrayList<>();
             try {
                 is = assets.open("semanticDomain/semanticDomains_en.json");
                 br = new BufferedReader(new InputStreamReader(is));
