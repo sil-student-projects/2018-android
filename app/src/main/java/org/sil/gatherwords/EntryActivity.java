@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Set;
 
 public class EntryActivity extends AppCompatActivity {
+    private static final String TAG = EntryActivity.class.getSimpleName();
+
     // Camera/Image processing
     // based on https://developer.android.com/training/camera/photobasics.html
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -49,7 +51,6 @@ public class EntryActivity extends AppCompatActivity {
 
     // Audio recording features
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
-    private static final String LOG_TAG = "AudioRecordTest";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String mFileName = null;
     private RecordButton mRecordButton = null;
@@ -169,7 +170,7 @@ public class EntryActivity extends AppCompatActivity {
         try {
             mRecorder.prepare();
         } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
+            Log.e(TAG, "prepare() failed");
         }
 
         mRecorder.start();
@@ -197,7 +198,7 @@ public class EntryActivity extends AppCompatActivity {
             mPlayer.prepare();
             mPlayer.start();
         } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
+            Log.e(TAG, "prepare() failed");
         }
     }
 
@@ -374,7 +375,7 @@ public class EntryActivity extends AppCompatActivity {
                     success = true;
                 }
             } catch (Exception e) {
-                Log.e("StorePicturesTask", "Exception while updating the Word", e);
+                Log.e(TAG, "Exception while updating the Word", e);
             } finally {
                 db.endTransaction();
             }

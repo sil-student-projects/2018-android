@@ -24,6 +24,8 @@ import java.lang.ref.WeakReference;
 
 
 public class EntryFragment extends Fragment {
+    private static final String TAG = EntryFragment.class.getSimpleName();
+
     private static final String ARG_WORD_ID = "wordID";
     private static final String ARG_POSITION = "position";
     private static final String ARG_TOTAL = "total";
@@ -81,7 +83,7 @@ public class EntryFragment extends Fragment {
             View rootView = getView();
             if (rootView == null) {
                 Log.e(
-                    EntryFragment.class.getSimpleName(),
+                    TAG,
                     "Root view not found"
                 );
                 return;
@@ -108,7 +110,7 @@ public class EntryFragment extends Fragment {
 
             new UpdateMeaningTask(getContext()).execute(meanings);
         } catch (Exception e) {
-            Log.e("EntryFragment.java", "Null pointer exception - failed to find ListView and/or EditText object", e);
+            Log.e(TAG, "Null pointer exception - failed to find ListView and/or EditText object", e);
         }
     }
 
@@ -138,7 +140,7 @@ public class EntryFragment extends Fragment {
         @Override
         protected FilledWord doInBackground(Long... wordIDs) {
             if (wordIDs == null || wordIDs.length != 1) {
-                Log.e(LoadWordTask.class.getSimpleName(), "Did not receive exactly 1 wordID");
+                Log.e(TAG, "Did not receive exactly 1 wordID");
                 return null;
             }
 
@@ -202,7 +204,7 @@ public class EntryFragment extends Fragment {
                 db.setTransactionSuccessful();
             } catch (Exception e) {
                 Log.e(
-                    EntryFragment.class.getSimpleName(),
+                    TAG,
                     "Error updating meanings",
                     e
                 );
