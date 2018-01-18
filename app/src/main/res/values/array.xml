@@ -20,6 +20,10 @@
         <item> Thai - Audio</item>
         <item> Thai - Video</item>
         <item> Thai - Gloss</item>
+        <item> Mandarin - IPA</item>
+        <item> Mandarin - Audio</item>
+        <item> Mandarin - Video</item>
+        <item> Mandarin - Gloss</item>
     </string-array>
     <string-array name="language_options_values">
         <item>1</item>
@@ -30,6 +34,10 @@
         <item>6</item>
         <item>7</item>
         <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
     </string-array>
     <string-array name="language_options_default_values">
         <item>1</item>
@@ -40,5 +48,9 @@
         <item>6</item>
         <item>7</item>
         <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
     </string-array>
 </resources>

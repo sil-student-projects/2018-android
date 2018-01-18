@@ -246,7 +246,7 @@ public class EntryFragment extends Fragment {
 
         @Override
         public long getItemId(int pos) {
-            return 0;
+            return pos;
         }
 
         @Override
