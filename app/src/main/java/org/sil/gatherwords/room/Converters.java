@@ -29,17 +29,17 @@ public class Converters {
     public static File byteArrayToFile(byte[] bytes, String filepath) {
         File file = new File(filepath);
         try {
-
             // Create the file if it doesn't exist
-            if (!file.exists()) {
-                file.createNewFile();
+            if (!file.exists() && !file.createNewFile()) {
+                // The file does not exist and could not be created
+                // jump out of the try block
+                throw new IOException("Cannot create file");
             }
 
             // Check that we can write to the file
-            if (!file.canWrite()) {
-                IOException e = new IOException("Cannot write to file");
-                Log.e("byteArrayToFile()", "Cannot write to file " + filepath, e);
-                throw e;
+            if (!file.canWrite() && !file.setWritable(true)) {
+                // We can't write to the file but it exists and cannot make writable
+                throw new IOException("Cannot write to file");
             }
 
             // Write the array to the file and close the stream
