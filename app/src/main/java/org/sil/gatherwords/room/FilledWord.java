@@ -11,4 +11,5 @@ public class FilledWord {
     public Bitmap picture;
     @Relation(parentColumn = "id", entityColumn = "wordID")
     public List<Meaning> meanings;
+    public String semanticDomain;
 }

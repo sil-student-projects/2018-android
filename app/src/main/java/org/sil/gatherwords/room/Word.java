@@ -25,6 +25,8 @@ public class Word {
 
     public Date deletedAt;
 
+    public String semanticDomain = "None";
+
     // Only filename stored (no path).
     public String audio; // NOTE: LF does NOT support multiple audio files
 
