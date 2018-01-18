@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
@@ -32,11 +31,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 
 public class EntryFragment extends Fragment {
@@ -131,6 +128,16 @@ public class EntryFragment extends Fragment {
             }
 
             new UpdateMeaningTask(getContext()).execute(meanings);
+
+            // Update the semantic domain. Blank should insert None as consisten with default
+            //      value in database
+            AutoCompleteTextView aCTV = entryFields.findViewById(R.id.semantic_domain_auto_complete);
+            if ( !aCTV.getText().toString().equals("") ) {
+                new UpdateWordTask(getContext(), "None").execute(m_wordID);
+            } else {
+                new UpdateWordTask(getContext(), aCTV.getText().toString()).execute(m_wordID);
+            }
+
         } catch (Exception e) {
             Log.e("EntryFragment.java", "Null pointer exception - failed to find ListView and/or EditText object", e);
         }
@@ -184,7 +191,7 @@ public class EntryFragment extends Fragment {
             ListView entryFields = entryPage.findViewById(R.id.entry_fields);
             entryFields.setAdapter(new EntryFieldAdapter(
                 LayoutInflater.from(context),
-                word.meanings, entryPage
+                word.meanings, word.semanticDomain, entryPage
             ));
         }
     }
@@ -284,12 +291,14 @@ public class EntryFragment extends Fragment {
         private int TYPE_COUNT = 2;
         private LayoutInflater inflater;
         private List<Meaning> meaningList;
+        private String semanticDomain;
         private View entryPage;
 
-        EntryFieldAdapter(LayoutInflater flate, List<Meaning> meanList, View page) {
+        EntryFieldAdapter(LayoutInflater flate, List<Meaning> meanList, String sd, View page) {
             inflater = flate;
             meaningList = meanList;
             entryPage = page;
+            semanticDomain = sd;
         }
 
         @Override
@@ -315,6 +324,7 @@ public class EntryFragment extends Fragment {
 
         @Override
         public View getView(int i, View convertView, ViewGroup container) {
+            // For each meaning
             if ( i != meaningList.size() ) {
                 Meaning meaning = getItem(i);
                 convertView = inflater.inflate(R.layout.entry_field_item,
@@ -325,17 +335,26 @@ public class EntryFragment extends Fragment {
                     EditText langDataField = convertView.findViewById(R.id.lang_data);
                     langDataField.setText(meaning.data);
                 }
+            // For the final item, the semantic domain
             } else {
                 convertView = inflater.inflate( R.layout.entry_field_semantic_domain_line,
                                                     container, false );
                 AutoCompleteTextView aCTV = convertView.findViewById(R.id.semantic_domain_auto_complete);
                 aCTV.setAdapter( new ArrayAdapter<String>(convertView.getContext(),
                                     android.R.layout.simple_dropdown_item_1line, getSemanticDomains() ));
+                if ( !semanticDomain.equals("None") ) {
+                    aCTV.setText(semanticDomain);
+                } else { // Not sure if this will ever run, but added as a precaution. If "" is read, "None" is inserted into db
+                    aCTV.setText("");
+                }
             }
 
             return convertView;
         }
 
+        /* Returns a List of semantic domains from the JSON file of semantic domains from Language Forge
+
+         */
         private List<String> getSemanticDomains() {
             InputStream is = null;
             BufferedReader br = null;
@@ -381,6 +400,32 @@ public class EntryFragment extends Fragment {
                 }
             }
             return semanticDomainList;
+        }
+    }
+
+    // Currently just used to update semantic domain
+    private static class UpdateWordTask extends AsyncTask<Long, Void, Void> {
+
+        private WordDao wd;
+        private String semanticDomainToSet;
+
+        UpdateWordTask(Context context, String semanticDomain) {
+
+            wd = AppDatabase.get(context).wordDao();
+            semanticDomainToSet = semanticDomain;
+        }
+
+        @Override
+        protected Void doInBackground(Long... ids) {
+            if ( ids == null || ids.length != 1) {
+                Log.e(UpdateAfterPicture.class.getSimpleName(), "Did not receive exactly 1 wordID");
+                return null;
+            }
+            Long id = ids[0];
+            Word word = wd.get(id);
+            word.semanticDomain = semanticDomainToSet;
+            wd.updateWords(word);
+            return null;
         }
     }
 }

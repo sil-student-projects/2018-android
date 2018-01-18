@@ -9,4 +9,5 @@ public class FilledWord {
     public long sessionID;
     @Relation(parentColumn = "id", entityColumn = "wordID")
     public List<Meaning> meanings;
+    public String semanticDomain;
 }
