@@ -12,6 +12,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <!-- Lists the name of the session -->
             <TextView
                 android:id="@+id/session_list_lable"
                 android:layout_width="wrap_content"
@@ -22,12 +24,15 @@
                 android:maxLength="13"
                 android:maxLines="1"/>
 
+            <!-- Press to edit the session -->
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@id/session_list_button_delete"
                 android:id="@+id/session_list_button_edit"
                 android:src="@drawable/ic_edit_black_24dp" />
+
+            <!-- Press to delete the session -->
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -43,6 +48,7 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <!-- Lists the session date -->
             <TextView
                 android:id="@+id/session_list_date"
                 android:layout_width="wrap_content"
@@ -51,6 +57,7 @@
                 android:text="@string/_date"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
+            <!-- Lists the session speaker -->
             <TextView
                 android:id="@+id/session_list_speaker"
                 android:layout_width="wrap_content"

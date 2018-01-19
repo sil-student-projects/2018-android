@@ -5,6 +5,12 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
+/**
+ * Preferences Activity class hosts the individual preference fragments.
+ *
+ * Currently, hosts one fragment which loads associated preference settings from the preferences.xml file
+ * in the xml directory folder.
+ */
 public class PreferencesActivity extends AppCompatActivity {
 
     @Override

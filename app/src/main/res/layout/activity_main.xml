@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Layout file for the MainActivity.java class -->
+
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,11 +10,13 @@
     android:id="@+id/mainView"
     tools:context="org.sil.gatherwords.MainActivity">
 
+    <!-- Lists the currently existing sessions -->
     <ListView
         android:id="@+id/session_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Press to create a new session -->
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/create"
         android:layout_width="wrap_content"

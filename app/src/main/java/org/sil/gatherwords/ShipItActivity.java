@@ -6,6 +6,9 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
 
+/**
+ * Joke Activity class.  Remove at some point further in development before shipping final product.
+ */
 public class ShipItActivity extends AppCompatActivity {
 
     MediaPlayer mp;

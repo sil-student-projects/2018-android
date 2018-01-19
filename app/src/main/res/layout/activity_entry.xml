@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Layout file for the EntryActivity.java class -->
+
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -15,6 +18,7 @@
         />
 
     <!--FIXME: Fix FAB position-->
+    <!-- Press button to create a new word entry -->
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/new_word_fab"
         android:layout_width="wrap_content"
@@ -35,6 +39,7 @@
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom">
 
+        <!-- Press button to take photos using external camera app -->
         <Button
             android:id="@+id/photo_button"
             android:layout_width="wrap_content"

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Layout file for the SessionActivity.java class -->
+
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,6 +11,7 @@
     android:focusable="true"
     android:focusableInTouchMode="true">
 
+        <!-- Hosts all session information fields -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -22,6 +26,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the name of the session -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -36,6 +42,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the eliciter of the session -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -49,6 +57,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the speaker of the session -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -75,6 +85,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the session  date -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -88,6 +100,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the session  time -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -101,6 +115,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the session time zone -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -109,10 +125,13 @@
                         android:textSize="24sp"
                         android:id="@+id/session_create_time_zone"/>
                 </android.support.design.widget.TextInputLayout>
+
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="16dp">
+
+                    <!-- Enter the session location -->
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -121,6 +140,7 @@
                         android:textSize="24sp"
                         android:id="@+id/session_create_location"/>
                 </android.support.design.widget.TextInputLayout>
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -141,6 +161,8 @@
                         android:id="@+id/session_create_gps_swtich"
                         android:paddingLeft="16dp"/>
                 </RelativeLayout>
+
+                <!-- Select the word list to load -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -155,9 +177,11 @@
                     android:spinnerMode="dialog"
                     android:paddingTop="8dp">
                 </Spinner>
+
             </LinearLayout>
         </ScrollView>
 
+        <!-- Click save adjustments to session information -->
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/save_settings_fab"
             android:layout_width="wrap_content"
