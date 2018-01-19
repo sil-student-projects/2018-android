@@ -31,4 +31,8 @@ public class Word {
     public Blob audio; // NOTE: LF does NOT support multiple audio files
 
     public Bitmap picture; // NOTE: LF DOES support multiple picture files
+
+    // Mark true if uploaded, false otherwise
+    public boolean uploadComplete = false;
+    public boolean hadError = false;
 }

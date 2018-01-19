@@ -3,6 +3,8 @@ package org.sil.gatherwords.room;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -29,6 +31,12 @@ public class Session {
 	public String gps; // google map gps string
 	public String label;
 	public Date deletedAt = null;
+
+	// Mark if the session is queued for upload
+	public boolean toBeUploaded = false;
+	public String projectID = "";
+	public JSONObject config;
+	public JSONObject inputSystems;
 
 	/**
 	 * Generate the current unix timestamp

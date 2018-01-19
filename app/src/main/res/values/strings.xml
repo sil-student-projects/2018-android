@@ -4,7 +4,7 @@
     <string name="entry_title">Lexical Entry</string>
     <string name="preferences_title">Preferences</string>
     <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
-    <string name="database_name_testing">test-gather_words</string>
+    <string name="upload_cache_name">gather_words_cache</string>
     <string name="database_name">gather_words</string>
     <string name="upload_title">Upload</string>
     <string name="undo">Undo</string>
@@ -64,5 +64,15 @@
     <string name="label">*label*</string>
     <string name="_speaker">*speaker*</string>
     <string name="_date">*date*</string>
+
+    <!-- TODO REMOVE HARDCODED VALUES -->
+    <string name="LF_UID">5a6056d0080d69151c133533</string> <!-- user ID (pending) -->
+    <string name="LF_PID">5a605af1080d6919196faca4</string> <!-- project ID (pending) -->
+
+    <string name="LF_base_url">http://dev.languageforge.org/api2/</string> <!-- base url to Language Forge -->
+    <string name="LF_GET_users_projects">users/%1$s/projects</string><!-- get project ids -->
+    <string name="LF_GET_lex_projects">lex_projects/%1$s</string> <!-- get project information -->
+    <string name="LF_POST_entry">lex_projects/%1$s/entries</string> <!-- upload new entry -->
+    <string name="LF_POST_assets">lex_projects/%1$s/assets</string> <!-- upload audio and pictures -->
 
 </resources>

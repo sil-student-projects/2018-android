@@ -27,6 +27,9 @@ public interface WordDao {
     @Query("SELECT :columns FROM word WHERE :comparisonStatement")
     List<String> getWhere(List<String> columns, String comparisonStatement);
 
+    @Query("SELECT * FROM word WHERE id IN (:ids)")
+    List<FilledWord> getManyFilled(List<Long> ids);
+
     // UPDATES
     @Update
     void updateWords(Word... words);

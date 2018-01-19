@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,10 +20,28 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
+import org.sil.gatherwords.room.Converters;
+import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Session;
 import org.sil.gatherwords.room.SessionDao;
+import org.sil.gatherwords.room.Word;
+import org.sil.gatherwords.room.WordDao;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -176,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
 
             final Session session = sessions.get(i);
 
+            // Send the session ID upstream
+
             // Get the date to prove that there is data being retrieved
             TextView labelText = convertView.findViewById(R.id.session_list_lable);
             labelText.setText(session.label);
@@ -201,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
             uploadButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO upload
+                    new GetProjectMetaTask(inflater.getContext(),session.id).execute();
                 }
             });
 
@@ -287,4 +308,192 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private static class GetProjectMetaTask extends AsyncTask<Void, Void, Void> {
+        private WeakReference<MainActivity> activityRef;
+        private AppDatabase db;
+        private SessionDao sDao;
+        private WordDao wDao;
+        private long sessionId;
+        private RequestQueue queue;
+        private String url_base;
+        private String projectID;
+        private List<Long> wordIds;
+        private List<FilledWord> manyWords;
+
+        GetProjectMetaTask(Context context, long id) {
+            db = AppDatabase.get(context);
+            activityRef = new WeakReference<>((MainActivity) context);
+            sDao = db.sessionDao();
+            wDao = db.wordDao();
+            sessionId = id;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            MainActivity activity = activityRef.get();
+            if (activity == null) {
+                return null;
+            }
+
+            /* Collected word (lexeme:)
+            {
+                LANGUAGE-KEY: { // Like qaa-fonipa-x-kal
+                    value: "some-word"
+                }
+                AUDIO-LANGUAGE-KEY: { // Like qaa-Zxxx-x-kal-audio
+                    value: filepath
+                }
+            }
+            */
+
+            /* meanings, pictures, other things (senses:)
+            {
+                gloss: {
+                    en: "some definition",
+                    fr: "",
+                    ...
+                }
+                pictures: [
+                    filepath // Possibly different? I don't see a way to manually add pictures to LanguageForge
+                ]
+                location : {
+                    value: ""
+                }
+            }
+            */
+            List<Session> sessionList = sDao.getSessionsByID(sessionId);
+            if (sessionList == null || sessionList.isEmpty()) {
+                Log.e(this.getClass().getSimpleName(), "Can't find the session to upload");
+                return null;
+            }
+            Session session = sessionList.get(0);
+            if (session == null) {
+                Log.e(this.getClass().getSimpleName(), "The session is null");
+                return null;
+            }
+            // Create the queue
+            queue = Volley.newRequestQueue(activity.getApplicationContext());
+            url_base = activity.getString(R.string.LF_base_url);
+
+            wordIds = wDao.getIDsForSession(sessionId);
+            manyWords = wDao.getManyFilled(wordIds);
+            // Assume that the project has already been selected
+            getProjectList(session);
+            return null;
+        }
+
+        private void getProjectList(Session session) {
+            getProjectInfo(session);
+            return;
+        }
+
+        private void getProjectInfo(final Session session) {
+            MainActivity activity = activityRef.get();
+            if (activity == null) {
+                return;
+            }
+            projectID = activity.getString(R.string.LF_PID);
+            String url = url_base + String.format(activity.getString(R.string.LF_GET_lex_projects), projectID);
+            StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    JSONObject object = Converters.stringToJsonObject(response);
+                    try {
+                        session.inputSystems = object.getJSONObject("inputSystems");
+                        postEntity(session);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("Volley", "Something broke", error);
+                }
+            });
+            queue.add(request);
+        }
+
+        private void postEntity(Session session) {
+            MainActivity activity = activityRef.get();
+            if (activity == null) {
+                return;
+            }
+            String url = url_base + String.format(activity.getString(R.string.LF_POST_entry), projectID);
+            for (final FilledWord word : manyWords) {
+                String filepath = postAsset();
+                final StringRequest request = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        new WordFailedUploadTask(wDao).execute(word);
+                    }
+                }) {
+                    @Override
+                    public String getBodyContentType() {
+                        return "application/json; charset=utf-8";
+                    }
+
+                    @Override
+                    public byte[] getBody() throws AuthFailureError {
+                        String requestBody = "";
+                        try {
+                            requestBody = word.toString();
+                            return requestBody == null ? null : requestBody.getBytes("utf-8");
+                        } catch (UnsupportedEncodingException uee) {
+                            VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                            return null;
+                        }
+                    }
+
+                    @Override
+                    protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                        String responseString = "";
+                        if (response != null) {
+                            responseString = String.valueOf(response.statusCode);
+                            // can get more details such as response.headers
+                        }
+                        return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+                    }
+                };
+                queue.add(request);
+            }
+        }
+
+        private String getEntity() {
+            return null;
+        }
+
+        private String postAsset() {
+            MainActivity activity = activityRef.get();
+            if (activity == null) {
+                return null;
+            }
+            String url = url_base + String.format(activity.getString(R.string.LF_POST_assets), projectID);
+            // TODO upload picture and return filepath
+            return null;
+        }
+    }
+
+    private static class WordFailedUploadTask extends AsyncTask<FilledWord, Void, Void> {
+        private WordDao wordDao;
+
+        WordFailedUploadTask(WordDao wordDao) {
+            this.wordDao = wordDao;
+        }
+        @Override
+        protected Void doInBackground(FilledWord... filledWords) {
+            for (Word word : filledWords) {
+                word.hadError = true;
+            }
+            wordDao.updateWords((Word[]) filledWords);
+            return null;
+        }
+    }
+
 }
