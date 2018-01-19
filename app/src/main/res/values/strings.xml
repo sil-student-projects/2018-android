@@ -1,15 +1,21 @@
 <resources>
+
+    <!-- General title strings -->
     <string name="app_name">Gather Words</string>
     <string name="session_title">Session</string>
     <string name="entry_title">Lexical Entry</string>
     <string name="preferences_title">Preferences</string>
-    <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
+
+    <!-- App database strings -->
     <string name="database_name_testing">test-gather_words</string>
     <string name="database_name">gather_words</string>
-    <string name="undo">Undo</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Menu xml strings -->
+    <string name="undo">Undo</string>
+    <string name="delete">Delete</string>
 
     <!-- Preferences - language options strings -->
     <string name="language_options_key">Language Options Key.</string>
@@ -28,7 +34,6 @@
     <string name="START_PLAYING_LABEL">Play</string>
     <string name="STOP_PLAYING_LABEL">Stop</string>
     <string name="audiorecordtest_3gp">/audiorecordtest.3gp</string>
-    <string name="delete">Delete</string>
     <string name="record_failed">Failed to start recording</string>
     <string name="no_audio">No audio</string>
 
@@ -36,6 +41,7 @@
     <string name="lang1">lang1</string>
     <string name="lang2">lang2</string>
     <string name="semantic_domain">Semantic Domain</string>
+    <string name="entry_status_line">%1$s (%2$d/%3$d)</string>
 
     <!-- Session activity strings -->
     <string name="name_of_session">Name of session</string>
@@ -52,10 +58,10 @@
     <!-- Ship it activity strings -->
     <string name="i_m_proud_of_you">I\'m proud of you</string>
 
-    <!-- Entry field item strings -->
+    <!-- Entry field item xml strings -->
     <string name="lang_code">*lang-code*</string>
 
-    <!-- Session list item strings -->
+    <!-- Session list item xml strings -->
     <string name="label">*label*</string>
     <string name="_speaker">*speaker*</string>
     <string name="_date">*date*</string>
