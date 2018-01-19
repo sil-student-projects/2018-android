@@ -108,6 +108,12 @@ public class EntryFragment extends Fragment {
             List<Meaning> meanings = new ArrayList<>(entryFields.getCount());
             for (int i = 0; i < entryFields.getCount(); i++) {
                 View entryField = entryFields.getChildAt(i);
+                if (entryField == null) {
+                    // TODO: Does this mean the field was deleted before we saved the data?
+                    //      ... yes, yes it does.
+                    continue;
+                }
+
                 TextView langCodeField = entryField.findViewById(R.id.lang_code);
                 EditText langDataField = entryField.findViewById(R.id.lang_data);
 
@@ -172,7 +178,18 @@ public class EntryFragment extends Fragment {
                 return null;
             }
 
-            return wDAO.getFilled(wordIDs[0]);
+            // Needed for context to load bitmap.
+            View entryPage = entryPageRef.get();
+            if (entryPage == null) {
+                return null;
+            }
+
+            FilledWord word = wDAO.getFilled(wordIDs[0]);
+            if (word != null){
+                word.loadImageDataScaled(entryPage.getContext());
+            }
+
+            return word;
         }
 
         @Override
@@ -346,7 +363,7 @@ public class EntryFragment extends Fragment {
             }
 
             ImageView display = (ImageView)convertView;
-            display.setImageBitmap(word.picture);
+            display.setImageBitmap(word.imageData);
 
             return display;
         }
@@ -362,7 +379,7 @@ public class EntryFragment extends Fragment {
             }
 
             AutoCompleteTextView aCTV = convertView.findViewById(R.id.semantic_domain_auto_complete);
-            aCTV.setAdapter(new ArrayAdapter<String>(
+            aCTV.setAdapter(new ArrayAdapter<>(
                 convertView.getContext(),
                 android.R.layout.simple_dropdown_item_1line,
                 getSemanticDomains()
