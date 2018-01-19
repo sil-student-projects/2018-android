@@ -34,7 +34,7 @@ Installation Instructions
 	
 	*	Note:  You will need Java installed on your machine.
 	
-4.	Generate the app.iml file following the steps specified on lines 14-17 above.
+4.	Generate the app.iml file following the steps specified on the lines above titled "To generate the app.iml file:" above.
 
 	*	App.iml and App.iml.template files are located in the repository.
 	
