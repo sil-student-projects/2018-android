@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -72,7 +71,7 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
         configureItemUpdateControls();
 
-        sessionID = getIntent().getLongExtra(SessionActivity.ARG_ID, 0);
+        sessionID = getIntent().getLongExtra(SessionActivity.ARG_SESSION_ID, 0);
 
         pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));

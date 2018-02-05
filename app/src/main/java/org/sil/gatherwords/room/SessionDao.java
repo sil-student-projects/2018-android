@@ -19,8 +19,8 @@ public interface SessionDao {
 	@Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
 	List<Session> getSessionsByID(Long... sessionIDs);
 
-	@Query("SELECT :columns FROM session")
-	List<String> get(List<String> columns);
+	@Query("SELECT * FROM session WHERE id = :sessionID")
+	Session get(long sessionID);
 
 	@Query("SELECT :columns FROM session WHERE :comparisonString")
 	List<String> getWhere(List<String> columns, String comparisonString);

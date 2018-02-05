@@ -32,4 +32,14 @@ public class Word {
 
     // Only filename stored (no path).
     public String picture; // NOTE: LF DOES support multiple picture files
+
+    public Status state = Status.Editing;
+
+    public enum Status {
+        Editing,
+        UploadingMeanings,
+        UploadingAudio,
+        UploadingPicture,
+        Uploaded
+    }
 }

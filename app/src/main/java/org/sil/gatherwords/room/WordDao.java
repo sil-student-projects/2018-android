@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Transaction;
 import android.arch.persistence.room.Update;
 
 import java.util.Date;
@@ -21,7 +22,8 @@ public interface WordDao {
     @Query("SELECT * FROM word WHERE id = :wordID")
     Word get(long wordID);
 
-    @Query("SELECT * FROM word WHERE id = :wordID")
+    @Query("SELECT id, sessionID, picture, semanticDomain FROM word WHERE id = :wordID")
+    @Transaction
     FilledWord getFilled(long wordID);
 
     @Query("SELECT :columns FROM word WHERE :comparisonStatement")

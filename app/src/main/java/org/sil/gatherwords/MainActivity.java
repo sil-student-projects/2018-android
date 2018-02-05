@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), EntryActivity.class);
                 Session session = (Session) sessionList.getAdapter().getItem(i);
-                intent.putExtra(SessionActivity.ARG_ID, session.id);
+                intent.putExtra(SessionActivity.ARG_SESSION_ID, session.id);
                 // Passes id of selected session into EntryActivity
                 startActivity(intent);
             }
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     Context context = inflater.getContext();
                     Intent intent = new Intent(context, SessionActivity.class);
                     intent.putExtra(SessionActivity.ARG_CREATING_SESSION, false);
-                    intent.putExtra(SessionActivity.ARG_ID, session.id);
+                    intent.putExtra(SessionActivity.ARG_SESSION_ID, session.id);
                     context.startActivity(intent);
                 }
             });
