@@ -60,4 +60,8 @@
     <string name="_speaker">*speaker*</string>
     <string name="_date">*date*</string>
 
+    <!-- Upload service -->
+    <string name="session_upload">Session upload</string>
+    <string name="uploading_session_name">Uploading session %1$s</string>
+    <string name="upload_complete">Upload complete</string>
 </resources>

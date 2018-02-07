@@ -29,6 +29,7 @@ public class Session {
 	public String gps; // google map gps string
 	public String label;
 	public Date deletedAt = null;
+	public Status state = Status.Editing;
 
 	/**
 	 * Generate the current unix timestamp
@@ -50,4 +51,10 @@ public class Session {
 		String[] out = {"ID: " + String.valueOf(id), "Date: " + date, "Speaker: " + speaker, "Recorder: " + recorder, "Vernacular: " + vernacular, "listLanguage: " + listLanguages, "Location: " + location, "GPS: " + gps, "Location: " + location};
 		return Arrays.toString(out);
 	}
+
+    public enum Status {
+        Editing,
+        Uploading,
+        Uploaded
+    }
 }

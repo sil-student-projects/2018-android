@@ -52,7 +52,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     public static final String ARG_CREATING_SESSION = "creating_session";
-    public static final String ARG_ID = "id";
+    public static final String ARG_SESSION_ID = "sessionID";
 
     // UI Elements
     private EditText dateField, timeField, timeZoneField, labelField, speakerField, eliciterField, locationField;
@@ -78,7 +78,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         setContentView(R.layout.activity_session);
 
         creatingNewSession = getIntent().getBooleanExtra(ARG_CREATING_SESSION, true);
-        sessionID = getIntent().getLongExtra(ARG_ID, 0);
+        sessionID = getIntent().getLongExtra(ARG_SESSION_ID, 0);
 
         gpsEnabled = false;
 
@@ -316,7 +316,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                 return;
             }
             Intent intent = new Intent(sessionActivity, EntryActivity.class);
-            intent.putExtra(ARG_ID, sessionID);
+            intent.putExtra(ARG_SESSION_ID, sessionID);
             sessionActivity.startActivity(intent);
             sessionActivity.finish();
         }
