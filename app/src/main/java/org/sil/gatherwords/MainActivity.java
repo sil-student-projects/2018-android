@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
-import org.sil.gatherwords.room.SessionDao;
+import org.sil.gatherwords.room.SessionDAO;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -61,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static class FillSessionListTask extends AsyncTask<Void, Void, List<Session>> {
-        private SessionDao sDAO;
+        private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
         FillSessionListTask(MainActivity mainActivity) {
-            sDAO = AppDatabase.get(mainActivity).sessionDao();
+            sDAO = AppDatabase.get(mainActivity).sessionDAO();
             mainActivityRef = new WeakReference<>(mainActivity);
         }
 
@@ -191,11 +191,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static class DeleteSessionFromDB extends AsyncTask<Session, Void, List<Session>> {
-        private SessionDao sDAO;
+        private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
         DeleteSessionFromDB(Context context) {
-            sDAO = AppDatabase.get(context).sessionDao();
+            sDAO = AppDatabase.get(context).sessionDAO();
             mainActivityRef = new WeakReference<>((MainActivity) context);
         }
 
@@ -235,11 +235,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static class UndoDeleteSessionFromDB extends AsyncTask<Void, Void, List<Session>> {
-        private SessionDao sDAO;
+        private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
         UndoDeleteSessionFromDB(MainActivity mainActivity) {
-            sDAO = AppDatabase.get(mainActivity).sessionDao();
+            sDAO = AppDatabase.get(mainActivity).sessionDAO();
             mainActivityRef = new WeakReference<>(mainActivity);
         }
 

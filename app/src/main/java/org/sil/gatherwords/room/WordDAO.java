@@ -14,7 +14,7 @@ import java.util.List;
  * Data Access Object for the word table
  */
 @Dao
-public interface WordDao {
+public interface WordDAO {
     // SELECT
     @Query("SELECT id FROM word WHERE sessionId = :sessionID AND deletedAt IS NULL ORDER BY id ASC")
     List<Long> getIDsForSession(long sessionID);

@@ -29,9 +29,9 @@ import android.widget.Toast;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Meaning;
-import org.sil.gatherwords.room.MeaningDao;
+import org.sil.gatherwords.room.MeaningDAO;
 import org.sil.gatherwords.room.Word;
-import org.sil.gatherwords.room.WordDao;
+import org.sil.gatherwords.room.WordDAO;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,7 +99,7 @@ public class EntryActivity extends AppCompatActivity {
                 new DeleteWordTask(
                     (EntryPagerAdapter)pager.getAdapter(),
                     sessionID,
-                    AppDatabase.get(this).wordDao()
+                    AppDatabase.get(this).wordDAO()
                 ).execute(entryFragment.getWordID());
                 return true;
 
@@ -107,7 +107,7 @@ public class EntryActivity extends AppCompatActivity {
                 new UndoLastDeleteWordTask(
                     (EntryPagerAdapter)pager.getAdapter(),
                     sessionID,
-                    AppDatabase.get(this).wordDao()
+                    AppDatabase.get(this).wordDAO()
                 ).execute();
                 return true;
 
@@ -285,9 +285,9 @@ public class EntryActivity extends AppCompatActivity {
     private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
         long sessionID;
-        WordDao wDAO;
+        WordDAO wDAO;
 
-        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, long sID, WordDAO dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
@@ -314,9 +314,9 @@ public class EntryActivity extends AppCompatActivity {
     private static class DeleteWordTask extends AsyncTask<Long, Void, List<Long>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
         long sessionID;
-        WordDao wDAO;
+        WordDAO wDAO;
 
-        DeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+        DeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDAO dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
@@ -344,9 +344,9 @@ public class EntryActivity extends AppCompatActivity {
     private static class UndoLastDeleteWordTask extends AsyncTask<Void, Void, List<Long>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
         long sessionID;
-        WordDao wDAO;
+        WordDAO wDAO;
 
-        UndoLastDeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDao dao) {
+        UndoLastDeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDAO dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
@@ -398,7 +398,7 @@ public class EntryActivity extends AppCompatActivity {
 
             db.beginTransaction();
             try {
-                WordDao wordDAO = db.wordDao();
+                WordDAO wordDAO = db.wordDAO();
 
                 Word currentWord = wordDAO.get(wordID);
                 if (currentWord != null) {
@@ -439,12 +439,12 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     private static class PlayAudioTask extends AsyncTask<Void, Void, String> {
-        private WordDao wordDAO;
+        private WordDAO wordDAO;
         WeakReference<EntryActivity> activityRef;
         long wordID;
 
         PlayAudioTask(EntryActivity activity) {
-            wordDAO = AppDatabase.get(activity).wordDao();
+            wordDAO = AppDatabase.get(activity).wordDAO();
             activityRef = new WeakReference<>(activity);
 
             EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
@@ -478,13 +478,13 @@ public class EntryActivity extends AppCompatActivity {
 
     private static class StorePicturesTask extends AsyncTask<File, Void, Boolean> {
         private AppDatabase db;
-        private WordDao wordDAO;
+        private WordDAO wordDAO;
         private long wordID;
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
 
         StorePicturesTask(EntryActivity activity) {
             db = AppDatabase.get(activity);
-            wordDAO = db.wordDao();
+            wordDAO = db.wordDAO();
             EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
             wordID = fragment.getWordID();
             pagerAdapterRef = new WeakReference<>((EntryPagerAdapter)activity.pager.getAdapter());
@@ -575,7 +575,7 @@ public class EntryActivity extends AppCompatActivity {
             new LoadWordIDsTask(
                 this,
                 sessionID,
-                AppDatabase.get(getApplicationContext()).wordDao()
+                AppDatabase.get(getApplicationContext()).wordDAO()
             ).execute();
         }
 
@@ -647,16 +647,16 @@ public class EntryActivity extends AppCompatActivity {
 
     private static class AddNewWordToDB extends AsyncTask<Void, Void, Void> {
         WeakReference<EntryActivity> entryActivityRef;
-        WordDao wDAO;
-        MeaningDao mDAO;
+        WordDAO wDAO;
+        MeaningDAO mDAO;
         Long sessionID;
         Set<String> sharedPrefs;
         String[] languages;
 
         AddNewWordToDB(EntryActivity entryActivity) {
             entryActivityRef = new WeakReference<>(entryActivity);
-            wDAO = AppDatabase.get(entryActivity).wordDao();
-            mDAO = AppDatabase.get(entryActivity).meaningDao();
+            wDAO = AppDatabase.get(entryActivity).wordDAO();
+            mDAO = AppDatabase.get(entryActivity).meaningDAO();
             sessionID = entryActivity.sessionID;
             sharedPrefs = PreferenceManager.getDefaultSharedPreferences(entryActivity).
                     getStringSet(entryActivity.getString(R.string.language_options_key), null);
