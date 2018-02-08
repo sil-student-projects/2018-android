@@ -16,9 +16,9 @@ import android.util.Log;
 
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Session;
-import org.sil.gatherwords.room.SessionDao;
+import org.sil.gatherwords.room.SessionDAO;
 import org.sil.gatherwords.room.Word;
-import org.sil.gatherwords.room.WordDao;
+import org.sil.gatherwords.room.WordDAO;
 
 import java.util.List;
 
@@ -79,7 +79,7 @@ public class UploadService extends Service implements Handler.Callback {
         int sessionID = msg.arg2;
 
         AppDatabase db = AppDatabase.get(this);
-        SessionDao sDAO = db.sessionDao();
+        SessionDAO sDAO = db.sessionDAO();
         Session session = sDAO.get(sessionID);
 
         if (session == null) {
@@ -113,7 +113,7 @@ public class UploadService extends Service implements Handler.Callback {
             getString(R.string.uploading_session_name, session.label)
         );
 
-        SessionDao sDAO = db.sessionDao();
+        SessionDAO sDAO = db.sessionDAO();
 
         // Begin upload.
         session.state = Session.Status.Uploading;
@@ -121,7 +121,7 @@ public class UploadService extends Service implements Handler.Callback {
 
         // TODO: xx.post(session);
 
-        WordDao wDAO = db.wordDao();
+        WordDAO wDAO = db.wordDAO();
         List<Long> wordIDs = wDAO.getIDsForSession(session.id);
 
         int numWords = wordIDs.size();

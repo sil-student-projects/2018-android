@@ -17,8 +17,8 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class AppDatabaseTest {
-	private WordDao wordDao;
-	private SessionDao sessionDao;
+	private WordDAO wordDAO;
+	private SessionDAO sessionDAO;
 	private AppDatabase db;
 	private Context context;
 
@@ -26,8 +26,8 @@ public class AppDatabaseTest {
 	public void createDb() {
 		context = InstrumentationRegistry.getTargetContext();
 		db = Room.inMemoryDatabaseBuilder(context, AppDatabase.class).build();
-		sessionDao = db.sessionDao();
-		wordDao = db.wordDao();
+		sessionDAO = db.sessionDAO();
+		wordDAO = db.wordDAO();
 	}
 
 	@After
@@ -38,21 +38,21 @@ public class AppDatabaseTest {
 	@Test
 	public void insertSessions() throws Exception {
 		Session s1 = new Session();
-		sessionDao.insertSession(s1);
-		List<Session> sessions = sessionDao.getAll();
+		sessionDAO.insertSession(s1);
+		List<Session> sessions = sessionDAO.getAll();
 		Session s2 = sessions.get(0);
 		compareSessions(s1,s2);
 
 		Session s3 = new Session();
 		s3.id = 3;
-		sessionDao.insertSession(s3);
-		compareSessions(s3,sessionDao.getAll().get(1));
+		sessionDAO.insertSession(s3);
+		compareSessions(s3, sessionDAO.getAll().get(1));
 
 		// Can duplicate primary keys be added
 		try {
 			Session s4 = new Session();
 			s4.id = 1;
-			sessionDao.insertSession(s4);
+			sessionDAO.insertSession(s4);
 			Assert.fail("Duplicate ID's");
 		} catch (Exception e) {
 
@@ -63,17 +63,17 @@ public class AppDatabaseTest {
 	public void insertWord() throws Exception {
 		Session s1 = new Session();
 		s1.id = 3;
-		sessionDao.insertSession(s1);
+		sessionDAO.insertSession(s1);
 
 		Word w1 = new Word();
 		Word w2 = new Word();
 		w2.sessionID = 3;
-		wordDao.insertWords(w1, w2);
+		wordDAO.insertWords(w1, w2);
 		// TODO Get foreign key working
 //		try {
 //			Word w3 = new Word();
 //			w3.session = -5;
-//			wordDao.insertWords(w3);
+//			wordDAO.insertWords(w3);
 //			Assert.fail("Expected to fail inserting word");
 //		} catch (Exception e) {
 //
@@ -83,7 +83,7 @@ public class AppDatabaseTest {
 		try {
 			Word w4 = new Word();
 			w4.id = 1;
-			wordDao.insertWords(w4);
+			wordDAO.insertWords(w4);
 			Assert.fail("Duplicate ID's");
 		} catch (Exception e) {
 

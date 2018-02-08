@@ -22,9 +22,9 @@ import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
-import org.sil.gatherwords.room.MeaningDao;
+import org.sil.gatherwords.room.MeaningDAO;
 import org.sil.gatherwords.room.Word;
-import org.sil.gatherwords.room.WordDao;
+import org.sil.gatherwords.room.WordDAO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -160,13 +160,13 @@ public class EntryFragment extends Fragment {
 
     private static class LoadWordTask extends AsyncTask<Long, Void, FilledWord> {
         WeakReference<View> entryPageRef;
-        WordDao wDAO;
+        WordDAO wDAO;
         int position;
         int total;
 
         LoadWordTask(View entryPage, int pos, int tot) {
             entryPageRef = new WeakReference<>(entryPage);
-            wDAO = AppDatabase.get(entryPage.getContext()).wordDao();
+            wDAO = AppDatabase.get(entryPage.getContext()).wordDAO();
             position = pos;
             total = tot;
         }
@@ -230,8 +230,8 @@ public class EntryFragment extends Fragment {
                 return null;
             }
 
-            MeaningDao mDAO = db.meaningDao();
-            WordDao wDAO = db.wordDao();
+            MeaningDAO mDAO = db.meaningDAO();
+            WordDAO wDAO = db.wordDAO();
 
             db.beginTransaction();
             FilledWord filledWord = words[0];

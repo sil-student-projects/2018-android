@@ -34,7 +34,7 @@ public abstract class AppDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public abstract SessionDao sessionDao();
-    public abstract WordDao wordDao();
-    public abstract MeaningDao meaningDao();
+    public abstract SessionDAO sessionDAO();
+    public abstract WordDAO wordDAO();
+    public abstract MeaningDAO meaningDAO();
 }

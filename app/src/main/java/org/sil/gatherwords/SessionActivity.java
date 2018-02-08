@@ -31,11 +31,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.Meaning;
-import org.sil.gatherwords.room.MeaningDao;
+import org.sil.gatherwords.room.MeaningDAO;
 import org.sil.gatherwords.room.Session;
-import org.sil.gatherwords.room.SessionDao;
+import org.sil.gatherwords.room.SessionDAO;
 import org.sil.gatherwords.room.Word;
-import org.sil.gatherwords.room.WordDao;
+import org.sil.gatherwords.room.WordDAO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -199,8 +199,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     }
 
     private static class InsertSessionsTask extends AsyncTask<Session, Void, Void> {
-        private SessionDao sDAO;
-        private WordDao wordDao;
+        private SessionDAO sDAO;
+        private WordDAO wordDAO;
         private long sessionID;
         private AppDatabase db;
         private String wordList;
@@ -210,8 +210,8 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         InsertSessionsTask(SessionActivity activity) {
             db = AppDatabase.get(activity.getApplicationContext());
             wordList = activity.worldListToLoad;
-            wordDao = db.wordDao();
-            sDAO = db.sessionDao();
+            wordDAO = db.wordDAO();
+            sDAO = db.sessionDAO();
             assets = activity.getApplicationContext().getAssets();
             sessionActivityRef = new WeakReference<>(activity);
         }
@@ -240,7 +240,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
             // Begin the transaction
             db.beginTransaction();
             try {
-                MeaningDao meaningDao = db.meaningDao();
+                MeaningDAO meaningDAO = db.meaningDAO();
 
                 JSONArray jsonArray = new JSONArray(loadWordList());
 
@@ -253,9 +253,9 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                     word.sessionID = sessionID;
 
                     // Insert
-                    long wordID = wordDao.insertWord(word);
+                    long wordID = wordDAO.insertWord(word);
 
-                    meaningDao.insertMeanings(
+                    meaningDAO.insertMeanings(
                         new Meaning(wordID, "entry", json.getString("entry")),
                         new Meaning(wordID, "pos", json.getString("pos")),
                         new Meaning(wordID, "notes", json.getString("notes"))
@@ -436,11 +436,11 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
      */
     private static class LoadSessionDataFromDB extends AsyncTask<Long, Void, List<Session>> {
-        private SessionDao sDAO;
+        private SessionDAO sDAO;
         private WeakReference<SessionActivity> sessionActivityRef;
 
         LoadSessionDataFromDB(SessionActivity sessionActivity) {
-            sDAO = AppDatabase.get(sessionActivity).sessionDao();
+            sDAO = AppDatabase.get(sessionActivity).sessionDAO();
             sessionActivityRef = new WeakReference<>(sessionActivity);
         }
 
@@ -497,10 +497,10 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
      */
     private static class UpdateSessionDataToDB extends AsyncTask<Session, Void, Void> {
-        private SessionDao sDAO;
+        private SessionDAO sDAO;
 
         UpdateSessionDataToDB(SessionActivity sessionActivity) {
-            sDAO = AppDatabase.get(sessionActivity).sessionDao();
+            sDAO = AppDatabase.get(sessionActivity).sessionDAO();
         }
 
         @Override

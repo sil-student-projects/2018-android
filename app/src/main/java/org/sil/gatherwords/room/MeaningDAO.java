@@ -12,7 +12,7 @@ import java.util.List;
  * Data Access Object for the word table
  */
 @Dao
-public interface MeaningDao {
+public interface MeaningDAO {
     // SELECT
     @Query("SELECT * FROM meaning WHERE wordID = :wordID ORDER BY id ASC")
     List<Meaning> getAll(long wordID);
