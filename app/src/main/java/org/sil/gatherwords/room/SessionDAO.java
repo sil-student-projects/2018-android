@@ -5,6 +5,7 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,8 +14,14 @@ import java.util.List;
 @Dao
 public interface SessionDAO {
     // SELECTS
-    @Query("SELECT * FROM session WHERE deletedAt IS NULL ORDER BY date DESC")
-    List<Session> getAll();
+    @Query("SELECT id, date, speaker, label, completed, total FROM session " +
+            "LEFT JOIN (" +
+                "SELECT COUNT(DISTINCT audio) completed, COUNT(*) total, sessionID " +
+                "FROM word WHERE deletedAt IS NULL " +
+                "GROUP BY sessionID) t1 " +
+            "ON session.id = t1.sessionID " +
+            "WHERE deletedAt IS NULL ORDER BY date DESC")
+    List<SessionMeta> getAll();
 
     @Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
     List<Session> getSessionsByID(Long... sessionIDs);
@@ -26,8 +33,8 @@ public interface SessionDAO {
     List<String> getWhere(List<String> columns, String comparisonString);
 
     // DELETE
-    @Query("DELETE FROM session WHERE :comparisonString")
-    int deleteColumn(String comparisonString);
+    @Query("UPDATE session SET deletedAt = :deletedAt WHERE id IN (:sessionIDs)")
+    void softDeleteSessions(Date deletedAt, Long... sessionIDs);
 
     // INSERT
     @Insert
