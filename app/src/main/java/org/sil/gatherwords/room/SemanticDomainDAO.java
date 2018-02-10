@@ -19,7 +19,7 @@ public interface SemanticDomainDAO {
     SemanticDomain getByName(String name);
 
     @Query("SELECT COUNT(*) FROM semanticDomain")
-    Integer count();
+    int count();
 
     // INSERT
     @Insert

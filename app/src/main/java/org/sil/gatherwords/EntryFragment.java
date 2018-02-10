@@ -27,7 +27,6 @@ import org.sil.gatherwords.room.WordDAO;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -130,7 +129,7 @@ public class EntryFragment extends Fragment {
             // Update the semantic domain. Blank should insert None as consistent with default
             //      value in database.
             AutoCompleteTextView aCTV = entryFields.findViewById(R.id.semantic_domain_auto_complete);
-            word.semanticDomains = Collections.singletonList(aCTV.getText().toString());
+            word.semanticDomain = aCTV.getText().toString();
 
             new UpdateWordTask(getContext()).execute(word);
 
@@ -248,7 +247,7 @@ public class EntryFragment extends Fragment {
 
                 Word word = wDAO.get(filledWord.id);
                 SemanticDomain semanticDomain = sdDAO.getByName(
-                    filledWord.getSemanticDomain()
+                    filledWord.semanticDomain
                 );
                 if (semanticDomain == null) {
                     if (word.semanticDomainID != null) {
@@ -377,7 +376,7 @@ public class EntryFragment extends Fragment {
             }
 
             AutoCompleteTextView aCTV = convertView.findViewById(R.id.semantic_domain_auto_complete);
-            aCTV.setText(word.getSemanticDomain());
+            aCTV.setText(word.semanticDomain);
             new FillSemanticDomainTask(aCTV).execute();
 
             return convertView;
