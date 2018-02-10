@@ -22,7 +22,7 @@ public interface WordDAO {
     @Query("SELECT * FROM word WHERE id = :wordID")
     Word get(long wordID);
 
-    @Query("SELECT id, sessionID, picture, semanticDomain FROM word WHERE id = :wordID")
+    @Query("SELECT id, sessionID, audio, picture, semanticDomain FROM word WHERE id = :wordID")
     @Transaction
     FilledWord getFilled(long wordID);
 

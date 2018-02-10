@@ -17,6 +17,7 @@ public class FilledWord {
 
     public long id;
     public long sessionID;
+    public String audio;
     public String picture;
     public String semanticDomain;
 
