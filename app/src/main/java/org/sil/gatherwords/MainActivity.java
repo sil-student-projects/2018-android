@@ -3,10 +3,12 @@ package org.sil.gatherwords;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,11 +18,12 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.sil.gatherwords.room.AppDatabase;
-import org.sil.gatherwords.room.Session;
 import org.sil.gatherwords.room.SessionDAO;
+import org.sil.gatherwords.room.SessionMeta;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -30,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), EntryActivity.class);
-                Session session = (Session) sessionList.getAdapter().getItem(i);
+                SessionMeta session = (SessionMeta) sessionList.getAdapter().getItem(i);
                 intent.putExtra(SessionActivity.ARG_SESSION_ID, session.id);
                 // Passes id of selected session into EntryActivity
                 startActivity(intent);
@@ -60,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         new FillSessionListTask(this).execute();
     }
 
-    private static class FillSessionListTask extends AsyncTask<Void, Void, List<Session>> {
+    private static class FillSessionListTask extends AsyncTask<Void, Void, List<SessionMeta>> {
         private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
@@ -70,12 +74,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected List<Session> doInBackground(Void... v) {
+        protected List<SessionMeta> doInBackground(Void... v) {
             return sDAO.getAll();
         }
 
         @Override
-        protected void onPostExecute(List<Session> sessions) {
+        protected void onPostExecute(List<SessionMeta> sessions) {
             MainActivity mainActivity = mainActivityRef.get();
             if (mainActivity != null) {
                 ListView sessionList = mainActivity.findViewById(R.id.session_list);
@@ -123,9 +127,9 @@ public class MainActivity extends AppCompatActivity {
     // TODO: Switch to CursorAdapter
     private static class SessionListAdapter extends BaseAdapter {
         private LayoutInflater inflater;
-        private List<Session> sessions;
+        private List<SessionMeta> sessions;
 
-        SessionListAdapter(LayoutInflater flate, List<Session> sessionList) {
+        SessionListAdapter(LayoutInflater flate, List<SessionMeta> sessionList) {
             inflater = flate;
             sessions = sessionList;
         }
@@ -155,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
-            final Session session = sessions.get(i);
+            final SessionMeta session = sessions.get(i);
 
             // Get the date to prove that there is data being retrieved
             TextView labelText = convertView.findViewById(R.id.session_list_lable);
@@ -165,6 +169,20 @@ public class MainActivity extends AppCompatActivity {
             date.setText(df.format(session.date));
             TextView speaker = convertView.findViewById(R.id.session_list_speaker);
             speaker.setText(session.speaker);
+
+            ProgressBar progressBar = convertView.findViewById(R.id.audio_progress);
+            if (session.progress == null) {
+                progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "Hiding progress bar for empty session " + session.label + " (" + session.id + ")");
+            }
+            else {
+                progressBar.setMax(session.progress.total);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    progressBar.setProgress(session.progress.completed, true);
+                } else {
+                    progressBar.setProgress(session.progress.completed);
+                }
+            }
 
             ImageButton editButton = convertView.findViewById(R.id.session_list_button_edit);
             editButton.setOnClickListener(new View.OnClickListener() {
@@ -181,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Context context = inflater.getContext();
-                    new DeleteSessionFromDB(context).execute(session);
+                    new DeleteSessionFromDB(context).execute(session.id);
 
                 }
             });
@@ -190,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static class DeleteSessionFromDB extends AsyncTask<Session, Void, List<Session>> {
+    private static class DeleteSessionFromDB extends AsyncTask<Long, Void, List<SessionMeta>> {
         private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
@@ -200,16 +218,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected List<Session> doInBackground(Session... sessions) {
-            for (Session session : sessions) {
-                session.deletedAt = new Date();
-            }
-            sDAO.updateSession(sessions);
+        protected List<SessionMeta> doInBackground(Long... sessionIDs) {
+            sDAO.softDeleteSessions(new Date(), sessionIDs);
             return sDAO.getAll();
         }
 
         @Override
-        protected void onPostExecute(List<Session> sessions) {
+        protected void onPostExecute(List<SessionMeta> sessions) {
             MainActivity mainActivity = mainActivityRef.get();
             if (mainActivity != null) {
                 SessionListAdapter sessionListAdapter = (SessionListAdapter) ((ListView) mainActivity.findViewById(R.id.session_list)).getAdapter();
@@ -234,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static class UndoDeleteSessionFromDB extends AsyncTask<Void, Void, List<Session>> {
+    private static class UndoDeleteSessionFromDB extends AsyncTask<Void, Void, List<SessionMeta>> {
         private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
@@ -244,13 +259,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected List<Session> doInBackground(Void... v) {
+        protected List<SessionMeta> doInBackground(Void... v) {
             sDAO.undoLastDeleted();
             return sDAO.getAll();
         }
 
         @Override
-        protected void onPostExecute(List<Session> sessions) {
+        protected void onPostExecute(List<SessionMeta> sessions) {
             MainActivity mainActivity = mainActivityRef.get();
             if (mainActivity != null) {
                 SessionListAdapter sessionListAdapter = (SessionListAdapter) ((ListView) mainActivity.findViewById(R.id.session_list)).getAdapter();
