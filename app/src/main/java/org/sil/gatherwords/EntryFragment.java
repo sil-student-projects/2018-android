@@ -1,7 +1,6 @@
 package org.sil.gatherwords;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,23 +16,19 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.sil.gatherwords.room.AppDatabase;
 import org.sil.gatherwords.room.FilledWord;
 import org.sil.gatherwords.room.Meaning;
 import org.sil.gatherwords.room.MeaningDAO;
+import org.sil.gatherwords.room.SemanticDomain;
+import org.sil.gatherwords.room.SemanticDomainDAO;
 import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDAO;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -135,11 +130,7 @@ public class EntryFragment extends Fragment {
             // Update the semantic domain. Blank should insert None as consistent with default
             //      value in database.
             AutoCompleteTextView aCTV = entryFields.findViewById(R.id.semantic_domain_auto_complete);
-            String semanticDomain = aCTV.getText().toString();
-            if (semanticDomain.isEmpty()) {
-                semanticDomain = "None";
-            }
-            word.semanticDomain = semanticDomain;
+            word.semanticDomains = Collections.singletonList(aCTV.getText().toString());
 
             new UpdateWordTask(getContext()).execute(word);
 
@@ -232,6 +223,7 @@ public class EntryFragment extends Fragment {
 
             MeaningDAO mDAO = db.meaningDAO();
             WordDAO wDAO = db.wordDAO();
+            SemanticDomainDAO sdDAO = db.semanticDomainDAO();
 
             db.beginTransaction();
             FilledWord filledWord = words[0];
@@ -255,9 +247,18 @@ public class EntryFragment extends Fragment {
                 }
 
                 Word word = wDAO.get(filledWord.id);
-                if (!word.semanticDomain.equals(filledWord.semanticDomain)) {
+                SemanticDomain semanticDomain = sdDAO.getByName(
+                    filledWord.getSemanticDomain()
+                );
+                if (semanticDomain == null) {
+                    if (word.semanticDomainID != null) {
+                        updateDate = true;
+                        word.semanticDomainID = null;
+                    }
+                }
+                else if (word.semanticDomainID == null || semanticDomain.id != word.semanticDomainID) {
                     updateDate = true;
-                    word.semanticDomain = filledWord.semanticDomain;
+                    word.semanticDomainID = semanticDomain.id;
                 }
 
                 if (updateDate) {
@@ -287,9 +288,6 @@ public class EntryFragment extends Fragment {
         private static final String MEANING_VIEW_TAG = "meaning";
         private static final String SEMANTIC_VIEW_TAG = "semantic";
         private static final String IMAGE_VIEW_TAG = "image";
-
-        // static so we only parse once.
-        private static List<String> semanticDomainList = null;
 
         private LayoutInflater inflater;
         private FilledWord word;
@@ -379,74 +377,44 @@ public class EntryFragment extends Fragment {
             }
 
             AutoCompleteTextView aCTV = convertView.findViewById(R.id.semantic_domain_auto_complete);
-            aCTV.setAdapter(new ArrayAdapter<>(
-                convertView.getContext(),
-                android.R.layout.simple_dropdown_item_1line,
-                getSemanticDomains()
-            ));
-
-                if ( !word.semanticDomain.equals("None") ) {
-                    aCTV.setText(word.semanticDomain);
-                } else { // Not sure if this will ever run, but added as a precaution. If "" is read, "None" is inserted into db
-                    aCTV.setText("");
-                }
+            aCTV.setText(word.getSemanticDomain());
+            new FillSemanticDomainTask(aCTV).execute();
 
             return convertView;
         }
+    }
 
-        /* Returns a List of semantic domains from the JSON file of semantic domains from Language Forge
+    private static class FillSemanticDomainTask extends AsyncTask<Void, Void, List<SemanticDomain>> {
+        private WeakReference<AutoCompleteTextView> aCTVRef;
 
-         */
-        private List<String> getSemanticDomains() {
-            if (semanticDomainList != null) {
-                return semanticDomainList;
+        FillSemanticDomainTask(AutoCompleteTextView aCTV) {
+            aCTVRef = new WeakReference<>(aCTV);
+        }
+
+        @Override
+        protected List<SemanticDomain> doInBackground(Void... voids) {
+            AutoCompleteTextView aCTV = aCTVRef.get();
+            if (aCTV == null) {
+                return null;
             }
 
-            InputStream is = null;
-            BufferedReader br = null;
+            AppDatabase db = AppDatabase.get(aCTV.getContext());
+            return db.semanticDomainDAO().getAll();
+        }
 
-            AssetManager assets = inflater.getContext().getAssets();
-            semanticDomainList = new ArrayList<>();
-            try {
-                is = assets.open("semanticDomain/semanticDomains_en.json");
-                br = new BufferedReader(new InputStreamReader(is));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append("\n");
-                    line = br.readLine();
-                }
-                String file = sb.toString();
-
-                JSONObject jsonObjectCluster = new JSONObject( file.trim() );
-                Iterator<String> keys = jsonObjectCluster.keys();
-
-                while( keys.hasNext() ) {
-                    String key = keys.next();
-                    if ( jsonObjectCluster.get(key) instanceof JSONObject ) {
-                        semanticDomainList.add( ((JSONObject) jsonObjectCluster.get(key)).getString("name") );
-                    }
-                }
-
-            } catch (IOException e) {
-                Log.e(TAG, "IOException while reading the semantic domain file", e);
-            } catch (JSONException e) {
-                Log.e(TAG, "JSONException while parsing the semantic domain file", e);
-            } finally {
-                // Assume the input stream is not null because it is used to construct the buffered reader
-                if (br != null) {
-                    try {
-                        is.close();
-                        br.close();
-                    } catch (IOException e) {
-                        Log.e(TAG, "IOException when closing buffered reader and stream", e);
-                    }
-                }
+        @Override
+        protected void onPostExecute(List<SemanticDomain> semanticDomains) {
+            AutoCompleteTextView aCTV = aCTVRef.get();
+            if (semanticDomains == null || aCTV == null) {
+                return;
             }
 
-            return semanticDomainList;
+            // TODO: Prevent text not in this list from being entered.
+            aCTV.setAdapter(new ArrayAdapter<>(
+                aCTV.getContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                semanticDomains
+            ));
         }
     }
 }

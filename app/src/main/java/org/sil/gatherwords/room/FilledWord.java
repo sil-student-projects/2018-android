@@ -18,13 +18,29 @@ public class FilledWord {
     public long id;
     public long sessionID;
     public String picture;
-    public String semanticDomain;
+    public Long semanticDomainID;
 
     @Ignore
     public Bitmap imageData;
 
     @Relation(parentColumn = "id", entityColumn = "wordID")
     public List<Meaning> meanings;
+
+    // Should have at most 1 entry.
+    @Relation(parentColumn = "semanticDomainID",
+              entityColumn = "id",
+              entity = SemanticDomain.class,
+              projection = {"name"})
+    public List<String> semanticDomains;
+
+    public String getSemanticDomain() {
+        if (semanticDomains == null || semanticDomains.isEmpty()) {
+            return null;
+        }
+        else {
+            return semanticDomains.get(0);
+        }
+    }
 
     public void loadImageDataScaled(Context context) {
         if (picture == null || imageData != null) {
