@@ -286,6 +286,7 @@ public class EntryFragment extends Fragment {
     private static class EntryFieldAdapter extends BaseAdapter {
         private static final String MEANING_VIEW_TAG = "meaning";
         private static final String SEMANTIC_VIEW_TAG = "semantic";
+        private static final String AUDIO_VIEW_TAG = "audio";
         private static final String IMAGE_VIEW_TAG = "image";
 
         private LayoutInflater inflater;
@@ -299,13 +300,14 @@ public class EntryFragment extends Fragment {
         @Override
         public int getCount() {
             // +1 for semantic domain.
+            // +1 for audio status.
 
             if (word.picture == null) {
-                return word.meanings.size() + 1;
+                return word.meanings.size() + 2;
             }
 
             // Last element is an ImageView.
-            return word.meanings.size() + 2;
+            return word.meanings.size() + 3;
         }
 
         @Override
@@ -324,6 +326,9 @@ public class EntryFragment extends Fragment {
                 return getSemanticDomainView(convertView, container);
             }
             else if (pos == word.meanings.size() + 1) {
+                return getAudioView(convertView, container);
+            }
+            else if (pos == word.meanings.size() + 2) {
                 // Photo shown last.
                 return getImageView(convertView);
             }
@@ -348,6 +353,27 @@ public class EntryFragment extends Fragment {
 
                 EditText langDataField = convertView.findViewById(R.id.lang_data);
                 langDataField.setText(meaning.data);
+            }
+
+            return convertView;
+        }
+
+        private View getAudioView(View convertView, ViewGroup container) {
+            if (convertView == null || !convertView.getTag().equals(AUDIO_VIEW_TAG)) {
+                convertView = inflater.inflate(
+                        R.layout.entry_audio_status,
+                        container,
+                        false
+                );
+                convertView.setTag(AUDIO_VIEW_TAG);
+            }
+
+            TextView audioStatus = convertView.findViewById(R.id.audio_status);
+            if (word.audio == null) {
+                audioStatus.setText(R.string.no_audio);
+            }
+            else {
+                audioStatus.setText(R.string.has_audio);
             }
 
             return convertView;

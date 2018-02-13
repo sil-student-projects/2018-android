@@ -33,9 +33,8 @@
     <string name="no_audio">No audio</string>
 
     <!-- Entry fragment strings -->
-    <string name="lang1">lang1</string>
-    <string name="lang2">lang2</string>
     <string name="semantic_domain">Semantic Domain</string>
+    <string name="has_audio">Audio recorded</string>
 
     <!-- Session activity strings -->
     <string name="name_of_session">Name of session</string>
