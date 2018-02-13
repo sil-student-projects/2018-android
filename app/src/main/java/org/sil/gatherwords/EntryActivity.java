@@ -9,13 +9,11 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -44,18 +42,15 @@ import java.util.Set;
 public class EntryActivity extends AppCompatActivity {
     private static final String TAG = EntryActivity.class.getSimpleName();
 
-    // Camera/Image processing
-    // based on https://developer.android.com/training/camera/photobasics.html
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-
     private long sessionID;
-    private ViewPager pager;
+    ViewPager pager;
+
+    private ImageCapture imageCapture;
 
     // Audio recording features
     // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private File mAudioFile = null;
-    private File mImageFile = null;
     private RecordButton mRecordButton = null;
     private MediaRecorder mRecorder = null;
     private PlayButton   mPlayButton = null;
@@ -75,6 +70,8 @@ public class EntryActivity extends AppCompatActivity {
 
         pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
+
+        imageCapture = new ImageCapture(this);
 
         findViewById(R.id.new_word_fab).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,41 +220,13 @@ public class EntryActivity extends AppCompatActivity {
      *
      * @param view the view from which the photo request originated
      */
-    public void dispatchTakePictureIntent(View view) {
-        if (mImageFile != null) {
-            if (!mImageFile.delete()) {
-                Log.e(TAG, "Failed to delete unconsumed image: " + mImageFile);
-            }
-        }
-
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Since the camera is a separate app, we cannot write directly
-        // to internal storage. So, put it in the cache and move it later.
-        mImageFile = Util.getNewCacheFile(this, ".jpg");
-        takePictureIntent.putExtra(
-            MediaStore.EXTRA_OUTPUT,
-            FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", mImageFile)
-        );
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
+    public void dispatchImageCaptureIntent(View view) {
+        imageCapture.dispatchImageCaptureIntent();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Handle the result of a photo-taking activity.
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            File internalFile = Util.getNewDataFile(this, ".jpg");
-            if (internalFile != null) {
-                new StorePicturesTask(this).execute(mImageFile, internalFile);
-            }
-            else if (!mImageFile.delete()) {
-                // Failed to pass along; clean up.
-                Log.e(TAG, "Failed to delete cached image: " + mImageFile);
-            }
-
-            mImageFile = null;
-        }
+        imageCapture.onActivityResult(requestCode, resultCode);
     }
 
     @Override
@@ -476,95 +445,7 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private static class StorePicturesTask extends AsyncTask<File, Void, Boolean> {
-        private AppDatabase db;
-        private WordDAO wordDAO;
-        private long wordID;
-        WeakReference<EntryPagerAdapter> pagerAdapterRef;
-
-        StorePicturesTask(EntryActivity activity) {
-            db = AppDatabase.get(activity);
-            wordDAO = db.wordDAO();
-            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
-            wordID = fragment.getWordID();
-            pagerAdapterRef = new WeakReference<>((EntryPagerAdapter)activity.pager.getAdapter());
-        }
-
-        @Override
-        protected Boolean doInBackground(File... files) {
-            if (files == null || files.length != 2) {
-                Log.e(TAG, "Expected exactly 2 image file");
-                return false;
-            }
-
-            File imageSourceFile = files[0];
-            File imageDestFile = files[1];
-
-            if (!Util.moveFile(imageSourceFile, imageDestFile)) {
-                // Save failed, clean up.
-                Log.e(TAG, "Failed to move to internal storage: " + imageSourceFile);
-                if (!imageSourceFile.delete()) {
-                    Log.e(TAG, "Failed to delete cached image: " + imageSourceFile);
-                }
-                if (imageDestFile != null && !imageDestFile.delete()) {
-                    Log.e(TAG, "Failed to delete placeholder: " + imageDestFile);
-                }
-
-                return false;
-            }
-
-            boolean success = false;
-            db.beginTransaction();
-            try {
-                Word currentWord = wordDAO.get(wordID);
-                if (currentWord != null) {
-                    File oldImage = null;
-                    if (currentWord.picture != null) {
-                        oldImage = new File(imageDestFile.getParent() + '/' + currentWord.picture);
-                    }
-
-                    // Save it.
-                    currentWord.picture = imageDestFile.getName();
-                    wordDAO.updateWords(currentWord);
-
-                    db.setTransactionSuccessful();
-                    success = true;
-
-                    if (oldImage != null) {
-                        // Remove since we no longer hold reference to it.
-                        if (!oldImage.delete()) {
-                            Log.e(TAG, "Failed to delete overridden image: " + oldImage);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Exception while updating the Word", e);
-            } finally {
-                db.endTransaction();
-            }
-
-            if (!success) {
-                // Remove the file since we no longer hold reference to it.
-                if (!imageDestFile.delete()) {
-                    Log.e(TAG, "Failed to delete unsaved image: " + imageDestFile);
-                }
-            }
-
-            return success;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
-            if (pagerAdapter == null || !success) {
-                return;
-            }
-
-            pagerAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private class EntryPagerAdapter extends FragmentStatePagerAdapter {
+    class EntryPagerAdapter extends FragmentStatePagerAdapter {
         // Position to ID map.
         List<Long> wordIDs = new ArrayList<>();
 

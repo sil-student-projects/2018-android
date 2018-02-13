@@ -39,7 +39,7 @@
             android:id="@+id/photo_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="dispatchTakePictureIntent"
+            android:onClick="dispatchImageCaptureIntent"
             android:text="@string/photo" />
 
     </LinearLayout>
