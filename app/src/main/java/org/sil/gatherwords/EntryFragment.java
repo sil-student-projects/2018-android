@@ -5,6 +5,8 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -104,44 +106,9 @@ public class EntryFragment extends Fragment {
             }
 
             ListView entryFields = rootView.findViewById(R.id.entry_fields);
+            EntryFieldAdapter adapter = (EntryFieldAdapter) entryFields.getAdapter();
 
-            List<Meaning> meanings = new ArrayList<>(entryFields.getCount());
-            for (int i = 0; i < entryFields.getCount(); i++) {
-                View entryField = entryFields.getChildAt(i);
-                if (entryField == null) {
-                    // TODO: Does this mean the field was deleted before we saved the data?
-                    //      ... yes, yes it does.
-                    continue;
-                }
-
-                TextView langCodeField = entryField.findViewById(R.id.lang_code);
-                EditText langDataField = entryField.findViewById(R.id.lang_data);
-
-                if (langCodeField == null || langDataField == null) {
-                    continue;
-                }
-
-                meanings.add(new Meaning(
-                    m_wordID,
-                    langCodeField.getText().toString(),
-                    langDataField.getText().toString()
-                ));
-            }
-
-            FilledWord word = new FilledWord();
-            word.id = m_wordID;
-            word.meanings = meanings;
-
-            // Update the semantic domain. Blank should insert None as consistent with default
-            //      value in database.
-            AutoCompleteTextView aCTV = entryFields.findViewById(R.id.semantic_domain_auto_complete);
-            String semanticDomain = aCTV.getText().toString();
-            if (semanticDomain.isEmpty()) {
-                semanticDomain = "None";
-            }
-            word.semanticDomain = semanticDomain;
-
-            new UpdateWordTask(getContext()).execute(word);
+            new UpdateWordTask(getContext()).execute(adapter.word);
 
         } catch (Exception e) {
             Log.e(TAG, "Null pointer exception - failed to find ListView and/or EditText object", e);
@@ -350,7 +317,20 @@ public class EntryFragment extends Fragment {
                 langCodeField.setText(meaning.type);
 
                 EditText langDataField = convertView.findViewById(R.id.lang_data);
+
+                // Remove the existing listener since this
+                // view can be reused.
+                if (langDataField.getTag() != null) {
+                    langDataField.removeTextChangedListener(
+                        (TextWatcher) langDataField.getTag()
+                    );
+                }
+
                 langDataField.setText(meaning.data);
+
+                TextWatcher watcher = new MeaningTextWatcher(meaning);
+                langDataField.addTextChangedListener(watcher);
+                langDataField.setTag(watcher);
             }
 
             return convertView;
@@ -379,6 +359,15 @@ public class EntryFragment extends Fragment {
             }
 
             AutoCompleteTextView aCTV = convertView.findViewById(R.id.semantic_domain_auto_complete);
+
+            // Remove the existing listener since this
+            // view can be reused.
+            if (aCTV.getTag() != null) {
+                aCTV.removeTextChangedListener(
+                    (TextWatcher) aCTV.getTag()
+                );
+            }
+
             aCTV.setAdapter(new ArrayAdapter<>(
                 convertView.getContext(),
                 android.R.layout.simple_dropdown_item_1line,
@@ -390,6 +379,22 @@ public class EntryFragment extends Fragment {
                 } else { // Not sure if this will ever run, but added as a precaution. If "" is read, "None" is inserted into db
                     aCTV.setText("");
                 }
+
+            TextWatcher watcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    word.semanticDomain = s.toString();
+                }
+            };
+
+            aCTV.addTextChangedListener(watcher);
+            aCTV.setTag(watcher);
 
             return convertView;
         }
@@ -447,6 +452,25 @@ public class EntryFragment extends Fragment {
             }
 
             return semanticDomainList;
+        }
+    }
+
+    private static class MeaningTextWatcher implements TextWatcher {
+        private Meaning meaning;
+
+        MeaningTextWatcher(Meaning m) {
+            meaning = m;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            meaning.data = s.toString();
         }
     }
 }
