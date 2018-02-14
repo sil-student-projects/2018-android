@@ -11,7 +11,7 @@ import org.sil.gatherwords.R;
 /**
  * The database class.
  */
-@Database(entities = {Session.class, Word.class, Meaning.class}, version = 15)
+@Database(entities = {Session.class, Word.class, Meaning.class, SemanticDomain.class}, version = 16)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton db instance; avoids expensive init.
@@ -25,6 +25,8 @@ public abstract class AppDatabase extends RoomDatabase {
         )
         .fallbackToDestructiveMigration()
         .build();
+
+        DatabaseSeeder.seed(context);
     }
 
     public static AppDatabase get(Context context) {
@@ -37,4 +39,5 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SessionDAO sessionDAO();
     public abstract WordDAO wordDAO();
     public abstract MeaningDAO meaningDAO();
+    public abstract SemanticDomainDAO semanticDomainDAO();
 }
