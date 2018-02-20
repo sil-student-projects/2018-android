@@ -24,17 +24,14 @@ public interface SessionDAO {
     List<SessionMeta> getAll();
 
     @Query("SELECT * FROM session WHERE id IN (:sessionIDs)")
-    List<Session> getSessionsByID(Long... sessionIDs);
+    List<Session> getSessionsByID(Integer... sessionIDs);
 
     @Query("SELECT * FROM session WHERE id = :sessionID")
-    Session get(long sessionID);
-
-    @Query("SELECT :columns FROM session WHERE :comparisonString")
-    List<String> getWhere(List<String> columns, String comparisonString);
+    Session get(int sessionID);
 
     // DELETE
     @Query("UPDATE session SET deletedAt = :deletedAt WHERE id IN (:sessionIDs)")
-    void softDeleteSessions(Date deletedAt, Long... sessionIDs);
+    void softDeleteSessions(Date deletedAt, Integer... sessionIDs);
 
     // INSERT
     @Insert

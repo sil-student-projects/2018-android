@@ -24,14 +24,14 @@ import java.util.Date;
                    @Index("semanticDomainID")})
 public class Word {
     @PrimaryKey (autoGenerate = true)
-    public long id;
+    public int id;
 
-    public long sessionID;
+    public int sessionID;
 
     public Date deletedAt;
     public Date updatedAt;
 
-    public Long semanticDomainID;
+    public Integer semanticDomainID;
 
     // Only filename stored (no path).
     public String audio; // NOTE: LF does NOT support multiple audio files

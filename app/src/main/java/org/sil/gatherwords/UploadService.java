@@ -61,7 +61,7 @@ public class UploadService extends Service implements Handler.Callback {
     public int onStartCommand(Intent intent, int flags, int startID) {
         Message msg = m_workerHandler.obtainMessage();
         msg.arg1 = startID;
-        msg.arg2 = (int) intent.getLongExtra(SessionActivity.ARG_SESSION_ID, 0);
+        msg.arg2 = intent.getIntExtra(SessionActivity.ARG_SESSION_ID, 0);
 
         m_workerHandler.sendMessage(msg);
 
@@ -122,7 +122,7 @@ public class UploadService extends Service implements Handler.Callback {
         // TODO: xx.post(session);
 
         WordDAO wDAO = db.wordDAO();
-        List<Long> wordIDs = wDAO.getIDsForSession(session.id);
+        List<Integer> wordIDs = wDAO.getIDsForSession(session.id);
 
         int numWords = wordIDs.size();
         for (int i = 0; i < numWords; ++i) {

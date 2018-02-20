@@ -42,7 +42,7 @@ import java.util.Set;
 public class EntryActivity extends AppCompatActivity {
     private static final String TAG = EntryActivity.class.getSimpleName();
 
-    private long sessionID;
+    private int sessionID;
     ViewPager pager;
 
     private ImageCapture imageCapture;
@@ -66,7 +66,7 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
         configureItemUpdateControls();
 
-        sessionID = getIntent().getLongExtra(SessionActivity.ARG_SESSION_ID, 0);
+        sessionID = getIntent().getIntExtra(SessionActivity.ARG_SESSION_ID, 0);
 
         pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
@@ -251,24 +251,24 @@ public class EntryActivity extends AppCompatActivity {
         return adapter.getItem(currentItem);
     }
 
-    private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Long>> {
+    private static class LoadWordIDsTask extends AsyncTask<Void, Void, List<Integer>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
-        long sessionID;
+        int sessionID;
         WordDAO wDAO;
 
-        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, long sID, WordDAO dao) {
+        LoadWordIDsTask(EntryPagerAdapter pagerAdapter, int sID, WordDAO dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
         }
 
         @Override
-        protected List<Long> doInBackground(Void... v) {
+        protected List<Integer> doInBackground(Void... v) {
             return wDAO.getIDsForSession(sessionID);
         }
 
         @Override
-        protected void onPostExecute(List<Long> wordIDs) {
+        protected void onPostExecute(List<Integer> wordIDs) {
             EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
             if (pagerAdapter == null || wordIDs == null) {
                 return;
@@ -280,25 +280,25 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private static class DeleteWordTask extends AsyncTask<Long, Void, List<Long>> {
+    private static class DeleteWordTask extends AsyncTask<Integer, Void, List<Integer>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
-        long sessionID;
+        int sessionID;
         WordDAO wDAO;
 
-        DeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDAO dao) {
+        DeleteWordTask(EntryPagerAdapter pagerAdapter, int sID, WordDAO dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
         }
 
         @Override
-        protected List<Long> doInBackground(Long... wordIDs) {
+        protected List<Integer> doInBackground(Integer... wordIDs) {
             wDAO.softDeleteWords(new Date(), wordIDs);
             return wDAO.getIDsForSession(sessionID);
         }
 
         @Override
-        protected void onPostExecute(List<Long> wordIDs) {
+        protected void onPostExecute(List<Integer> wordIDs) {
             EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
             if (pagerAdapter == null || wordIDs == null) {
                 return;
@@ -310,20 +310,20 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private static class UndoLastDeleteWordTask extends AsyncTask<Void, Void, List<Long>> {
+    private static class UndoLastDeleteWordTask extends AsyncTask<Void, Void, List<Integer>> {
         WeakReference<EntryPagerAdapter> pagerAdapterRef;
-        long sessionID;
+        int sessionID;
         WordDAO wDAO;
 
-        UndoLastDeleteWordTask(EntryPagerAdapter pagerAdapter, long sID, WordDAO dao) {
+        UndoLastDeleteWordTask(EntryPagerAdapter pagerAdapter, int sID, WordDAO dao) {
             pagerAdapterRef = new WeakReference<>(pagerAdapter);
             sessionID = sID;
             wDAO = dao;
         }
 
         @Override
-        protected List<Long> doInBackground(Void... v) {
-            long numUpdated = wDAO.undoLastDeleted(sessionID);
+        protected List<Integer> doInBackground(Void... v) {
+            int numUpdated = wDAO.undoLastDeleted(sessionID);
             if (numUpdated > 0) {
                 return wDAO.getIDsForSession(sessionID);
             }
@@ -333,7 +333,7 @@ public class EntryActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(List<Long> wordIDs) {
+        protected void onPostExecute(List<Integer> wordIDs) {
             EntryPagerAdapter pagerAdapter = pagerAdapterRef.get();
             if (pagerAdapter == null || wordIDs == null) {
                 return;
@@ -347,7 +347,7 @@ public class EntryActivity extends AppCompatActivity {
 
     private static class SaveAudioTask extends AsyncTask<File, Void, Void> {
         private AppDatabase db;
-        private long wordID;
+        private int wordID;
 
         SaveAudioTask(EntryActivity activity) {
             db = AppDatabase.get(activity);
@@ -410,7 +410,7 @@ public class EntryActivity extends AppCompatActivity {
     private static class PlayAudioTask extends AsyncTask<Void, Void, String> {
         private WordDAO wordDAO;
         WeakReference<EntryActivity> activityRef;
-        long wordID;
+        int wordID;
 
         PlayAudioTask(EntryActivity activity) {
             wordDAO = AppDatabase.get(activity).wordDAO();
@@ -447,7 +447,7 @@ public class EntryActivity extends AppCompatActivity {
 
     class EntryPagerAdapter extends FragmentStatePagerAdapter {
         // Position to ID map.
-        List<Long> wordIDs = new ArrayList<>();
+        List<Integer> wordIDs = new ArrayList<>();
 
         EntryPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -462,7 +462,7 @@ public class EntryActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            long wordID = 0; // Invalid ID, should never yield results.
+            int wordID = 0; // Invalid ID, should never yield results.
             if (position < wordIDs.size()) {
                 wordID = wordIDs.get(position);
             }
@@ -530,7 +530,7 @@ public class EntryActivity extends AppCompatActivity {
         WeakReference<EntryActivity> entryActivityRef;
         WordDAO wDAO;
         MeaningDAO mDAO;
-        Long sessionID;
+        int sessionID;
         Set<String> sharedPrefs;
         String[] languages;
 
@@ -550,7 +550,7 @@ public class EntryActivity extends AppCompatActivity {
             Word newWord = new Word();
             newWord.sessionID = sessionID;
             newWord.updatedAt = new Date();
-            long wordID = wDAO.insertWord(newWord);
+            int wordID = (int) wDAO.insertWord(newWord);
 
             // Insert blank Meanings for all preferences currently selected
             int idx = 0;

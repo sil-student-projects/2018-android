@@ -66,7 +66,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     private String worldListToLoad;
 
     // Session variables
-    private long sessionID;
+    private int sessionID;
     private FusedLocationProviderClient mFusedLocationClient; // Used to track gps through multiple methods
     private Date date;
     private Location gps;
@@ -78,7 +78,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         setContentView(R.layout.activity_session);
 
         creatingNewSession = getIntent().getBooleanExtra(ARG_CREATING_SESSION, true);
-        sessionID = getIntent().getLongExtra(ARG_SESSION_ID, 0);
+        sessionID = getIntent().getIntExtra(ARG_SESSION_ID, 0);
 
         gpsEnabled = false;
 
@@ -201,7 +201,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     private static class InsertSessionsTask extends AsyncTask<Session, Void, Void> {
         private SessionDAO sDAO;
         private WordDAO wordDAO;
-        private long sessionID;
+        private int sessionID;
         private AppDatabase db;
         private String wordList;
         private AssetManager assets;
@@ -218,11 +218,10 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
 
         @Override
         protected Void doInBackground(Session... sessions) {
-            long[] ids;
-            ids = sDAO.insertSession(sessions);
+            long[] ids = sDAO.insertSession(sessions);
 
             if (ids.length > 0) {
-                sessionID = ids[0];
+                sessionID = (int) ids[0];
                 insertFromAsset();
             }
             return null;
@@ -253,7 +252,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
                     word.sessionID = sessionID;
 
                     // Insert
-                    long wordID = wordDAO.insertWord(word);
+                    int wordID = (int) wordDAO.insertWord(word);
 
                     meaningDAO.insertMeanings(
                         new Meaning(wordID, "entry", json.getString("entry")),
@@ -435,7 +434,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
     /* Database access when loading information from a previously created session
 
      */
-    private static class LoadSessionDataFromDB extends AsyncTask<Long, Void, List<Session>> {
+    private static class LoadSessionDataFromDB extends AsyncTask<Integer, Void, List<Session>> {
         private SessionDAO sDAO;
         private WeakReference<SessionActivity> sessionActivityRef;
 
@@ -445,7 +444,7 @@ public class SessionActivity extends AppCompatActivity implements AdapterView.On
         }
 
         @Override
-        protected List<Session> doInBackground(Long... ids) {
+        protected List<Session> doInBackground(Integer... ids) {
             return sDAO.getSessionsByID(ids);
         }
 

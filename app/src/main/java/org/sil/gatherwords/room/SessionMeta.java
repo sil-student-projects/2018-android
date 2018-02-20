@@ -5,7 +5,7 @@ import android.arch.persistence.room.Embedded;
 import java.util.Date;
 
 public class SessionMeta {
-    public long id;
+    public int id;
     public Date date;
     public String speaker;
     public String label;

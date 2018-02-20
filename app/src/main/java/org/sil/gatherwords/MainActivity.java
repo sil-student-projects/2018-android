@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static class DeleteSessionFromDB extends AsyncTask<Long, Void, List<SessionMeta>> {
+    private static class DeleteSessionFromDB extends AsyncTask<Integer, Void, List<SessionMeta>> {
         private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
 
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected List<SessionMeta> doInBackground(Long... sessionIDs) {
+        protected List<SessionMeta> doInBackground(Integer... sessionIDs) {
             sDAO.softDeleteSessions(new Date(), sessionIDs);
             return sDAO.getAll();
         }

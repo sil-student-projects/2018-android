@@ -16,9 +16,9 @@ import android.arch.persistence.room.PrimaryKey;
         indices = @Index(value = {"wordID", "type"}, unique = true))
 public class Meaning {
     @PrimaryKey (autoGenerate = true)
-    public long id;
+    public int id;
 
-    public long wordID;
+    public int wordID;
 
     // Potentially something like "en" or "IPA".
     // TODO: Should this field be renamed to something like "language"?
@@ -26,7 +26,7 @@ public class Meaning {
     // Description word/phrase for this type.
     public String data;
 
-    public Meaning(long wordID, String type, String data) {
+    public Meaning(int wordID, String type, String data) {
         this.wordID = wordID;
         this.type = type;
         this.data = data;

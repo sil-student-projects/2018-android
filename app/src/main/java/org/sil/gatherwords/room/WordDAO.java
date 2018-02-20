@@ -1,7 +1,6 @@
 package org.sil.gatherwords.room;
 
 import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
@@ -16,11 +15,11 @@ import java.util.List;
 @Dao
 public interface WordDAO {
     // SELECT
-    @Query("SELECT id FROM word WHERE sessionId = :sessionID AND deletedAt IS NULL ORDER BY id ASC")
-    List<Long> getIDsForSession(long sessionID);
+    @Query("SELECT id FROM word WHERE sessionID = :sessionID AND deletedAt IS NULL ORDER BY id ASC")
+    List<Integer> getIDsForSession(int sessionID);
 
     @Query("SELECT * FROM word WHERE id = :wordID")
-    Word get(long wordID);
+    Word get(int wordID);
 
     @Query("SELECT word.id, sessionID, audio, picture, " +
                 "semanticDomain.name AS semanticDomain " +
@@ -28,10 +27,7 @@ public interface WordDAO {
             "LEFT JOIN semanticDomain ON semanticDomainID = semanticDomain.id " +
             "WHERE word.id = :wordID")
     @Transaction
-    FilledWord getFilled(long wordID);
-
-    @Query("SELECT :columns FROM word WHERE :comparisonStatement")
-    List<String> getWhere(List<String> columns, String comparisonStatement);
+    FilledWord getFilled(int wordID);
 
     // UPDATES
     @Update
@@ -39,19 +35,13 @@ public interface WordDAO {
 
     @Query("UPDATE word SET deletedAt = NULL WHERE deletedAt = " +
             "(SELECT MAX(deletedAt) FROM word WHERE sessionID = :sessionID)")
-    long undoLastDeleted(long sessionID);
+    int undoLastDeleted(int sessionID);
 
     // DELETE
-    @Delete
-    void deleteWords(Word... words);
-
     @Query("UPDATE word SET deletedAt = :deletedAt WHERE id IN (:wordIDs)")
-    void softDeleteWords(Date deletedAt, Long... wordIDs);
+    void softDeleteWords(Date deletedAt, Integer... wordIDs);
 
     // INSERT
     @Insert
     long insertWord(Word word);
-
-    @Insert
-    void insertWords(Word... words);
 }

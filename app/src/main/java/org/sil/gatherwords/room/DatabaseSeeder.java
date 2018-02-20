@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DatabaseSeeder {
-    public static String TAG = DatabaseSeeder.class.getSimpleName();
+    private static String TAG = DatabaseSeeder.class.getSimpleName();
 
     public static void seed(Context context) {
         new SeedTask(context).execute();

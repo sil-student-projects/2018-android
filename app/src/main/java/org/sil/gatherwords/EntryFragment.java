@@ -28,7 +28,6 @@ import org.sil.gatherwords.room.Word;
 import org.sil.gatherwords.room.WordDAO;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,14 +39,14 @@ public class EntryFragment extends Fragment {
     private static final String ARG_POSITION = "position";
     private static final String ARG_TOTAL = "total";
 
-    private long m_wordID;  // Database ID of the word displayed word.
+    private int m_wordID;  // Database ID of the word displayed word.
     private int m_position; // The index of the displayed word (0-indexed).
     private int m_total;    // Total number of words.
 
-    public static EntryFragment newInstance(long wordID, int position, int total) {
+    public static EntryFragment newInstance(int wordID, int position, int total) {
         EntryFragment fragment = new EntryFragment();
         Bundle args = new Bundle();
-        args.putLong(ARG_WORD_ID, wordID);
+        args.putInt(ARG_WORD_ID, wordID);
         args.putInt(ARG_POSITION, position);
         args.putInt(ARG_TOTAL, total);
         fragment.setArguments(args);
@@ -60,7 +59,7 @@ public class EntryFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            m_wordID = args.getLong(ARG_WORD_ID);
+            m_wordID = args.getInt(ARG_WORD_ID);
             m_position = args.getInt(ARG_POSITION);
             m_total = args.getInt(ARG_TOTAL);
         }
@@ -71,7 +70,7 @@ public class EntryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View entryPage = inflater.inflate(R.layout.fragment_entry, container, false);
 
-        new LoadWordTask(entryPage, m_position, m_total).execute(m_wordID);
+        new LoadWordTask(entryPage).execute(m_wordID);
         TextView pageStatus = entryPage.findViewById(R.id.page_status);
         // TODO: Hard coded "Word" is intended to be the word this page represents.
         // What word would that be?
@@ -109,30 +108,26 @@ public class EntryFragment extends Fragment {
     }
 
     /**
-     * Gets the current wordId
+     * Gets the current wordID
      *
      * It seems m_wordID is not set when returning from taking a picture.
      * @return The wordID of the current Word
      */
-    public long getWordID() {
-        return getArguments().getLong(ARG_WORD_ID);
+    public int getWordID() {
+        return getArguments().getInt(ARG_WORD_ID);
     }
 
-    private static class LoadWordTask extends AsyncTask<Long, Void, FilledWord> {
+    private static class LoadWordTask extends AsyncTask<Integer, Void, FilledWord> {
         WeakReference<View> entryPageRef;
         WordDAO wDAO;
-        int position;
-        int total;
 
-        LoadWordTask(View entryPage, int pos, int tot) {
+        LoadWordTask(View entryPage) {
             entryPageRef = new WeakReference<>(entryPage);
             wDAO = AppDatabase.get(entryPage.getContext()).wordDAO();
-            position = pos;
-            total = tot;
         }
 
         @Override
-        protected FilledWord doInBackground(Long... wordIDs) {
+        protected FilledWord doInBackground(Integer... wordIDs) {
             if (wordIDs == null || wordIDs.length != 1) {
                 Log.e(TAG, "Did not receive exactly 1 wordID");
                 return null;
