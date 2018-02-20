@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -165,10 +166,10 @@ public class EntryActivity extends AppCompatActivity {
         }
 
         mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mRecorder.setOutputFile(mAudioFile.getAbsolutePath());
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 
         try {
             mRecorder.prepare();
@@ -201,6 +202,13 @@ public class EntryActivity extends AppCompatActivity {
         try {
             File audioFile = Util.getDataFile(this, filename);
             mPlayer.setDataSource(audioFile.getAbsolutePath());
+            mPlayer.setAudioAttributes(
+                new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            );
+
             mPlayer.prepare();
             mPlayer.start();
         } catch (IOException e) {
