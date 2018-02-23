@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import static android.content.Context.MODE_PRIVATE;
 
 public class Util {
-    private static String TAG = Util.class.getSimpleName();
+    private static final String TAG = Util.class.getSimpleName();
 
     @Nullable
     public static File getNewCacheFile(Context context, String suffix) {

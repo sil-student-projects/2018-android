@@ -78,7 +78,7 @@ public class ImageCapture {
     private static class StoreImageTask extends AsyncTask<File, Void, Boolean> {
         private AppDatabase db;
         private WordDAO wordDAO;
-        private long wordID;
+        private int wordID;
         WeakReference<EntryActivity.EntryPagerAdapter> pagerAdapterRef;
 
         StoreImageTask(EntryActivity activity) {

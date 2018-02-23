@@ -8,7 +8,7 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity(indices = @Index(value = {"name"}, unique = true))
 public class SemanticDomain {
     @PrimaryKey(autoGenerate = true)
-    public long id;
+    public int id;
     public String guid;
     public String key;
     public String abbr;

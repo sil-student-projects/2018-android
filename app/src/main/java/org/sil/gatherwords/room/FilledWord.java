@@ -15,8 +15,8 @@ import java.util.List;
 public class FilledWord {
     private static final String TAG = FilledWord.class.getSimpleName();
 
-    public long id;
-    public long sessionID;
+    public int id;
+    public int sessionID;
     public String audio;
     public String picture;
     public String semanticDomain;
