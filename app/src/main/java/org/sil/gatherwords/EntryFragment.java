@@ -248,14 +248,14 @@ public class EntryFragment extends Fragment {
         }
     }
 
-    private static class EntryFieldAdapter extends BaseAdapter {
+    static class EntryFieldAdapter extends BaseAdapter {
         private static final String MEANING_VIEW_TAG = "meaning";
         private static final String SEMANTIC_VIEW_TAG = "semantic";
         private static final String AUDIO_VIEW_TAG = "audio";
         private static final String IMAGE_VIEW_TAG = "image";
 
         private LayoutInflater inflater;
-        private FilledWord word;
+        FilledWord word;
 
         EntryFieldAdapter(LayoutInflater flate, FilledWord filledWord) {
             inflater = flate;

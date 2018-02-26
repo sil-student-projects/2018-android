@@ -23,12 +23,12 @@
     <!-- Entry activity strings -->
     <string name="photo">Photo</string>
     <string name="TAKE_PHOTO_LABEL">Photo</string>
-    <string name="START_RECORDING_LABEL">Record</string>
-    <string name="STOP_RECORDING_LABEL">Stop</string>
+    <string name="record">Record</string>
+    <string name="stop">Stop</string>
     <string name="START_PLAYING_LABEL">Play</string>
     <string name="STOP_PLAYING_LABEL">Stop</string>
     <string name="delete">Delete</string>
-    <string name="record_failed">Failed to start recording</string>
+    <string name="record_failed">Recording failed</string>
     <string name="no_audio">No audio</string>
 
     <!-- Entry fragment strings -->

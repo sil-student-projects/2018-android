@@ -1,17 +1,13 @@
 package org.sil.gatherwords;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -19,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,20 +43,11 @@ public class EntryActivity extends AppCompatActivity {
     private int sessionID;
     ViewPager pager;
 
+    private AudioCapture audioCapture;
     private ImageCapture imageCapture;
 
-    // Audio recording features
-    // adapted from https://developer.android.com/guide/topics/media/mediarecorder.html
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private File mAudioFile = null;
-    private RecordButton mRecordButton = null;
-    private MediaRecorder mRecorder = null;
-    private PlayButton   mPlayButton = null;
-    private MediaPlayer   mPlayer = null;
-
-    // Requesting permission to RECORD_AUDIO
-    private boolean permissionToRecordAccepted = false;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+    private PlayButton  mPlayButton = null;
+    private MediaPlayer mPlayer = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +59,21 @@ public class EntryActivity extends AppCompatActivity {
 
         pager = findViewById(R.id.viewpager);
         pager.setAdapter(new EntryPagerAdapter(getSupportFragmentManager()));
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
+            @Override
+            public void onPageSelected(int position) {
+                // Changed page, stop recording if necessary.
+                audioCapture.endRecord();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
+
+        audioCapture = new AudioCapture(this);
         imageCapture = new ImageCapture(this);
 
         findViewById(R.id.new_word_fab).setOnClickListener(new View.OnClickListener() {
@@ -118,16 +120,8 @@ public class EntryActivity extends AppCompatActivity {
      * This function configures the audio recording buttons and temp storage.
      */
     private void configureItemUpdateControls() {
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
         // TODO: Define these in XML instead of dynamically.
         LinearLayout ll = findViewById(R.id.footer_controls);
-        mRecordButton = new RecordButton(this);
-        ll.addView(mRecordButton,
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        0));
         mPlayButton = new PlayButton(this);
         ll.addView(mPlayButton,
                 new LinearLayout.LayoutParams(
@@ -139,10 +133,7 @@ public class EntryActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        if (mRecorder != null) {
-            mRecorder.release();
-            mRecorder = null;
-        }
+        audioCapture.endRecord();
 
         if (mPlayer != null) {
             mPlayer.release();
@@ -150,43 +141,10 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private void onRecord(boolean start) {
-        if (start) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
-
-    private void startRecording() {
-        mAudioFile = Util.getNewDataFile(this, ".3gp");
-        if (mAudioFile == null) {
+    public void onRecord(View view) {
+        if (!audioCapture.onRecord()) {
             Toast.makeText(this, R.string.record_failed, Toast.LENGTH_LONG).show();
-            return;
         }
-
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(mAudioFile.getAbsolutePath());
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(TAG, "prepare() failed");
-        }
-
-        mRecorder.start();
-    }
-
-    private void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
-        mRecorder = null;
-
-        new SaveAudioTask(this).execute(mAudioFile);
-        mAudioFile = null; // File control is taken by SaveAudioTask.
     }
 
     private void onPlay(boolean start) {
@@ -240,13 +198,7 @@ public class EntryActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                break;
-        }
-        if (!permissionToRecordAccepted ) finish();
-
+        audioCapture.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**
@@ -353,68 +305,6 @@ public class EntryActivity extends AppCompatActivity {
         }
     }
 
-    private static class SaveAudioTask extends AsyncTask<File, Void, Void> {
-        private AppDatabase db;
-        private int wordID;
-
-        SaveAudioTask(EntryActivity activity) {
-            db = AppDatabase.get(activity);
-            EntryFragment fragment = (EntryFragment)activity.getCurrentFragment();
-            wordID = fragment.getWordID();
-        }
-
-        @Override
-        protected Void doInBackground(File... files) {
-            if (files == null || files.length != 1) {
-                Log.e(TAG, "Expected exactly 1 audio file");
-                return null;
-            }
-
-            File audioFile = files[0];
-            boolean success = false;
-
-            db.beginTransaction();
-            try {
-                WordDAO wordDAO = db.wordDAO();
-
-                Word currentWord = wordDAO.get(wordID);
-                if (currentWord != null) {
-                    File oldAudio = null;
-                    if (currentWord.audio != null) {
-                        oldAudio = new File(audioFile.getParent() + '/' + currentWord.audio);
-                    }
-
-                    // Save it.
-                    currentWord.audio = audioFile.getName();
-                    wordDAO.updateWords(currentWord);
-
-                    db.setTransactionSuccessful();
-                    success = true;
-
-                    if (oldAudio != null) {
-                        // Remove since we no longer hold reference to it.
-                        if (!oldAudio.delete()) {
-                            Log.e(TAG, "Failed to delete overridden audio: " + oldAudio.getAbsolutePath());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Exception while updating audio in the Word", e);
-            } finally {
-                db.endTransaction();
-            }
-
-            if (!success) {
-                // Remove the file since we no longer hold reference to it.
-                if (!audioFile.delete()) {
-                    Log.e(TAG, "Failed to delete unsaved audio: " + audioFile.getAbsolutePath());
-                }
-            }
-
-            return null;
-        }
-    }
-
     private static class PlayAudioTask extends AsyncTask<Void, Void, String> {
         private WordDAO wordDAO;
         WeakReference<EntryActivity> activityRef;
@@ -456,9 +346,12 @@ public class EntryActivity extends AppCompatActivity {
     class EntryPagerAdapter extends FragmentStatePagerAdapter {
         // Position to ID map.
         List<Integer> wordIDs = new ArrayList<>();
+        LruCache<Integer, WeakReference<Fragment>> pageCache;
 
         EntryPagerAdapter(FragmentManager fm) {
             super(fm);
+
+            pageCache = new LruCache<>(5);
 
             // Task will trigger update after IDs are loaded.
             new LoadWordIDsTask(
@@ -469,12 +362,25 @@ public class EntryActivity extends AppCompatActivity {
         }
 
         @Override
+        public void notifyDataSetChanged() {
+            pageCache.evictAll();
+            super.notifyDataSetChanged();
+        }
+
+        @Override
         public Fragment getItem(int position) {
+            WeakReference<Fragment> fragmentRef = pageCache.get(position);
+            if (fragmentRef != null && fragmentRef.get() != null) {
+                return fragmentRef.get();
+            }
+
             int wordID = 0; // Invalid ID, should never yield results.
             if (position < wordIDs.size()) {
                 wordID = wordIDs.get(position);
             }
-            return EntryFragment.newInstance(wordID, position, getCount());
+            Fragment fragment = EntryFragment.newInstance(wordID, position, getCount());
+            pageCache.put(position, new WeakReference<>(fragment));
+            return fragment;
         }
 
         @Override
@@ -487,28 +393,6 @@ public class EntryActivity extends AppCompatActivity {
         @Override
         public int getItemPosition(Object obj) {
             return POSITION_NONE;
-        }
-    }
-
-    class RecordButton extends AppCompatButton {
-        boolean mStartRecording = true;
-
-        OnClickListener clicker = new OnClickListener() {
-            public void onClick(View v) {
-                onRecord(mStartRecording);
-                if (mStartRecording) {
-                    setText(R.string.STOP_RECORDING_LABEL);
-                } else {
-                    setText(R.string.START_RECORDING_LABEL);
-                }
-                mStartRecording = !mStartRecording;
-            }
-        };
-
-        public RecordButton(Context ctx) {
-            super(ctx);
-            setText(R.string.START_RECORDING_LABEL);
-            setOnClickListener(clicker);
         }
     }
 
