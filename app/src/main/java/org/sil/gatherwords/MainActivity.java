@@ -1,12 +1,22 @@
 package org.sil.gatherwords;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorDescription;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,10 +44,52 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
+    private AccountManager am;
+    private Account[] accounts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.GET_ACCOUNTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.GET_ACCOUNTS)) {
+
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.GET_ACCOUNTS},
+                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+            }
+        }
+        am = AccountManager.get(getApplicationContext());
+
+        accounts = am.getAccountsByType("com.google");
+        Bundle options = new Bundle();
+        if (accounts.length != 1) {
+            Intent i = AccountManager.newChooseAccountIntent(null, null, new String[]{"com.google"}, true, null, null, null, null);
+            // Todo: crashes on the first run
+            startActivityForResult(i, 1);
+        }
+        am.getAuthToken(accounts[0],
+                "oauth2:openid",            // Auth scope
+                options,                        // Authenticator-specific options
+                this,                           // Your activity
+                new OnTokenAcquired(),          // Callback called when a token is successfully acquired
+                new Handler(new OnError()));
+
         setContentView(R.layout.activity_main);
 
         final ListView sessionList = findViewById(R.id.session_list);
@@ -55,6 +107,14 @@ public class MainActivity extends AppCompatActivity {
         // Initializes the default preferences so that program does not crash on word creation
         //  if the settings have not been accessed
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode,
+                                    final Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+        }
     }
 
     @Override
@@ -204,6 +264,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            ImageButton uploadButton = convertView.findViewById(R.id.upload_session);
+            uploadButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Todo: Use UploadService for uploading
+                    Util.sendGetTokenRequest(AccountManager.get(view.getContext()));
+                }
+            });
             return convertView;
         }
     }
@@ -272,6 +340,20 @@ public class MainActivity extends AppCompatActivity {
                 sessionListAdapter.sessions = sessions;
                 sessionListAdapter.notifyDataSetChanged();
             }
+        }
+    }
+
+    private class OnTokenAcquired implements AccountManagerCallback<Bundle> {
+        @Override
+        public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+            Log.d(TAG, "run: test");
+        }
+    }
+
+    private class OnError implements Handler.Callback {
+        @Override
+        public boolean handleMessage(Message message) {
+            return false;
         }
     }
 }

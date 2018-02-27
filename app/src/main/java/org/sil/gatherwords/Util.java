@@ -1,6 +1,9 @@
 package org.sil.gatherwords;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -86,5 +89,11 @@ public class Util {
         }
 
         return success;
+    }
+
+    public static void sendGetTokenRequest(AccountManager accountManager) {
+        Account[] accounts = accountManager.getAccounts();
+        Bundle options = new Bundle();
+//        accountManager.getAuthToken()
     }
 }

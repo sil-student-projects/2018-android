@@ -64,4 +64,8 @@
     <string name="session_upload">Session upload</string>
     <string name="uploading_session_name">Uploading session %1$s</string>
     <string name="upload_complete">Upload complete</string>
+
+    <!-- OAuth2 -->
+    <string name="account_type">Auth</string>
+    <string name="token_type">testing</string>
 </resources>
