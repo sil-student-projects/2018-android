@@ -25,6 +25,13 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/session_list_button_edit"
+                android:id="@+id/session_list_button_upload"
+                android:src="@android:drawable/stat_sys_upload_done"
+                android:tint="#000" />
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_toLeftOf="@id/session_list_button_delete"
                 android:id="@+id/session_list_button_edit"
                 android:src="@drawable/ic_edit_black_24dp" />
