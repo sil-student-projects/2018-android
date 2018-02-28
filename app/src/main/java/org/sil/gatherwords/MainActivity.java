@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -35,10 +36,14 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private Uploader m_uploader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        m_uploader = new Uploader(this);
 
         final ListView sessionList = findViewById(R.id.session_list);
 
@@ -64,6 +69,16 @@ public class MainActivity extends AppCompatActivity {
         new FillSessionListTask(this).execute();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        m_uploader.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        m_uploader.onActivityResult(requestCode, resultCode, data);
+    }
+
     private static class FillSessionListTask extends AsyncTask<Void, Void, List<SessionMeta>> {
         private SessionDAO sDAO;
         private WeakReference<MainActivity> mainActivityRef;
@@ -84,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             if (mainActivity != null) {
                 ListView sessionList = mainActivity.findViewById(R.id.session_list);
                 sessionList.setAdapter(new SessionListAdapter(
-                    mainActivity.getLayoutInflater(),
+                    mainActivity,
                     sessions
                 ));
             }
@@ -124,14 +139,15 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // TODO: Switch to CursorAdapter
     private static class SessionListAdapter extends BaseAdapter {
         private LayoutInflater inflater;
         private List<SessionMeta> sessions;
+        private WeakReference<MainActivity> activityRef;
 
-        SessionListAdapter(LayoutInflater flate, List<SessionMeta> sessionList) {
-            inflater = flate;
+        SessionListAdapter(MainActivity activity, List<SessionMeta> sessionList) {
+            inflater = activity.getLayoutInflater();
             sessions = sessionList;
+            activityRef = new WeakReference<>(activity);
         }
 
         @Override
@@ -183,6 +199,17 @@ public class MainActivity extends AppCompatActivity {
                     progressBar.setProgress(session.progress.completed);
                 }
             }
+
+            ImageButton uploadButton = convertView.findViewById(R.id.session_list_button_upload);
+            uploadButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity activity = activityRef.get();
+                    if (activity != null) {
+                        activity.m_uploader.upload(session.id);
+                    }
+                }
+            });
 
             ImageButton editButton = convertView.findViewById(R.id.session_list_button_edit);
             editButton.setOnClickListener(new View.OnClickListener() {
