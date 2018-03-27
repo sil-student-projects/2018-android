@@ -15,6 +15,8 @@
     <string name="language_options_key">Language Options Key.</string>
     <string name="language_options_title">Language Options Title.</string>
     <string name="language_options_summary">Language Options Summary.</string>
+    <string name="preference_file_key">org.sil.gatherwords.preferences</string>
+    <string name="jwt_pref_key">jwt</string>
 
     <!-- Main activity strings -->
     <string name="yyyy_MM_dd">yyyy-MM-dd</string>
@@ -62,4 +64,9 @@
     <string name="session_upload">Session upload</string>
     <string name="uploading_session_name">Uploading session %1$s</string>
     <string name="upload_complete">Upload complete</string>
+
+    <!-- XForgeAPI -->
+    <string name="logging_in">Logging in</string>
+    <string name="login_failed">Login failed</string>
+    <string name="x_forge_base_path">https://dev.languageforge.org/api2/</string>
 </resources>
