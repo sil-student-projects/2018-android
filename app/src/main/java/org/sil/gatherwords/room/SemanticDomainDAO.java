@@ -23,5 +23,5 @@ public interface SemanticDomainDAO {
 
     // INSERT
     @Insert
-    void insertSemanticDomains(List<SemanticDomain> semanticDomains);
+    void insertSemanticDomains(SemanticDomain... semanticDomains);
 }
