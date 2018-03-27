@@ -16,10 +16,16 @@ import java.net.URL;
 public class XForgeAPI {
     private static final String TAG = XForgeAPI.class.getSimpleName();
 
-    private Context context;
+    private Context m_context;
+    private String m_jwt;
 
-    public XForgeAPI(Context ctx) {
-        context = ctx;
+    public XForgeAPI(Context context) {
+        this(context, null);
+    }
+
+    public XForgeAPI(Context context, String jwt) {
+        m_context = context;
+        m_jwt = jwt;
     }
 
     public String login(String accessToken) {
@@ -34,7 +40,7 @@ public class XForgeAPI {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             try {
-                jwt = postData(conn, accessToken);
+                jwt = doPostRequest(conn, accessToken);
             } finally {
                 conn.disconnect();
             }
@@ -55,7 +61,7 @@ public class XForgeAPI {
     private URL getApiUrl(String path) {
         try {
             return new URL(
-                context.getString(R.string.x_forge_base_path) + path
+                m_context.getString(R.string.x_forge_base_path) + path
             );
         } catch (MalformedURLException e) {
             Log.d(TAG, "Failed to create api url for: " + path, e);
@@ -64,8 +70,12 @@ public class XForgeAPI {
     }
 
     @Nullable
-    private String postData(HttpURLConnection conn, String data) throws IOException {
+    private String doPostRequest(HttpURLConnection conn, String data) throws IOException {
         Log.d(TAG, "POST: " + conn.getURL());
+
+        if (m_jwt != null) {
+            conn.setRequestProperty("Authorization", "Bearer " + m_jwt);
+        }
 
         conn.setDoOutput(true);
         conn.setFixedLengthStreamingMode(data.length());
@@ -77,6 +87,27 @@ public class XForgeAPI {
         int responseCode = conn.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
             Log.w(TAG, "POST failed with response code: " + responseCode);
+            return null;
+        }
+
+        InputStream in = new BufferedInputStream(conn.getInputStream());
+        String output = Util.readStream(in);
+        in.close();
+
+        return output;
+    }
+
+    @Nullable
+    private String doGetRequest(HttpURLConnection conn) throws IOException {
+        Log.d(TAG, "GET: " + conn.getURL());
+
+        if (m_jwt != null) {
+            conn.setRequestProperty("Authorization", "Bearer " + m_jwt);
+        }
+
+        int responseCode = conn.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            Log.w(TAG, "GET failed with response code: " + responseCode);
             return null;
         }
 
